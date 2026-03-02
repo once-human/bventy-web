@@ -291,7 +291,7 @@ export default function MyQuotesPage() {
                         </DialogHeader>
 
                         {selectedQuote && (
-                            <div className="space-y-6 py-4">
+                            <div className="space-y-6 py-4 max-h-[60vh] overflow-y-auto scrollbar-thin pr-1">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground mb-1">Vendor</p>
