@@ -260,12 +260,12 @@ export default function MyQuotesPage() {
                                                     <TableCell className="text-right">
                                                         <div className="flex justify-end gap-2">
                                                             {quote.status === 'accepted' && (
-                                                                <Button size="sm" variant="outline" className="h-8 shadow-none text-green-600 hover:text-green-700 hover:bg-green-50" onClick={(e) => { e.stopPropagation(); handleContactVendor(quote); }}>
+                                                                <Button size="sm" variant="outline" className="h-8 shadow-none text-green-600 hover:text-green-700 hover:bg-green-50" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleContactVendor(quote); }}>
                                                                     <Phone className="h-4 w-4 mr-2" />
                                                                     Contact
                                                                 </Button>
                                                             )}
-                                                            <Button size="sm" variant="ghost" className="h-8 shadow-none" onClick={(e) => { e.stopPropagation(); openDetails(quote); }}>
+                                                            <Button size="sm" variant="ghost" className="h-8 shadow-none" onClick={(e: React.MouseEvent) => { e.stopPropagation(); openDetails(quote); }}>
                                                                 <Eye className="h-4 w-4 mr-2" />
                                                                 View
                                                             </Button>
@@ -282,37 +282,37 @@ export default function MyQuotesPage() {
 
                 {/* Quote Details Dialog */}
                 <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-                    <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
-                            <DialogTitle>Quote Details</DialogTitle>
-                            <DialogDescription>
+                    <DialogContent className="sm:max-w-[550px] max-h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl border-none">
+                        <DialogHeader className="p-6 pb-4 border-b bg-white dark:bg-slate-900 sticky top-0 z-10">
+                            <DialogTitle className="text-xl font-bold">Quote Details</DialogTitle>
+                            <DialogDescription className="text-sm">
                                 Review the quote response from the vendor.
                             </DialogDescription>
                         </DialogHeader>
 
                         {selectedQuote && (
-                            <div className="space-y-6 py-4 max-h-[60vh] overflow-y-auto scrollbar-thin pr-1">
-                                <div className="grid grid-cols-2 gap-4">
+                            <div className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide hover:scrollbar-default transition-all">
+                                <div className="grid grid-cols-2 gap-6 bg-muted/30 p-4 rounded-xl border border-muted-foreground/10">
                                     <div>
-                                        <p className="text-sm font-medium text-muted-foreground mb-1">Vendor</p>
-                                        <p className="font-medium">{selectedQuote.vendor_name}</p>
+                                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Vendor</p>
+                                        <p className="font-semibold text-base">{selectedQuote.vendor_name}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-muted-foreground mb-1">Event</p>
-                                        <p className="font-medium">{selectedQuote.event_title}</p>
+                                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Event</p>
+                                        <p className="font-semibold text-base">{selectedQuote.event_title}</p>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <p className="text-sm font-medium text-muted-foreground mb-1">Your Message</p>
-                                    <div className="bg-muted p-3 flex rounded-md text-sm whitespace-pre-wrap">
-                                        {selectedQuote.message || "No message provided."}
+                                <div className="space-y-2">
+                                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Your Message</p>
+                                    <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl text-sm leading-relaxed border border-slate-200 dark:border-slate-800 italic text-muted-foreground">
+                                        "{selectedQuote.message || "No message provided."}"
                                     </div>
                                 </div>
 
-                                <div className="pt-4 border-t">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <h4 className="font-semibold text-base">Vendor Response</h4>
+                                <div className="space-y-4 pt-2">
+                                    <div className="flex justify-between items-center bg-slate-100 dark:bg-slate-800/50 p-3 rounded-lg border">
+                                        <h4 className="font-bold text-sm uppercase tracking-tight">Vendor Response</h4>
                                         <Badge
                                             variant={
                                                 selectedQuote.status === 'accepted' ? 'default' :
@@ -321,131 +321,130 @@ export default function MyQuotesPage() {
                                                             selectedQuote.status === 'archived' ? 'outline' :
                                                                 selectedQuote.status === 'revision_requested' ? 'outline' : 'outline'
                                             }
-                                            className="capitalize"
+                                            className="px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider"
                                         >
                                             {selectedQuote.status === 'archived' ? 'Contact Expired' : selectedQuote.status.replace('_', ' ')}
                                         </Badge>
                                     </div>
 
                                     {selectedQuote.status === 'accepted' && selectedQuote.contact_expires_at && (
-                                        <div className="bg-orange-50 border border-orange-100 p-2 rounded-md mb-4 flex items-center gap-2">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-orange-600 animate-pulse" />
-                                            <p className="text-[11px] text-orange-700 font-medium">
-                                                Contact access will expire on {new Date(selectedQuote.contact_expires_at).toLocaleDateString()} ({new Date(selectedQuote.contact_expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {selectedQuote.status === 'archived' && (
-                                        <div className="bg-slate-50 border border-slate-200 p-2 rounded-md mb-4 flex items-center gap-2">
-                                            <X className="h-3 w-3 text-slate-500" />
-                                            <p className="text-[11px] text-slate-600 font-medium">
-                                                This quote has been archived. Contact access is no longer available.
+                                        <div className="bg-green-50/50 dark:bg-green-950/20 border border-green-100 dark:border-green-900/30 p-3 rounded-xl flex items-center gap-3">
+                                            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                                            <p className="text-[11px] text-green-700 dark:text-green-400 font-semibold">
+                                                Active access until {new Date(selectedQuote.contact_expires_at).toLocaleDateString()}
                                             </p>
                                         </div>
                                     )}
 
                                     {selectedQuote.status === 'pending' ? (
-                                        <p className="text-sm text-muted-foreground italic mt-2">
-                                            The vendor has not responded yet.
-                                        </p>
+                                        <div className="text-center py-8 border-2 border-dashed rounded-xl">
+                                            <p className="text-sm text-muted-foreground italic">
+                                                Waiting for the vendor to respond...
+                                            </p>
+                                        </div>
                                     ) : (
-                                        <div className="space-y-4">
-                                            <div>
-                                                <p className="text-sm font-medium text-muted-foreground">Requested Budget</p>
-                                                <p className="font-semibold">{selectedQuote.budget_range || '-'}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-muted-foreground">Quoted Price</p>
-                                                <p className="font-semibold">{selectedQuote.quoted_price ? `₹${selectedQuote.quoted_price}` : 'Pending'}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-muted-foreground mb-1">Message from Vendor</p>
-                                                <div className="bg-primary/5 border border-primary/20 p-3 rounded-md text-sm whitespace-pre-wrap">
-                                                    {selectedQuote.vendor_response || "No response details."}
+                                        <div className="grid gap-6">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+                                                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Requested Budget</p>
+                                                    <p className="font-bold text-lg">{selectedQuote.budget_range || '-'}</p>
+                                                </div>
+                                                <div className="p-4 rounded-xl bg-green-50/50 dark:bg-green-950/20 border border-green-200/50 dark:border-green-800/50">
+                                                    <p className="text-[10px] uppercase tracking-wider font-bold text-green-700 dark:text-green-400 mb-1">Final Quoted Price</p>
+                                                    <p className="font-bold text-lg text-green-800 dark:text-green-300">{selectedQuote.quoted_price ? `₹${selectedQuote.quoted_price}` : 'Pending'}</p>
                                                 </div>
                                             </div>
+
+                                            <div className="space-y-2">
+                                                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Proposal Details</p>
+                                                <div className="bg-white dark:bg-slate-900 border shadow-inner p-4 rounded-xl text-sm whitespace-pre-wrap leading-relaxed min-h-[100px]">
+                                                    {selectedQuote.vendor_response || "The vendor provided pricing without a detailed message."}
+                                                </div>
+                                            </div>
+
                                             {selectedQuote.attachment_url && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-muted-foreground mb-1">Attachment</p>
+                                                <div className="space-y-2">
+                                                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Files & Attachments</p>
                                                     <a
                                                         href={selectedQuote.attachment_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="flex items-center p-3 border rounded-md hover:bg-muted/50 transition-colors group"
+                                                        className="flex items-center justify-between p-4 border rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group"
                                                     >
-                                                        <FileText className="h-5 w-5 text-primary mr-2" />
-                                                        <span className="text-sm font-medium">View Quote Attachment</span>
+                                                        <div className="flex items-center">
+                                                            <div className="bg-primary/10 p-2 rounded-lg mr-3 group-hover:bg-primary/20 transition-colors">
+                                                                <FileText className="h-5 w-5 text-primary" />
+                                                            </div>
+                                                            <span className="text-sm font-semibold">View Quote PDF</span>
+                                                        </div>
+                                                        <Eye className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                                                     </a>
                                                 </div>
-                                            )}
-                                            {selectedQuote.responded_at && (
-                                                <p className="text-xs text-muted-foreground">
-                                                    Responded on {new Date(selectedQuote.responded_at).toLocaleString()}
-                                                </p>
                                             )}
                                         </div>
                                     )}
                                 </div>
+
                                 {(selectedQuote.special_requirements || selectedQuote.deadline) && (
-                                    <div className="pt-4 border-t space-y-3">
-                                        <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Request Details</h4>
-                                        {selectedQuote.special_requirements && (
-                                            <div>
-                                                <p className="text-xs font-medium text-muted-foreground">Special Requirements</p>
-                                                <p className="text-sm">{selectedQuote.special_requirements}</p>
-                                            </div>
-                                        )}
-                                        {selectedQuote.deadline && (
-                                            <div>
-                                                <p className="text-xs font-medium text-muted-foreground">Required By</p>
-                                                <p className="text-sm">{new Date(selectedQuote.deadline).toLocaleDateString()}</p>
-                                            </div>
-                                        )}
+                                    <div className="pt-6 border-t space-y-4">
+                                        <h4 className="font-bold text-xs uppercase tracking-[0.2em] text-muted-foreground">Additional Details</h4>
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            {selectedQuote.special_requirements && (
+                                                <div className="p-3 bg-muted/40 rounded-lg">
+                                                    <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Requirements</p>
+                                                    <p className="text-xs leading-relaxed">{selectedQuote.special_requirements}</p>
+                                                </div>
+                                            )}
+                                            {selectedQuote.deadline && (
+                                                <div className="p-3 bg-muted/40 rounded-lg">
+                                                    <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Expected By</p>
+                                                    <p className="text-xs font-semibold">{new Date(selectedQuote.deadline).toLocaleDateString()}</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         )}
 
                         {selectedQuote?.status === 'responded' && (
-                            <DialogFooter className="flex flex-col sm:flex-row gap-2">
+                            <DialogFooter className="p-6 pt-4 border-t bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm sticky bottom-0 z-10 flex flex-col sm:flex-row gap-3">
                                 <Button
                                     type="button"
                                     variant="outline"
                                     disabled={!!actionLoading}
                                     onClick={() => setIsRevisionOpen(true)}
-                                    className="flex-1"
+                                    className="flex-1 h-11 rounded-xl shadow-none"
                                 >
-                                    <Eye className="h-4 w-4 mr-2" />
+                                    <MessageCircle className="h-4 w-4 mr-2" />
                                     Request Revision
                                 </Button>
-                                <div className="flex gap-2 flex-1">
+                                <div className="flex gap-3 flex-1">
                                     <Button
                                         type="button"
                                         variant="outline"
                                         disabled={!!actionLoading}
                                         onClick={() => handleReject(selectedQuote.id)}
-                                        className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                        className="flex-1 h-11 rounded-xl shadow-none text-red-600 hover:text-red-700 hover:bg-red-50"
                                     >
-                                        {actionLoading === selectedQuote.id + "-reject" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <X className="h-4 w-4 mr-2" />}
-                                        Reject
+                                        {actionLoading === selectedQuote.id + "-reject" ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
                                     </Button>
                                     <Button
                                         type="button"
                                         disabled={!!actionLoading}
                                         onClick={() => handleAccept(selectedQuote.id)}
-                                        className="flex-1"
+                                        className="flex-[2] h-11 rounded-xl shadow-lg shadow-primary/10"
                                     >
                                         {actionLoading === selectedQuote.id + "-accept" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
-                                        Accept
+                                        Accept Quote
                                     </Button>
                                 </div>
                             </DialogFooter>
                         )}
                         {selectedQuote?.status === 'accepted' && (
-                            <DialogFooter>
-                                <Button className="w-full bg-green-600 hover:bg-green-700" onClick={() => handleContactVendor(selectedQuote)}>
-                                    <Phone className="h-4 w-4 mr-2" />
+                            <DialogFooter className="p-6 pt-4 border-t bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm sticky bottom-0 z-10">
+                                <Button className="w-full h-12 rounded-xl bg-green-600 hover:bg-green-700 shadow-xl shadow-green-500/20 text-base font-bold" onClick={() => handleContactVendor(selectedQuote)}>
+                                    <Phone className="h-5 w-5 mr-3" />
                                     Contact Vendor
                                 </Button>
                             </DialogFooter>
