@@ -24,7 +24,7 @@ export function VerificationBanner() {
                         Please verify your email address to access all features. We've sent a code to <strong>{user.email}</strong>.
                     </span>
                     <Link
-                        href={`${AUTH_URL}/auth/verify-email?email=${encodeURIComponent(user.email)}`}
+                        href={`${AUTH_URL}/verify-email?email=${encodeURIComponent(user.email)}`}
                         className="inline-flex items-center text-sm font-bold underline underline-offset-4 hover:text-amber-900 dark:hover:text-amber-200 transition-colors"
                     >
                         Verify Now <ArrowRight className="ml-1 h-3 w-3" />

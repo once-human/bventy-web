@@ -102,7 +102,7 @@ export function LoginForm() {
                                 </FormControl>
                                 <div className="flex justify-end">
                                     <Link
-                                        href="/auth/forgot-password"
+                                        href="/forgot-password"
                                         className="text-xs font-medium text-primary hover:underline underline-offset-4 transition-all"
                                     >
                                         Forgot password?

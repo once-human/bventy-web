@@ -58,7 +58,7 @@ export function ForgotPasswordForm() {
                     If an account exists with that email, we've sent a instructions to reset your password.
                 </p>
                 <div className="pt-4">
-                    <Link href={`/auth/reset-password?email=${encodeURIComponent(form.getValues("email"))}`}>
+                    <Link href={`/reset-password?email=${encodeURIComponent(form.getValues("email"))}`}>
                         <Button className="w-full">Enter Reset Code</Button>
                     </Link>
                 </div>
