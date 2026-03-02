@@ -24,12 +24,7 @@
     ],
     "paths": {
       "@/*": [
-        "./src/*",
-        "../../apps/www/src/*",
-        "../../apps/auth/src/*",
-        "../../apps/app/src/*",
-        "../../apps/vendor/src/*",
-        "../../apps/admin/src/*"
+        "./src/*"
       ],
       "@styles/*": [
         "../../packages/ui/src/styles/*"
@@ -41,8 +36,6 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "../../apps/*/src/**/*.ts",
-    "../../apps/*/src/**/*.tsx",
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
