@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { VendorOnboardingForm } from "@/components/vendor/vendor/VendorOnboardingForm";
+import { VendorOnboardingForm } from "@/components/vendor/VendorOnboardingForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bventy/ui";
 import { Navbar } from "@bventy/ui";
 import { Footer } from "@bventy/ui";

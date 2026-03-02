@@ -17,8 +17,8 @@ import { Badge } from "@bventy/ui";
 import { Loader2, ArrowLeft, Store, Save, ExternalLink, Phone, Mail, MessageCircle, X, Archive } from "lucide-react";
 import { toast } from "sonner";
 import { FileUpload } from "@bventy/ui";
-import { GalleryUpload } from "@/components/vendor/vendor/GalleryUpload";
-import { PortfolioUpload } from "@/components/vendor/vendor/PortfolioUpload";
+import { GalleryUpload } from "@/components/vendor/GalleryUpload";
+import { PortfolioUpload } from "@/components/vendor/PortfolioUpload";
 import Link from "next/link";
 import { QuoteContact } from "@bventy/services";
 import {

@@ -3,7 +3,7 @@
 import { useAuth } from "@bventy/services";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { AdminSidebar } from "@/components/admin/admin/AdminSidebar";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { Loader2 } from "lucide-react";
 
 export default function AdminLayout({

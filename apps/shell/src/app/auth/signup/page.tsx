@@ -1,6 +1,6 @@
 "use client";
 
-import { SignupForm } from "@/components/auth/auth/SignupForm";
+import { SignupForm } from "@/components/auth/SignupForm";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@bventy/ui";
 import { useEffect } from "react";

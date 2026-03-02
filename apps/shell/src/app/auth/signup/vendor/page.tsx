@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { VendorSignupForm } from "@/components/auth/auth/VendorSignupForm";
+import { VendorSignupForm } from "@/components/auth/VendorSignupForm";
 
 export const metadata: Metadata = {
     title: "Join as Vendor | Bventy",

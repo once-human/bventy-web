@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { adminService  } from "@bventy/services";
-import { OverviewCards, OverviewData } from "@/components/admin/admin/OverviewCards";
+import { OverviewCards, OverviewData } from "@/components/admin/OverviewCards";
 import { GrowthCharts, GrowthData  } from "@bventy/ui";
-import { MarketplaceAnalytics, MarketplaceData } from "@/components/admin/admin/MarketplaceAnalytics";
-import { RiskSection } from "@/components/admin/admin/RiskSection";
+import { MarketplaceAnalytics, MarketplaceData } from "@/components/admin/MarketplaceAnalytics";
+import { RiskSection } from "@/components/admin/RiskSection";
 
 export default function AdminOverviewPage() {
     const [overviewData, setOverviewData] = useState<OverviewData | undefined>();
