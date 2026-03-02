@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@bventy/ui";
 import { Check, X, ReceiptText } from "lucide-react";
 import { toast } from "sonner";
+import { VerificationBanner } from "@/components/VerificationBanner";
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -105,6 +106,7 @@ export default function DashboardPage() {
         <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
             <Navbar />
             <main className="flex-1 container mx-auto px-4 py-12">
+                <VerificationBanner />
                 <div className="mb-10 text-center md:text-left">
                     <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
                         Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening"}, {firstName}.

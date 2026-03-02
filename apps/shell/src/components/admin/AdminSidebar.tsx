@@ -22,6 +22,11 @@ const sidebarItems = [
         href: "/users",
         icon: Users,
     },
+    {
+        title: "Email",
+        href: "/email",
+        icon: Settings,
+    },
 ];
 
 export function AdminSidebar() {

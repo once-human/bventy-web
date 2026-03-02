@@ -13,56 +13,75 @@ import {
     FormMessage,
 } from "@bventy/ui";
 import { Input } from "@bventy/ui";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { authService } from "@bventy/services";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@bventy/ui";
-import Link from "next/link";
-import { useAuth } from "@bventy/services";
 
 const formSchema = z.object({
-    email: z.string().email({
-        message: "Please enter a valid email address.",
+    email: z.string().email(),
+    otp: z.string().length(6, {
+        message: "Code must be 6 digits.",
     }),
-    password: z.string().min(1, {
-        message: "Password is required.",
+    new_password: z.string().min(6, {
+        message: "Password must be at least 6 characters.",
     }),
 });
 
-export function LoginForm() {
-    const router = useRouter(); // Keep for safety if login doesn't redirect (but it does)
-    const { login } = useAuth();
+export function ResetPasswordForm() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
+
+    const emailParam = searchParams.get("email") || "";
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: "",
-            password: "",
+            email: emailParam,
+            otp: "",
+            new_password: "",
         },
     });
+
+    useEffect(() => {
+        if (emailParam) {
+            form.setValue("email", emailParam);
+        }
+    }, [emailParam, form]);
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true);
         setError(null);
         try {
-            await authService.login(values);
-            await login(true); // login handles the redirect logic internally based on profile/role
-
+            await authService.resetPassword(values);
+            setSuccess(true);
+            setTimeout(() => {
+                router.push("/login?reset=success");
+            }, 2000);
         } catch (err: any) {
-            if (err.response && err.response.data && err.response.data.error) {
+            if (err.response?.data?.error) {
                 setError(err.response.data.error);
-            } else if (err.response && err.response.data && err.response.data.message) {
-                setError(err.response.data.message);
             } else {
-                setError("Unable to connect to the login service. Please check your internet or try again later.");
+                setError("Failed to reset password. Please check your code and try again.");
             }
         } finally {
-
             setIsLoading(false);
         }
+    }
+
+    if (success) {
+        return (
+            <div className="space-y-4 text-center">
+                <div className="text-primary font-semibold text-lg">Password Reset!</div>
+                <p className="text-sm text-muted-foreground">
+                    Your password has been successfully reset. Redirecting to login...
+                </p>
+            </div>
+        );
     }
 
     return (
@@ -88,10 +107,28 @@ export function LoginForm() {
                     />
                     <FormField
                         control={form.control}
-                        name="password"
+                        name="otp"
                         render={({ field }) => (
                             <FormItem className="space-y-1.5">
-                                <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Password</FormLabel>
+                                <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Reset Code</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="123456"
+                                        maxLength={6}
+                                        {...field}
+                                        className="h-11 bg-muted/30 border-muted-foreground/20 focus:bg-background transition-all tracking-[0.5em] text-center font-mono text-lg"
+                                    />
+                                </FormControl>
+                                <FormMessage className="text-[10px]" />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="new_password"
+                        render={({ field }) => (
+                            <FormItem className="space-y-1.5">
+                                <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">New Password</FormLabel>
                                 <FormControl>
                                     <Input
                                         type="password"
@@ -100,14 +137,6 @@ export function LoginForm() {
                                         className="h-11 bg-muted/30 border-muted-foreground/20 focus:bg-background transition-all"
                                     />
                                 </FormControl>
-                                <div className="flex justify-end">
-                                    <Link
-                                        href="/auth/forgot-password"
-                                        className="text-xs font-medium text-primary hover:underline underline-offset-4 transition-all"
-                                    >
-                                        Forgot password?
-                                    </Link>
-                                </div>
                                 <FormMessage className="text-[10px]" />
                             </FormItem>
                         )}
@@ -121,16 +150,8 @@ export function LoginForm() {
 
                     <Button type="submit" className="w-full h-11 text-sm font-semibold shadow-sm hover:shadow-md transition-all active:scale-[0.98]" disabled={isLoading}>
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isLoading ? "Signing in..." : "Sign In"}
+                        {isLoading ? "Resetting..." : "Reset Password"}
                     </Button>
-
-                    <p className="text-center text-xs text-muted-foreground/60 leading-relaxed max-w-[280px] mx-auto">
-                        By signing in, you agree to our{" "}
-                        <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground transition-colors font-medium">
-                            Privacy Policy
-                        </Link>
-                        .
-                    </p>
                 </form>
             </Form>
         </div>

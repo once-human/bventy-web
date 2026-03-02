@@ -27,5 +27,17 @@ export const authService = {
     logout: async (): Promise<void> => {
         await api.post("/auth/logout");
     },
+    verifyEmail: async (data: { email: string; otp: string }): Promise<void> => {
+        await api.post("/auth/verify-email", data);
+    },
+    requestReset: async (data: { email: string }): Promise<void> => {
+        await api.post("/auth/request-reset", data);
+    },
+    resetPassword: async (data: { email: string; otp: string; new_password: string }): Promise<void> => {
+        await api.post("/auth/reset-password", data);
+    },
+    resendVerification: async (data: { email: string }): Promise<void> => {
+        await api.post("/auth/resend-verification", data);
+    },
 };
 

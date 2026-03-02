@@ -11,6 +11,7 @@ export interface UserProfile {
     bio?: string;
     profile_image_url?: string;
     vendor_profile_exists: boolean;
+    email_verified: boolean;
     // organizer_profile_exists is deprecated in V8
     groups: any[]; // We will define Group type later
     permissions: string[];

@@ -33,4 +33,18 @@ export const adminService = {
     updateUserRole: async (id: string, role: string): Promise<void> => {
         await api.patch(`/admin/users/${id}/role`, { role });
     },
+    getEmailTemplates: async (): Promise<any[]> => {
+        const response = await api.get("/admin/email/templates");
+        return response.data;
+    },
+    updateEmailTemplate: async (key: string, data: any): Promise<void> => {
+        await api.put(`/admin/email/templates/${key}`, data);
+    },
+    getPlatformSettings: async (): Promise<any> => {
+        const response = await api.get("/admin/email/settings");
+        return response.data;
+    },
+    updatePlatformSetting: async (key: string, value: string): Promise<void> => {
+        await api.put("/admin/email/settings", { key, value });
+    },
 };

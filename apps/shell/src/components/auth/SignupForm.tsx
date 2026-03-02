@@ -53,8 +53,8 @@ export function SignupForm() {
         setError(null);
         try {
             await authService.signup(values);
-            await login(true);
-
+            // After signup, redirect to verification instead of login
+            router.push(`/auth/verify-email?email=${encodeURIComponent(values.email)}`);
         } catch (err: any) {
             if (err.response && err.response.data && err.response.data.error) {
                 setError(err.response.data.error);
