@@ -23,7 +23,7 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@bventy/ui";
-import { FileText, Phone, Mail, MessageCircle } from "lucide-react";
+import { FileText, Phone, Mail, MessageCircle, ExternalLink } from "lucide-react";
 
 export default function MyQuotesPage() {
     const { user, loading: authLoading } = useAuth();
@@ -260,12 +260,12 @@ export default function MyQuotesPage() {
                                                     <TableCell className="text-right">
                                                         <div className="flex justify-end gap-2">
                                                             {quote.status === 'accepted' && (
-                                                                <Button size="sm" variant="outline" className="h-8 shadow-none text-green-600 hover:text-green-700 hover:bg-green-50" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleContactVendor(quote); }}>
+                                                                <Button size="sm" variant="outline" className="h-8 shadow-none text-green-600 hover:text-green-700 hover:bg-green-50" onClick={(e) => { e.stopPropagation(); handleContactVendor(quote); }}>
                                                                     <Phone className="h-4 w-4 mr-2" />
                                                                     Contact
                                                                 </Button>
                                                             )}
-                                                            <Button size="sm" variant="ghost" className="h-8 shadow-none" onClick={(e: React.MouseEvent) => { e.stopPropagation(); openDetails(quote); }}>
+                                                            <Button size="sm" variant="ghost" className="h-8 shadow-none" onClick={(e) => { e.stopPropagation(); openDetails(quote); }}>
                                                                 <Eye className="h-4 w-4 mr-2" />
                                                                 View
                                                             </Button>
@@ -282,172 +282,185 @@ export default function MyQuotesPage() {
 
                 {/* Quote Details Dialog */}
                 <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-                    <DialogContent className="sm:max-w-[550px] max-h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl border-none">
-                        <DialogHeader className="p-6 pb-4 border-b bg-white dark:bg-slate-900 sticky top-0 z-10">
-                            <DialogTitle className="text-xl font-bold">Quote Details</DialogTitle>
-                            <DialogDescription className="text-sm">
-                                Review the quote response from the vendor.
-                            </DialogDescription>
-                        </DialogHeader>
+                    <DialogContent className="sm:max-w-[600px] h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl border-none">
+                        <div className="p-6 pb-4 border-b bg-white dark:bg-slate-950 z-10">
+                            <DialogHeader>
+                                <DialogTitle className="text-xl font-bold">Quote Details</DialogTitle>
+                                <DialogDescription>
+                                    Review the quote response from the vendor.
+                                </DialogDescription>
+                            </DialogHeader>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10 min-h-0">
+                            {selectedQuote && (
+                                <>
+                                    <div className="grid grid-cols-2 gap-8 pb-6 border-b border-dashed border-slate-200 dark:border-slate-800">
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Vendor</p>
+                                            <p className="font-semibold text-foreground text-base">{selectedQuote.vendor_name || 'Something'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Event</p>
+                                            <p className="font-semibold text-foreground text-base">{selectedQuote.event_title || 'Wednesday'}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Your Message</p>
+                                        <div className="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/60 italic text-sm text-foreground/80 leading-relaxed shadow-sm">
+                                            "{selectedQuote.message || 'No message provided.'}"
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-2 space-y-8">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="font-bold text-xl flex items-center gap-3">
+                                                Vendor Response
+                                                <Badge
+                                                    variant={selectedQuote.status === 'accepted' ? 'default' : 'secondary'}
+                                                    className="rounded-full px-4 py-0.5 h-6 text-[10px] uppercase font-black"
+                                                >
+                                                    {selectedQuote.status === 'archived' ? 'Contact Expired' : selectedQuote.status.replace('_', ' ')}
+                                                </Badge>
+                                            </h3>
+                                        </div>
+
+                                        {selectedQuote.status === 'accepted' && selectedQuote.contact_expires_at && (
+                                            <div className="bg-orange-50/60 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/40 p-5 rounded-2xl flex items-start gap-4 shadow-sm shadow-orange-100/10 transition-all">
+                                                <div className="h-2.5 w-2.5 rounded-full bg-orange-500 mt-1.5 shrink-0 animate-pulse ring-4 ring-orange-500/10" />
+                                                <div className="space-y-1">
+                                                    <p className="text-sm font-bold text-orange-900 dark:text-orange-200 uppercase tracking-tighter">Access Unlocked</p>
+                                                    <p className="text-xs text-orange-800/80 dark:text-orange-300/80 leading-relaxed font-medium">
+                                                        Direct contact window ends on {new Date(selectedQuote.contact_expires_at).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {selectedQuote.status !== 'pending' && (
+                                            <div className="grid grid-cols-2 gap-8">
+                                                <div className="bg-slate-50/80 dark:bg-slate-900/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/60 group hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
+                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 group-hover:text-foreground transition-colors">Requested Budget</p>
+                                                    <p className="font-extrabold text-xl font-mono tracking-tight">₹{selectedQuote.budget_range || '-'}</p>
+                                                </div>
+                                                <div className="bg-primary/5 p-5 rounded-2xl border border-primary/20 group hover:bg-primary/[0.08] transition-all">
+                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60 mb-1 group-hover:text-primary transition-colors">Quoted Price</p>
+                                                    <p className="font-extrabold text-xl text-primary font-mono tracking-tight">
+                                                        {selectedQuote.quoted_price ? `₹${selectedQuote.quoted_price}` : 'Pending'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-4">
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Message from Vendor</p>
+                                            <div className="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/60 text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">
+                                                {selectedQuote.vendor_response || (selectedQuote.status === 'pending' ? 'The vendor has not responded yet.' : 'No response details provided.')}
+                                            </div>
+                                        </div>
+
+                                        {selectedQuote.attachment_url && (
+                                            <div className="space-y-4">
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Related Documents</p>
+                                                <a
+                                                    href={selectedQuote.attachment_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center p-5 border rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-all group border-dashed border-slate-300 dark:border-slate-700 hover:border-primary/50"
+                                                >
+                                                    <div className="bg-primary/10 p-3 rounded-xl mr-4 group-hover:scale-110 transition-transform">
+                                                        <FileText className="h-6 w-6 text-primary" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-bold group-hover:text-primary transition-colors truncate">Quote Rate Card & PDF</p>
+                                                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Digital Attachment</p>
+                                                    </div>
+                                                    <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all opacity-0 group-hover:opacity-100 group-hover:translate-x-1" />
+                                                </a>
+                                            </div>
+                                        )}
+
+                                        {(selectedQuote.special_requirements || selectedQuote.deadline) && (
+                                            <div className="pt-10 border-t border-dashed border-slate-200 dark:border-slate-800 space-y-6">
+                                                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/50">Full Request Meta</p>
+                                                <div className="grid gap-6">
+                                                    {selectedQuote.special_requirements && (
+                                                        <div className="space-y-2">
+                                                            <p className="font-bold text-[11px] text-muted-foreground uppercase">Special Requirements</p>
+                                                            <p className="text-sm text-foreground/80 leading-relaxed font-medium">{selectedQuote.special_requirements}</p>
+                                                        </div>
+                                                    )}
+                                                    {selectedQuote.deadline && (
+                                                        <div className="space-y-2">
+                                                            <p className="font-bold text-[11px] text-muted-foreground uppercase">Organized By Date</p>
+                                                            <p className="text-sm font-bold underline decoration-primary/30 underline-offset-4 decoration-2">
+                                                                {new Date(selectedQuote.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
 
                         {selectedQuote && (
-                            <div className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide hover:scrollbar-default transition-all">
-                                <div className="grid grid-cols-2 gap-6 bg-muted/30 p-4 rounded-xl border border-muted-foreground/10">
-                                    <div>
-                                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Vendor</p>
-                                        <p className="font-semibold text-base">{selectedQuote.vendor_name}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Event</p>
-                                        <p className="font-semibold text-base">{selectedQuote.event_title}</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Your Message</p>
-                                    <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl text-sm leading-relaxed border border-slate-200 dark:border-slate-800 italic text-muted-foreground">
-                                        "{selectedQuote.message || "No message provided."}"
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4 pt-2">
-                                    <div className="flex justify-between items-center bg-slate-100 dark:bg-slate-800/50 p-3 rounded-lg border">
-                                        <h4 className="font-bold text-sm uppercase tracking-tight">Vendor Response</h4>
-                                        <Badge
-                                            variant={
-                                                selectedQuote.status === 'accepted' ? 'default' :
-                                                    selectedQuote.status === 'rejected' ? 'destructive' :
-                                                        selectedQuote.status === 'responded' ? 'secondary' :
-                                                            selectedQuote.status === 'archived' ? 'outline' :
-                                                                selectedQuote.status === 'revision_requested' ? 'outline' : 'outline'
-                                            }
-                                            className="px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+                            <div className="p-6 pt-5 border-t bg-slate-50/40 dark:bg-slate-950/40 z-20 backdrop-blur-sm mt-auto">
+                                <DialogFooter className="flex flex-col sm:flex-row gap-4 w-full">
+                                    {selectedQuote.status === 'accepted' ? (
+                                        <Button
+                                            className="w-full h-14 rounded-2xl text-base font-black bg-green-600 hover:bg-green-700 shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] border-none"
+                                            onClick={() => handleContactVendor(selectedQuote)}
                                         >
-                                            {selectedQuote.status === 'archived' ? 'Contact Expired' : selectedQuote.status.replace('_', ' ')}
-                                        </Badge>
-                                    </div>
-
-                                    {selectedQuote.status === 'accepted' && selectedQuote.contact_expires_at && (
-                                        <div className="bg-green-50/50 dark:bg-green-950/20 border border-green-100 dark:border-green-900/30 p-3 rounded-xl flex items-center gap-3">
-                                            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-                                            <p className="text-[11px] text-green-700 dark:text-green-400 font-semibold">
-                                                Active access until {new Date(selectedQuote.contact_expires_at).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {selectedQuote.status === 'pending' ? (
-                                        <div className="text-center py-8 border-2 border-dashed rounded-xl">
-                                            <p className="text-sm text-muted-foreground italic">
-                                                Waiting for the vendor to respond...
-                                            </p>
-                                        </div>
-                                    ) : (
-                                        <div className="grid gap-6">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
-                                                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Requested Budget</p>
-                                                    <p className="font-bold text-lg">{selectedQuote.budget_range || '-'}</p>
-                                                </div>
-                                                <div className="p-4 rounded-xl bg-green-50/50 dark:bg-green-950/20 border border-green-200/50 dark:border-green-800/50">
-                                                    <p className="text-[10px] uppercase tracking-wider font-bold text-green-700 dark:text-green-400 mb-1">Final Quoted Price</p>
-                                                    <p className="font-bold text-lg text-green-800 dark:text-green-300">{selectedQuote.quoted_price ? `₹${selectedQuote.quoted_price}` : 'Pending'}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Proposal Details</p>
-                                                <div className="bg-white dark:bg-slate-900 border shadow-inner p-4 rounded-xl text-sm whitespace-pre-wrap leading-relaxed min-h-[100px]">
-                                                    {selectedQuote.vendor_response || "The vendor provided pricing without a detailed message."}
-                                                </div>
-                                            </div>
-
-                                            {selectedQuote.attachment_url && (
-                                                <div className="space-y-2">
-                                                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Files & Attachments</p>
-                                                    <a
-                                                        href={selectedQuote.attachment_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="flex items-center justify-between p-4 border rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group"
+                                            <Phone className="mr-3 h-6 w-6 fill-current" />
+                                            CONTACT VENDOR NOW
+                                        </Button>
+                                    ) : selectedQuote.status === 'responded' ? (
+                                        <>
+                                            <div className="flex gap-4 w-full">
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    className="flex-1 h-14 rounded-2xl font-bold transition-all hover:bg-white dark:hover:bg-slate-900 hover:shadow-md border-slate-200 dark:border-slate-800"
+                                                    onClick={() => setIsRevisionOpen(true)}
+                                                >
+                                                    <Eye className="h-5 w-5 mr-2" />
+                                                    REVISION
+                                                </Button>
+                                                <div className="flex-[2] flex gap-4">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        className="flex-1 h-14 rounded-2xl font-bold border-red-100 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
+                                                        onClick={() => handleReject(selectedQuote.id)}
                                                     >
-                                                        <div className="flex items-center">
-                                                            <div className="bg-primary/10 p-2 rounded-lg mr-3 group-hover:bg-primary/20 transition-colors">
-                                                                <FileText className="h-5 w-5 text-primary" />
-                                                            </div>
-                                                            <span className="text-sm font-semibold">View Quote PDF</span>
-                                                        </div>
-                                                        <Eye className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                    </a>
+                                                        REJECT
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        className="flex-[1.5] h-14 rounded-2xl font-black bg-primary transition-all hover:shadow-2xl hover:scale-[1.01] active:scale-[0.99]"
+                                                        onClick={() => handleAccept(selectedQuote.id)}
+                                                    >
+                                                        <Check className="h-5 w-5 mr-3 stroke-[3]" />
+                                                        ACCEPT
+                                                    </Button>
                                                 </div>
-                                            )}
-                                        </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full h-14 rounded-2xl font-bold uppercase tracking-widest text-muted-foreground hover:bg-slate-100 dark:hover:bg-slate-900"
+                                            onClick={() => setIsDetailsOpen(false)}
+                                        >
+                                            Dismiss Overview
+                                        </Button>
                                     )}
-                                </div>
-
-                                {(selectedQuote.special_requirements || selectedQuote.deadline) && (
-                                    <div className="pt-6 border-t space-y-4">
-                                        <h4 className="font-bold text-xs uppercase tracking-[0.2em] text-muted-foreground">Additional Details</h4>
-                                        <div className="grid gap-4 sm:grid-cols-2">
-                                            {selectedQuote.special_requirements && (
-                                                <div className="p-3 bg-muted/40 rounded-lg">
-                                                    <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Requirements</p>
-                                                    <p className="text-xs leading-relaxed">{selectedQuote.special_requirements}</p>
-                                                </div>
-                                            )}
-                                            {selectedQuote.deadline && (
-                                                <div className="p-3 bg-muted/40 rounded-lg">
-                                                    <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Expected By</p>
-                                                    <p className="text-xs font-semibold">{new Date(selectedQuote.deadline).toLocaleDateString()}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
+                                </DialogFooter>
                             </div>
-                        )}
-
-                        {selectedQuote?.status === 'responded' && (
-                            <DialogFooter className="p-6 pt-4 border-t bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm sticky bottom-0 z-10 flex flex-col sm:flex-row gap-3">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    disabled={!!actionLoading}
-                                    onClick={() => setIsRevisionOpen(true)}
-                                    className="flex-1 h-11 rounded-xl shadow-none"
-                                >
-                                    <MessageCircle className="h-4 w-4 mr-2" />
-                                    Request Revision
-                                </Button>
-                                <div className="flex gap-3 flex-1">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        disabled={!!actionLoading}
-                                        onClick={() => handleReject(selectedQuote.id)}
-                                        className="flex-1 h-11 rounded-xl shadow-none text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    >
-                                        {actionLoading === selectedQuote.id + "-reject" ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        disabled={!!actionLoading}
-                                        onClick={() => handleAccept(selectedQuote.id)}
-                                        className="flex-[2] h-11 rounded-xl shadow-lg shadow-primary/10"
-                                    >
-                                        {actionLoading === selectedQuote.id + "-accept" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
-                                        Accept Quote
-                                    </Button>
-                                </div>
-                            </DialogFooter>
-                        )}
-                        {selectedQuote?.status === 'accepted' && (
-                            <DialogFooter className="p-6 pt-4 border-t bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm sticky bottom-0 z-10">
-                                <Button className="w-full h-12 rounded-xl bg-green-600 hover:bg-green-700 shadow-xl shadow-green-500/20 text-base font-bold" onClick={() => handleContactVendor(selectedQuote)}>
-                                    <Phone className="h-5 w-5 mr-3" />
-                                    Contact Vendor
-                                </Button>
-                            </DialogFooter>
                         )}
                     </DialogContent>
                 </Dialog>

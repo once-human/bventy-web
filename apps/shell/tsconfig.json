@@ -26,6 +26,12 @@
       "@/*": [
         "./src/*"
       ],
+      "@bventy/ui": [
+        "../../packages/ui/src/index.ts"
+      ],
+      "@bventy/services": [
+        "../../packages/services/src/index.ts"
+      ],
       "@styles/*": [
         "../../packages/ui/src/styles/*"
       ]
