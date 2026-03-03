@@ -226,6 +226,17 @@ export default function AdminUsersPage() {
     const canManageUsers = ["admin", "super_admin"].includes(currentUser?.role || "");
     const canManageRoles = currentUser?.role === "super_admin";
 
+    const canDeleteUser = (targetUser: UserProfile) => {
+        if (!currentUser) return false;
+        if (targetUser.id === currentUser.id) return false; // Can't delete self
+        if (currentUser.role === "super_admin") return true; // Super Admin can delete anyone else
+        if (currentUser.role === "admin") {
+            // Admin can only delete users with lower roles (staff, user)
+            return !["admin", "super_admin"].includes(targetUser.role);
+        }
+        return false;
+    };
+
     return (
         <div className="flex flex-col gap-4">
             <h1 className="text-3xl font-bold tracking-tight">Users</h1>
@@ -301,17 +312,19 @@ export default function AdminUsersPage() {
                                             ) : (
                                                 <Badge variant="outline" className="capitalize">{user.role}</Badge>
                                             )}
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    openUserDetails(user);
-                                                }}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            {canDeleteUser(user) && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openUserDetails(user);
+                                                    }}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                         </div>
                                     ) : (
                                         <span className="text-sm text-muted-foreground italic">
@@ -332,7 +345,7 @@ export default function AdminUsersPage() {
                 onDelete={handleDeleteUser}
                 onRoleChange={handleRoleChange}
                 canManageRoles={canManageRoles}
-                canManageUsers={canManageUsers}
+                canManageUsers={canManageUsers && !!selectedUser && canDeleteUser(selectedUser)}
             />
         </div>
     );
