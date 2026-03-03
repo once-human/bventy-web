@@ -175,7 +175,7 @@ export default function DashboardPage() {
                         <CardContent className="mt-auto pt-4">
                             {profile.vendor_profile_exists ? (
                                 <Button className="w-full justify-between group" variant="outline" asChild>
-                                    <Link href={`${getVendorUrl()}/overview?token=${localStorage.getItem("token")}`}>
+                                    <Link href={`${getVendorUrl()}?token=${localStorage.getItem("token")}`}>
                                         Vendor Dashboard
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>

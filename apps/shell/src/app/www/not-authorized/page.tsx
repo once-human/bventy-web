@@ -25,7 +25,7 @@ export default function NotAuthorizedPage() {
             </div>
             <div className="flex gap-4">
                 <Button asChild variant="outline">
-                    <Link href="/vendor/overview">Back to Dashboard</Link>
+                    <Link href="/">Back to Home</Link>
                 </Button>
                 <Button variant="destructive" onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />

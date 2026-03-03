@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (profile && ["admin", "super_admin"].includes(profile.role)) {
                 window.location.href = ADMIN_URL;
             } else if (profile && profile.vendor_profile_exists) {
-                window.location.href = `${VENDOR_URL}/overview`;
+                window.location.href = VENDOR_URL;
             } else {
                 window.location.href = `${APP_URL}/dashboard`;
             }

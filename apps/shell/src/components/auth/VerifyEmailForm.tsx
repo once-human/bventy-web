@@ -40,7 +40,7 @@ export function VerifyEmailForm() {
     useEffect(() => {
         if (!authLoading && user?.email_verified) {
             if (user?.vendor_profile_exists) {
-                window.location.href = `${getVendorUrl()}/overview`;
+                window.location.href = getVendorUrl();
             } else {
                 window.location.href = `${getAppUrl()}/dashboard`;
             }
