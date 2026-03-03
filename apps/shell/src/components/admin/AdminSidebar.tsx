@@ -33,7 +33,7 @@ export function AdminSidebar() {
     const pathname = usePathname();
 
     return (
-        <div className="hidden border-r bg-muted/40 md:block md:w-64 lg:w-72 h-[calc(100vh-3.5rem)] sticky top-14">
+        <div className="hidden border-r bg-muted/40 md:block md:w-64 lg:w-72 h-[calc(100vh-4rem)] sticky top-16">
             <div className="flex h-full max-h-screen flex-col gap-2">
                 <div className="flex-1 overflow-auto py-2">
                     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
