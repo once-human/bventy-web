@@ -171,4 +171,11 @@ Our current focus includes:
 This roadmap is subject to change based on community needs. No specific timelines are promised.
 
 ---
+
+## Bventy Ecosystem
+
+- [Backend](https://github.com/bventy/backend): The Go microservice powering the marketplace engine.
+- [Mobile](https://github.com/bventy/mobile): Native mobile experiences for Bventy.
+
+---
 © 2026 Bventy.
