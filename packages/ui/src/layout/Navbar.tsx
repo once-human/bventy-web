@@ -13,7 +13,7 @@ import {
     DropdownMenuTrigger,
 } from "@bventy/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@bventy/ui";
-import { User, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { User, LogOut, LayoutDashboard, ShieldCheck, MessageSquare } from "lucide-react";
 
 const WWW_URL = process.env.NEXT_PUBLIC_WWW_URL || "";
 const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || "";
@@ -36,8 +36,17 @@ export function Navbar() {
                     </Button>
                     {user ? (
                         <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm" asChild className="text-sm font-medium">
-                                <Link href={`${APP_URL}/dashboard`}>Dashboard</Link>
+                            <Button variant="ghost" size="sm" asChild className="text-sm font-medium gap-2">
+                                <Link href={`${APP_URL}/dashboard`}>
+                                    <LayoutDashboard className="h-4 w-4" />
+                                    <span className="hidden lg:inline">Dashboard</span>
+                                </Link>
+                            </Button>
+                            <Button variant="ghost" size="sm" asChild className="text-sm font-medium gap-2">
+                                <Link href={`${APP_URL}/messages`}>
+                                    <MessageSquare className="h-4 w-4" />
+                                    <span className="hidden lg:inline">Messages</span>
+                                </Link>
                             </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -69,7 +78,7 @@ export function Navbar() {
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild className="cursor-pointer">
-                                        <Link href={`${APP_URL}/dashboard/profile`} className="flex w-full items-center">
+                                        <Link href={`${APP_URL}/profile`} className="flex w-full items-center">
                                             <User className="mr-2 h-4 w-4 opacity-70" />
                                             Profile
                                         </Link>

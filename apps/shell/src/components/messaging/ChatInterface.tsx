@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChatMessage, messagingService, useWebSocket, quoteService } from '@bventy/services';
-import { Send, Paperclip, Lock, Check, CheckCheck } from 'lucide-react';
+import { ChatMessage, messagingService, useWebSocket, quoteService, mediaService } from '@bventy/services';
+import { Send, Paperclip, Lock, Check, CheckCheck, Loader2, FileIcon, X } from 'lucide-react';
 import { Button, Input, Skeleton } from '@bventy/ui';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -25,7 +25,10 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
     // Quote Response State
     const [quotePrice, setQuotePrice] = useState('');
     const [quoteMessage, setQuoteMessage] = useState('');
+    const [attachmentUrl, setAttachmentUrl] = useState<string | null>(null);
     const [isSubmittingQuote, setIsSubmittingQuote] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { lastMessage, isConnected } = useWebSocket(conversationId);
@@ -85,6 +88,23 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        try {
+            const url = await mediaService.uploadMedia(file);
+            setAttachmentUrl(url);
+            toast.success("File uploaded successfully");
+        } catch (error) {
+            console.error('File upload failed:', error);
+            toast.error("Failed to upload file");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         const trimmed = inputValue.trim();
@@ -138,7 +158,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
 
         setIsSubmittingQuote(true);
         try {
-            await quoteService.respondToQuote(quoteId, Number(quotePrice), quoteMessage);
+            await quoteService.respondToQuote(quoteId, Number(quotePrice), quoteMessage, attachmentUrl || undefined);
             toast.success("Quote submitted to Organizer");
             if (onQuoteResponded) onQuoteResponded();
         } catch (error) {
@@ -168,7 +188,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
     }
 
     return (
-        <div className="flex flex-col h-[500px] sm:h-[600px] border border-border rounded-lg bg-card overflow-hidden shadow-sm">
+        <div className="flex flex-col h-[500px] sm:h-[750px] border border-border rounded-lg bg-card overflow-hidden shadow-sm">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border bg-muted/20">
                 <div className="flex items-center gap-3">
@@ -305,7 +325,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                         onChange={e => setQuotePrice(e.target.value)}
                                         required
                                         className="sm:max-w-[140px]"
-                                        disabled={isSubmittingQuote}
+                                        disabled={isSubmittingQuote || isUploading}
                                         min="0"
                                     />
                                     <Input
@@ -314,12 +334,43 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                         value={quoteMessage}
                                         onChange={e => setQuoteMessage(e.target.value)}
                                         className="flex-1"
-                                        disabled={isSubmittingQuote}
+                                        disabled={isSubmittingQuote || isUploading}
                                     />
-                                    <Button type="submit" disabled={isSubmittingQuote || !quotePrice} className="shrink-0 w-full sm:w-auto">
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        ref={fileInputRef}
+                                        onChange={handleFileChange}
+                                        accept="application/pdf,image/*"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        className="shrink-0 h-10 w-10"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={isSubmittingQuote || isUploading}
+                                        title="Attach Proposal (PDF/Image)"
+                                    >
+                                        {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
+                                    </Button>
+                                    <Button type="submit" disabled={isSubmittingQuote || isUploading || !quotePrice} className="shrink-0 w-full sm:w-auto">
                                         {isSubmittingQuote ? 'Sending...' : 'Send Quote'}
                                     </Button>
                                 </div>
+                                {attachmentUrl && (
+                                    <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 p-2 rounded border border-primary/20 animate-in fade-in slide-in-from-top-1">
+                                        <FileIcon className="h-3 w-3" />
+                                        <span className="truncate flex-1">Proposal attached</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setAttachmentUrl(null)}
+                                            className="hover:text-destructive transition-colors"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </div>
+                                )}
                             </form>
                         ) : (
                             <div className="flex flex-col items-center justify-center p-4 text-center space-y-2 bg-muted/50 rounded-md border border-dashed border-border text-muted-foreground">
