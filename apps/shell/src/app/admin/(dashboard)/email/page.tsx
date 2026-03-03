@@ -110,7 +110,7 @@ export default function EmailManagementPage() {
                         Manage system emails, templates, and platform-wide notification settings.
                     </p>
                 </div>
-                <Link href="/admin/email/logs">
+                <Link href="/email/logs">
                     <Button variant="outline">
                         <History className="h-4 w-4 mr-2" />
                         View Send Logs
@@ -160,6 +160,24 @@ export default function EmailManagementPage() {
                         <div className="text-xs text-muted-foreground mt-1">Status: Active</div>
                         <div className="mt-4 flex items-center gap-2">
                             <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">Operational</Badge>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="opacity-60 bg-muted/20">
+                    <CardHeader className="pb-3">
+                        <div className="flex items-center gap-2">
+                            <div className="p-2 bg-orange-100 text-orange-600 rounded-lg dark:bg-orange-900/30 dark:text-orange-400">
+                                <Mail className="h-4 w-4" />
+                            </div>
+                            <CardTitle className="text-lg">Amazon SES</CardTitle>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-sm font-medium text-muted-foreground italic">Coming Soon</div>
+                        <div className="text-xs text-muted-foreground mt-1">Integration pending configuration</div>
+                        <div className="mt-4 flex items-center gap-2">
+                            <Badge variant="secondary" className="text-[10px]">Not Operational</Badge>
                         </div>
                     </CardContent>
                 </Card>
