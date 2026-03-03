@@ -79,6 +79,8 @@ export default function EmailManagementPage() {
                 subject: editForm.subject,
                 body_html: editForm.body_html,
                 is_enabled: editForm.is_enabled,
+                from_name: editForm.from_name,
+                from_email: editForm.from_email,
             });
             toast.success("Template updated successfully!");
             setEditingKey(null);
@@ -165,6 +167,7 @@ export default function EmailManagementPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Template Key</TableHead>
+                                    <TableHead>Sender (Name & Email)</TableHead>
                                     <TableHead>Subject</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead className="text-right">Action</TableHead>
@@ -174,6 +177,29 @@ export default function EmailManagementPage() {
                                 {templates.map((template) => (
                                     <TableRow key={template.template_key} className={editingKey === template.template_key ? "bg-muted/50" : ""}>
                                         <TableCell className="font-mono text-xs">{template.template_key}</TableCell>
+                                        <TableCell>
+                                            {editingKey === template.template_key ? (
+                                                <div className="flex flex-col gap-1">
+                                                    <Input
+                                                        value={editForm.from_name || ""}
+                                                        onChange={(e) => setEditForm({ ...editForm, from_name: e.target.value })}
+                                                        placeholder="From Name"
+                                                        className="h-7 text-[10px]"
+                                                    />
+                                                    <Input
+                                                        value={editForm.from_email || ""}
+                                                        onChange={(e) => setEditForm({ ...editForm, from_email: e.target.value })}
+                                                        placeholder="from@domain.com"
+                                                        className="h-7 text-[10px]"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-medium">{template.from_name || "Default"}</span>
+                                                    <span className="text-[10px] text-muted-foreground">{template.from_email || "default@bventy.in"}</span>
+                                                </div>
+                                            )}
+                                        </TableCell>
                                         <TableCell>
                                             {editingKey === template.template_key ? (
                                                 <Input
