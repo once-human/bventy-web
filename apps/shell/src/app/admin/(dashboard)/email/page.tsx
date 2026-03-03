@@ -167,7 +167,7 @@ export default function EmailManagementPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Template Key</TableHead>
-                                    <TableHead>Sender (Name & Email)</TableHead>
+                                    <TableHead>Sender</TableHead>
                                     <TableHead>Subject</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead className="text-right">Action</TableHead>
@@ -175,73 +175,36 @@ export default function EmailManagementPage() {
                             </TableHeader>
                             <TableBody>
                                 {templates.map((template) => (
-                                    <TableRow key={template.template_key} className={editingKey === template.template_key ? "bg-muted/50" : ""}>
-                                        <TableCell className="font-mono text-xs">{template.template_key}</TableCell>
+                                    <TableRow key={template.template_key} className={editingKey === template.template_key ? "bg-primary/5 border-l-4 border-l-primary" : ""}>
+                                        <TableCell className="font-mono text-xs font-bold">{template.template_key}</TableCell>
                                         <TableCell>
-                                            {editingKey === template.template_key ? (
-                                                <div className="flex flex-col gap-1">
-                                                    <Input
-                                                        value={editForm.from_name || ""}
-                                                        onChange={(e) => setEditForm({ ...editForm, from_name: e.target.value })}
-                                                        placeholder="From Name"
-                                                        className="h-7 text-[10px]"
-                                                    />
-                                                    <Input
-                                                        value={editForm.from_email || ""}
-                                                        onChange={(e) => setEditForm({ ...editForm, from_email: e.target.value })}
-                                                        placeholder="from@domain.com"
-                                                        className="h-7 text-[10px]"
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col">
-                                                    <span className="text-xs font-medium">{template.from_name || "Default"}</span>
-                                                    <span className="text-[10px] text-muted-foreground">{template.from_email || "default@bventy.in"}</span>
-                                                </div>
-                                            )}
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-medium">{template.from_name || "Default"}</span>
+                                                <span className="text-[10px] text-muted-foreground">{template.from_email || "default@bventy.in"}</span>
+                                            </div>
                                         </TableCell>
                                         <TableCell>
-                                            {editingKey === template.template_key ? (
-                                                <Input
-                                                    value={editForm.subject}
-                                                    onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })}
-                                                    className="h-8 text-sm"
-                                                />
-                                            ) : (
-                                                <span className="text-sm">{template.subject}</span>
-                                            )}
+                                            <span className="text-sm truncate max-w-[200px] block">{template.subject}</span>
                                         </TableCell>
                                         <TableCell>
-                                            {editingKey === template.template_key ? (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-7 text-[10px]"
-                                                    onClick={() => setEditForm({ ...editForm, is_enabled: !editForm.is_enabled })}
-                                                >
-                                                    {editForm.is_enabled ? "Enabled" : "Disabled"}
-                                                </Button>
-                                            ) : (
-                                                <Badge variant={template.is_enabled ? "default" : "secondary"} className="h-5 text-[10px]">
-                                                    {template.is_enabled ? "Active" : "Paused"}
-                                                </Badge>
-                                            )}
+                                            <Badge variant={template.is_enabled ? "default" : "secondary"} className="h-5 text-[10px]">
+                                                {template.is_enabled ? "Active" : "Paused"}
+                                            </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            {editingKey === template.template_key ? (
-                                                <div className="flex justify-end gap-1">
-                                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={cancelEditing}>
-                                                        <X className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button size="sm" className="h-8 w-8 p-0" onClick={saveTemplate} disabled={saving}>
-                                                        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                                                    </Button>
-                                                </div>
-                                            ) : (
-                                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => startEditing(template)}>
-                                                    <Edit2 className="h-3.5 w-3.5" />
-                                                </Button>
-                                            )}
+                                            <Button
+                                                size="sm"
+                                                variant={editingKey === template.template_key ? "secondary" : "ghost"}
+                                                className="h-8 px-3"
+                                                onClick={() => editingKey === template.template_key ? cancelEditing() : startEditing(template)}
+                                            >
+                                                {editingKey === template.template_key ? (
+                                                    <X className="h-3.5 w-3.5 mr-1" />
+                                                ) : (
+                                                    <Edit2 className="h-3.5 w-3.5 mr-1" />
+                                                )}
+                                                {editingKey === template.template_key ? "Cancel" : "Edit"}
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -250,24 +213,82 @@ export default function EmailManagementPage() {
                     </div>
 
                     {editingKey && (
-                        <div className="mt-6 space-y-4 p-4 border rounded-lg bg-muted/20 animate-in fade-in slide-in-from-bottom-2">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">HTML Content Editor</h3>
-                                <p className="text-[10px] text-muted-foreground italic truncate max-w-[200px]">Editing: {editingKey}</p>
-                            </div>
-                            <Textarea
-                                value={editForm.body_html}
-                                onChange={(e) => setEditForm({ ...editForm, body_html: e.target.value })}
-                                className="min-h-[200px] font-mono text-xs bg-background"
-                                placeholder="Paste your HTML template here..."
-                            />
-                            <div className="flex justify-between items-center text-[10px] text-muted-foreground">
-                                <div>Tags: <code>{"{{organizer_name}}"}</code>, <code>{"{{vendor_name}}"}</code>, <code>{"{{event_title}}"}</code></div>
+                        <div className="mt-8 space-y-6 p-6 border-2 border-primary/20 rounded-xl bg-primary/5 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            <div className="flex items-center justify-between border-b pb-4">
+                                <div>
+                                    <h3 className="text-lg font-bold">Edit Email Template</h3>
+                                    <p className="text-xs text-muted-foreground font-mono">{editingKey}</p>
+                                </div>
                                 <div className="flex gap-2">
-                                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={cancelEditing}>Cancel</Button>
-                                    <Button size="sm" className="h-7 text-xs" onClick={saveTemplate} disabled={saving}>
-                                        {saving ? "Saving..." : "Save Changes"}
+                                    <Button variant="outline" size="sm" onClick={cancelEditing}>Cancel</Button>
+                                    <Button size="sm" onClick={saveTemplate} disabled={saving}>
+                                        {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                        Save Changes
                                     </Button>
+                                </div>
+                            </div>
+
+                            <div className="grid gap-6 md:grid-cols-2">
+                                <div className="space-y-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Subject Line</label>
+                                        <Input
+                                            value={editForm.subject}
+                                            onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })}
+                                            placeholder="Enter email subject"
+                                            className="bg-background shadow-sm"
+                                        />
+                                    </div>
+                                    <div className="grid gap-4 grid-cols-2">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">From Name</label>
+                                            <Input
+                                                value={editForm.from_name || ""}
+                                                onChange={(e) => setEditForm({ ...editForm, from_name: e.target.value })}
+                                                placeholder="e.g. Bventy Team"
+                                                className="bg-background shadow-sm"
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">From Email</label>
+                                            <Input
+                                                value={editForm.from_email || ""}
+                                                onChange={(e) => setEditForm({ ...editForm, from_email: e.target.value })}
+                                                placeholder="e.g. hello@bventy.in"
+                                                className="bg-background shadow-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <label className="text-sm font-medium">Template Status:</label>
+                                        <Button
+                                            variant={editForm.is_enabled ? "default" : "outline"}
+                                            size="sm"
+                                            className="h-8"
+                                            onClick={() => setEditForm({ ...editForm, is_enabled: !editForm.is_enabled })}
+                                        >
+                                            {editForm.is_enabled ? "Enabled (Active)" : "Disabled (Paused)"}
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5 flex flex-col h-full mt-[-0px]">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">HTML Body Content</label>
+                                    <Textarea
+                                        value={editForm.body_html}
+                                        onChange={(e) => setEditForm({ ...editForm, body_html: e.target.value })}
+                                        className="flex-1 min-h-[300px] font-mono text-xs bg-background shadow-sm resize-none"
+                                        placeholder="Paste your HTML template here..."
+                                    />
+                                    <div className="pt-2">
+                                        <p className="text-[10px] text-muted-foreground">
+                                            Available Dynamic Tags:
+                                            <code className="ml-1 px-1 bg-muted rounded">{"{{organizer_name}}"}</code>
+                                            <code className="ml-1 px-1 bg-muted rounded">{"{{vendor_name}}"}</code>
+                                            <code className="ml-1 px-1 bg-muted rounded">{"{{event_title}}"}</code>
+                                            <code className="ml-1 px-1 bg-muted rounded">{"{{verification_code}}"}</code>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>

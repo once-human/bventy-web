@@ -14,7 +14,7 @@ import {
 } from "@bventy/ui";
 import { Input } from "@bventy/ui";
 import { useState, useEffect } from "react";
-import { authService } from "@bventy/services";
+import { authService, useAuth } from "@bventy/services";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@bventy/ui";
@@ -29,11 +29,19 @@ const formSchema = z.object({
 export function VerifyEmailForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { user, login, loading: authLoading } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
     const emailParam = searchParams.get("email") || "";
+
+    // Redirect if already verified
+    useEffect(() => {
+        if (!authLoading && user?.email_verified) {
+            router.push("/dashboard");
+        }
+    }, [user, authLoading, router]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -55,9 +63,10 @@ export function VerifyEmailForm() {
         try {
             await authService.verifyEmail(values);
             setSuccess(true);
-            setTimeout(() => {
-                router.push("/login?verified=true");
-            }, 2000);
+            // Auto-login after verification
+            setTimeout(async () => {
+                await login(true); // This handles the role-based redirect to dashboard
+            }, 1500);
         } catch (err: any) {
             if (err.response?.data?.error) {
                 setError(err.response.data.error);
