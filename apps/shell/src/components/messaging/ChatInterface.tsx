@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChatMessage, messagingService, useWebSocket } from '@bventy/services';
+import { ChatMessage, messagingService, useWebSocket, quoteService } from '@bventy/services';
 import { Send, Paperclip, Lock, Check, CheckCheck } from 'lucide-react';
 import { Button, Input, Skeleton } from '@bventy/ui';
 import { format } from 'date-fns';
@@ -11,13 +11,21 @@ interface ChatInterfaceProps {
     chatLocked: boolean;
     otherPartyName: string;
     otherPartyRole: 'vendor' | 'organizer';
+    quoteId: string;
+    quoteStatus?: string;
+    onQuoteResponded?: () => void;
 }
 
-export function ChatInterface({ conversationId, currentUserId, chatLocked, otherPartyName, otherPartyRole }: ChatInterfaceProps) {
+export function ChatInterface({ conversationId, currentUserId, chatLocked, otherPartyName, otherPartyRole, quoteId, quoteStatus, onQuoteResponded }: ChatInterfaceProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [inputValue, setInputValue] = useState('');
     const [isSending, setIsSending] = useState(false);
+
+    // Quote Response State
+    const [quotePrice, setQuotePrice] = useState('');
+    const [quoteMessage, setQuoteMessage] = useState('');
+    const [isSubmittingQuote, setIsSubmittingQuote] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { lastMessage, isConnected } = useWebSocket(conversationId);
@@ -124,6 +132,23 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
         }
     };
 
+    const handleQuoteResponse = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!quotePrice || isSubmittingQuote) return;
+
+        setIsSubmittingQuote(true);
+        try {
+            await quoteService.respondToQuote(quoteId, Number(quotePrice), quoteMessage);
+            toast.success("Quote submitted to Organizer");
+            if (onQuoteResponded) onQuoteResponded();
+        } catch (error) {
+            console.error('Failed to respond to quote:', error);
+            toast.error('Failed to submit quote');
+        } finally {
+            setIsSubmittingQuote(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="flex flex-col h-[500px] border border-border rounded-lg bg-card overflow-hidden">
@@ -172,7 +197,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                 ) : (
                     messages.map((msg, idx) => {
                         const isMe = msg.sender_user_id === currentUserId;
-                        const isSystem = msg.message_type === 'system' || msg.message_type === 'quote_card';
+                        const isSystem = msg.message_type === 'system';
 
                         // Add date separators if needed (simple check against previous message date)
                         let showDateSeparator = false;
@@ -197,55 +222,58 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
 
                                     {isSystem ? (
                                         <div className="max-w-[85%] bg-muted border border-border text-center px-4 py-3 rounded-lg text-sm text-foreground space-y-2 relative">
+                                            <div className="flex items-center gap-2 text-muted-foreground">
+                                                {msg.body?.includes("locked") || msg.body?.includes("expired") ? <Lock className="h-4 w-4" /> : null}
+                                                <span>{msg.body}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className={`flex flex-col max-w-[85%] sm:max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
                                             {msg.message_type === 'quote_card' && msg.system_payload ? (
-                                                <div className="space-y-3">
-                                                    <div className="flex items-center justify-center gap-2 text-primary font-medium pb-2 border-b border-border/50">
-                                                        <Paperclip className="h-4 w-4" />
-                                                        <span>Quote Request Context</span>
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-4 text-left text-xs">
-                                                        {msg.system_payload.budget_range && (
-                                                            <div>
-                                                                <span className="text-muted-foreground block mb-1">Budget</span>
-                                                                <span className="font-medium">{msg.system_payload.budget_range}</span>
-                                                            </div>
-                                                        )}
-                                                        {msg.system_payload.deadline && (
-                                                            <div>
-                                                                <span className="text-muted-foreground block mb-1">Deadline</span>
-                                                                <span className="font-medium">{format(new Date(msg.system_payload.deadline), 'PP')}</span>
-                                                            </div>
-                                                        )}
-                                                        {msg.system_payload.special_requirements && (
-                                                            <div className="col-span-2 mt-2 pt-2 border-t border-border/50">
-                                                                <span className="text-muted-foreground block mb-1">Notes</span>
-                                                                <span className="italic">"{msg.system_payload.special_requirements}"</span>
-                                                            </div>
-                                                        )}
+                                                <div className={`px-4 py-3 shadow-sm text-sm ${isMe ? 'bg-primary/5 border border-primary/20 text-foreground rounded-tl-xl rounded-tr-md rounded-bl-xl rounded-br-sm' : 'bg-muted border border-border text-foreground rounded-tr-xl rounded-tl-md rounded-br-xl rounded-bl-sm'}`}>
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-center gap-2 font-medium pb-2 border-b border-primary/10 dark:border-border/50">
+                                                            <Paperclip className="h-4 w-4" />
+                                                            <span>Quote Request Context</span>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-4 text-left text-xs">
+                                                            {msg.system_payload.budget_range && (
+                                                                <div>
+                                                                    <span className="text-muted-foreground block mb-1">Budget</span>
+                                                                    <span className="font-medium">{msg.system_payload.budget_range}</span>
+                                                                </div>
+                                                            )}
+                                                            {msg.system_payload.deadline && (
+                                                                <div>
+                                                                    <span className="text-muted-foreground block mb-1">Deadline</span>
+                                                                    <span className="font-medium">{format(new Date(msg.system_payload.deadline), 'PP')}</span>
+                                                                </div>
+                                                            )}
+                                                            {msg.system_payload.special_requirements && (
+                                                                <div className="col-span-2 mt-2 pt-2 border-t border-primary/10 dark:border-border/50">
+                                                                    <span className="text-muted-foreground block mb-1">Notes</span>
+                                                                    <span className="italic">"{msg.system_payload.special_requirements}"</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center gap-2 text-muted-foreground">
-                                                    {msg.body?.includes("locked") || msg.body?.includes("expired") ? <Lock className="h-4 w-4" /> : null}
-                                                    <span>{msg.body}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className={`flex flex-col max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
-                                            <div
-                                                className={`px-4 py-2 text-sm shadow-sm ${isMe
+                                                <div
+                                                    className={`px-4 py-2 text-sm shadow-sm ${isMe
                                                         ? 'bg-primary text-primary-foreground rounded-tl-xl rounded-tr-md rounded-bl-xl rounded-br-sm'
                                                         : 'bg-muted border border-border text-foreground rounded-tr-xl rounded-tl-md rounded-br-xl rounded-bl-sm'
-                                                    }`}
-                                            >
-                                                {msg.body}
-                                            </div>
+                                                        }`}
+                                                >
+                                                    {msg.body}
+                                                </div>
+                                            )}
+
                                             <div className={`flex items-center gap-1 mt-1 px-1 text-[10px] text-muted-foreground bg-background/80 backdrop-blur-sm rounded-full py-0.5`}>
                                                 <span>{format(new Date(msg.created_at), 'HH:mm')}</span>
                                                 {isMe && (
                                                     <span className="ml-1 text-primary/80">
-                                                        {msg.is_read ? <CheckCheck className="h-3 w-3" /> : <Check className="h-3 w-3" />}
+                                                        {msg.is_read ? <CheckCheck className="h-3 w-3 inline-block" /> : <Check className="h-3 w-3 inline-block" />}
                                                     </span>
                                                 )}
                                             </div>
@@ -262,15 +290,59 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
             {/* Input Area */}
             <div className="p-3 border-t border-border bg-card">
                 {chatLocked ? (
-                    <div className="flex flex-col items-center justify-center p-4 text-center space-y-2 bg-muted/50 rounded-md border border-dashed border-border">
-                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center mb-1">
-                            <Lock className="h-4 w-4 text-muted-foreground" />
+                    otherPartyRole === 'organizer' ? (
+                        quoteStatus === 'pending' ? (
+                            <form onSubmit={handleQuoteResponse} className="bg-muted/10 p-3 sm:p-4 rounded-lg border border-border/50 flex flex-col gap-3">
+                                <div className="text-sm font-semibold flex items-center justify-between">
+                                    <span>Respond to Quote Request</span>
+                                    <span className="text-xs font-normal text-muted-foreground hidden sm:inline-block">This officially unlocks pricing logic.</span>
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <Input
+                                        type="number"
+                                        placeholder="Quoted Price (₹)"
+                                        value={quotePrice}
+                                        onChange={e => setQuotePrice(e.target.value)}
+                                        required
+                                        className="sm:max-w-[140px]"
+                                        disabled={isSubmittingQuote}
+                                        min="0"
+                                    />
+                                    <Input
+                                        type="text"
+                                        placeholder="Optional message..."
+                                        value={quoteMessage}
+                                        onChange={e => setQuoteMessage(e.target.value)}
+                                        className="flex-1"
+                                        disabled={isSubmittingQuote}
+                                    />
+                                    <Button type="submit" disabled={isSubmittingQuote || !quotePrice} className="shrink-0 w-full sm:w-auto">
+                                        {isSubmittingQuote ? 'Sending...' : 'Send Quote'}
+                                    </Button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center p-4 text-center space-y-2 bg-muted/50 rounded-md border border-dashed border-border text-muted-foreground">
+                                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center mb-1">
+                                    <Check className="h-4 w-4" />
+                                </div>
+                                <h4 className="text-sm font-medium text-foreground">Quote Response Sent</h4>
+                                <p className="text-xs max-w-sm">
+                                    Waiting for the Organizer to review your price and accept the quote to unlock the chat.
+                                </p>
+                            </div>
+                        )
+                    ) : (
+                        <div className="flex flex-col items-center justify-center p-4 text-center space-y-2 bg-muted/50 rounded-md border border-dashed border-border text-muted-foreground">
+                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center mb-1">
+                                <Lock className="h-4 w-4" />
+                            </div>
+                            <h4 className="text-sm font-medium text-foreground">Chat is Locked</h4>
+                            <p className="text-xs max-w-sm">
+                                Messaging is only available for accepted quotes.
+                            </p>
                         </div>
-                        <h4 className="text-sm font-medium">Chat is Locked</h4>
-                        <p className="text-xs text-muted-foreground max-w-sm">
-                            Messaging is only available for accepted quotes.
-                        </p>
-                    </div>
+                    )
                 ) : (
                     <form onSubmit={handleSend} className="flex gap-2">
                         <Button

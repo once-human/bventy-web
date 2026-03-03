@@ -142,6 +142,11 @@ export default function MessagesPage() {
                         chatLocked={activeConv.chat_locked}
                         otherPartyName={activeConv.organizer_name || "Organizer"}
                         otherPartyRole="organizer"
+                        quoteId={activeConv.quote_id}
+                        quoteStatus={activeConv.quote_status}
+                        onQuoteResponded={() => {
+                            messagingService.getConversations().then(data => setConversations(data));
+                        }}
                     />
                 )}
             </div>

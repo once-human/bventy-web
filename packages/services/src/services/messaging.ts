@@ -12,6 +12,7 @@ export interface Conversation {
     vendor_name: string;
     organizer_name: string | null;
     unread_count: number;
+    quote_status?: "pending" | "responded" | "accepted" | "rejected" | "revision_requested" | "archived";
 }
 
 export interface ChatMessage {
