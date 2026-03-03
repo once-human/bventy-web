@@ -42,9 +42,10 @@ export default function EmailLogsPage() {
         try {
             const data = await adminService.getEmailLogs();
             setLogs(data);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to fetch email logs", error);
-            toast.error("Failed to load email logs.");
+            const message = error.response?.data?.error || "Failed to load email logs.";
+            toast.error(message);
         } finally {
             setLoading(false);
         }
