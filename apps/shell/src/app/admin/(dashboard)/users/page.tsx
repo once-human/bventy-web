@@ -42,9 +42,10 @@ interface UserDetailsModalProps {
     onDelete: (userId: string) => Promise<void>;
     onRoleChange: (userId: string, newRole: string) => Promise<void>;
     canManageRoles: boolean;
+    canManageUsers: boolean;
 }
 
-function UserDetailsModal({ user, open, onClose, onDelete, onRoleChange, canManageRoles }: UserDetailsModalProps) {
+function UserDetailsModal({ user, open, onClose, onDelete, onRoleChange, canManageRoles, canManageUsers }: UserDetailsModalProps) {
     const [isDeleting, setIsDeleting] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
@@ -135,7 +136,7 @@ function UserDetailsModal({ user, open, onClose, onDelete, onRoleChange, canMana
                 </div>
 
                 <DialogFooter className="sm:justify-between border-t pt-4">
-                    {canManageRoles ? (
+                    {canManageUsers ? (
                         showConfirm ? (
                             <div className="flex items-center gap-2 w-full">
                                 <p className="text-xs text-destructive font-semibold flex-1">Are you absolutely sure?</p>
@@ -222,6 +223,7 @@ export default function AdminUsersPage() {
         );
     }
 
+    const canManageUsers = ["admin", "super_admin"].includes(currentUser?.role || "");
     const canManageRoles = currentUser?.role === "super_admin";
 
     return (
@@ -275,25 +277,42 @@ export default function AdminUsersPage() {
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                                    {canManageRoles ? (
-                                        <Select
-                                            value={user.role}
-                                            onValueChange={(value) =>
-                                                handleRoleChange(user.id, value)
-                                            }
-                                        >
-                                            <SelectTrigger className="w-[130px] ml-auto">
-                                                <SelectValue placeholder="Select role" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="user">User</SelectItem>
-                                                <SelectItem value="staff">Staff</SelectItem>
-                                                <SelectItem value="admin">Admin</SelectItem>
-                                                <SelectItem value="super_admin">
-                                                    Super Admin
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                    {canManageUsers ? (
+                                        <div className="flex items-center justify-end gap-2">
+                                            {canManageRoles ? (
+                                                <Select
+                                                    value={user.role}
+                                                    onValueChange={(value) =>
+                                                        handleRoleChange(user.id, value)
+                                                    }
+                                                >
+                                                    <SelectTrigger className="w-[130px]">
+                                                        <SelectValue placeholder="Select role" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="user">User</SelectItem>
+                                                        <SelectItem value="staff">Staff</SelectItem>
+                                                        <SelectItem value="admin">Admin</SelectItem>
+                                                        <SelectItem value="super_admin">
+                                                            Super Admin
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            ) : (
+                                                <Badge variant="outline" className="capitalize">{user.role}</Badge>
+                                            )}
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openUserDetails(user);
+                                                }}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     ) : (
                                         <span className="text-sm text-muted-foreground italic">
                                             View Only
@@ -313,6 +332,7 @@ export default function AdminUsersPage() {
                 onDelete={handleDeleteUser}
                 onRoleChange={handleRoleChange}
                 canManageRoles={canManageRoles}
+                canManageUsers={canManageUsers}
             />
         </div>
     );
