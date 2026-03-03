@@ -188,7 +188,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
     }
 
     return (
-        <div className="flex flex-col h-[500px] sm:h-[750px] border border-border rounded-lg bg-card overflow-hidden shadow-sm">
+        <div className="flex flex-col h-full border border-border rounded-lg bg-card overflow-hidden shadow-sm">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border bg-muted/20">
                 <div className="flex items-center gap-3">
@@ -250,28 +250,27 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                     ) : (
                                         <div className={`flex flex-col max-w-[85%] sm:max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
                                             {msg.message_type === 'quote_card' && msg.system_payload ? (
-                                                <div className={`px-4 py-3 shadow-sm text-sm ${isMe ? 'bg-primary/5 border border-primary/20 text-foreground rounded-tl-xl rounded-tr-md rounded-bl-xl rounded-br-sm' : 'bg-muted border border-border text-foreground rounded-tr-xl rounded-tl-md rounded-br-xl rounded-bl-sm'}`}>
-                                                    <div className="space-y-3">
-                                                        <div className="flex items-center gap-2 font-medium pb-2 border-b border-primary/10 dark:border-border/50">
-                                                            <Paperclip className="h-4 w-4" />
-                                                            <span>Quote Request Context</span>
+                                                <div className={`px-3 py-2 shadow-sm text-sm ${isMe ? 'bg-primary/5 border border-primary/20 text-foreground rounded-tl-xl rounded-tr-md rounded-bl-xl rounded-br-sm' : 'bg-muted border border-border text-foreground rounded-tr-xl rounded-tl-md rounded-br-xl rounded-bl-sm'}`}>
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-2 font-medium pb-1 border-b border-primary/10 dark:border-border/50 text-xs">
+                                                            <Paperclip className="h-3 w-3" />
+                                                            <span>Request Context</span>
                                                         </div>
-                                                        <div className="grid grid-cols-2 gap-4 text-left text-xs">
+                                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-left text-[10px]">
                                                             {msg.system_payload.budget_range && (
                                                                 <div>
-                                                                    <span className="text-muted-foreground block mb-1">Budget</span>
+                                                                    <span className="text-muted-foreground">Budget: </span>
                                                                     <span className="font-medium">{msg.system_payload.budget_range}</span>
                                                                 </div>
                                                             )}
                                                             {msg.system_payload.deadline && (
                                                                 <div>
-                                                                    <span className="text-muted-foreground block mb-1">Deadline</span>
+                                                                    <span className="text-muted-foreground">Deadline: </span>
                                                                     <span className="font-medium">{format(new Date(msg.system_payload.deadline), 'PP')}</span>
                                                                 </div>
                                                             )}
                                                             {msg.system_payload.special_requirements && (
-                                                                <div className="col-span-2 mt-2 pt-2 border-t border-primary/10 dark:border-border/50">
-                                                                    <span className="text-muted-foreground block mb-1">Notes</span>
+                                                                <div className="col-span-2 text-muted-foreground line-clamp-2">
                                                                     <span className="italic">"{msg.system_payload.special_requirements}"</span>
                                                                 </div>
                                                             )}

@@ -43,7 +43,7 @@ export default function MessagesPage() {
     const activeConv = conversations.find(c => c.id === activeConvId);
 
     return (
-        <div className="flex h-[calc(100vh-12rem)] overflow-hidden rounded-xl border bg-card shadow-sm">
+        <div className="flex h-[calc(100vh-8rem)] overflow-hidden rounded-xl border bg-card shadow-sm">
             {/* Sidebar */}
             <div className="w-80 flex-col border-r hidden md:flex">
                 <div className="p-4 border-b space-y-4 bg-muted/10">
