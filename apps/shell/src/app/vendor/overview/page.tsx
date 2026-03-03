@@ -40,7 +40,7 @@ export default function OverviewPage() {
                         <div className="text-2xl font-bold">12</div>
                         <p className="text-xs text-muted-foreground">4 urgent requests</p>
                         <Button variant="link" className="mt-4 h-auto p-0 text-xs" asChild>
-                            <Link href="/vendor/leads?tab=new">View all <ChevronRight className="ml-1 h-3 w-3" /></Link>
+                            <Link href="/leads?tab=new">View all <ChevronRight className="ml-1 h-3 w-3" /></Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -55,7 +55,7 @@ export default function OverviewPage() {
                         <div className="text-2xl font-bold">5</div>
                         <p className="text-xs text-muted-foreground">Average wait: 4 hours</p>
                         <Button variant="link" className="mt-4 h-auto p-0 text-xs" asChild>
-                            <Link href="/vendor/messages">Open inbox <ChevronRight className="ml-1 h-3 w-3" /></Link>
+                            <Link href="/messages">Open inbox <ChevronRight className="ml-1 h-3 w-3" /></Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -72,7 +72,7 @@ export default function OverviewPage() {
                             <ArrowUpRight className="mr-1 h-3 w-3" /> 12% from last week
                         </p>
                         <Button variant="link" className="mt-4 h-auto p-0 text-xs" asChild>
-                            <Link href="/vendor/performance">Insights <ChevronRight className="ml-1 h-3 w-3" /></Link>
+                            <Link href="/performance">Insights <ChevronRight className="ml-1 h-3 w-3" /></Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -102,7 +102,7 @@ export default function OverviewPage() {
                             ))}
                         </div>
                         <Button variant="outline" className="mt-4 w-full" asChild>
-                            <Link href="/vendor/calendar">View Calendar</Link>
+                            <Link href="/calendar">View Calendar</Link>
                         </Button>
                     </CardContent>
                 </Card>

@@ -14,7 +14,7 @@ import {
 } from "@bventy/ui";
 import { Input } from "@bventy/ui";
 import { useState, useEffect } from "react";
-import { authService, useAuth } from "@bventy/services";
+import { authService, useAuth, getVendorUrl, getAppUrl } from "@bventy/services";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@bventy/ui";
@@ -39,9 +39,13 @@ export function VerifyEmailForm() {
     // Redirect if already verified
     useEffect(() => {
         if (!authLoading && user?.email_verified) {
-            router.push("/vendor/overview");
+            if (user?.vendor_profile_exists) {
+                window.location.href = `${getVendorUrl()}/overview`;
+            } else {
+                window.location.href = `${getAppUrl()}/dashboard`;
+            }
         }
-    }, [user, authLoading, router]);
+    }, [user, authLoading]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),

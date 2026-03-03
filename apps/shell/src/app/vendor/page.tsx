@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAuth, getAuthUrl } from "@bventy/services";
+import { useAuth, getAuthUrl, getVendorUrl } from "@bventy/services";
 
 export default function RootPage() {
     const { user, loading } = useAuth();
@@ -9,7 +9,7 @@ export default function RootPage() {
     useEffect(() => {
         if (!loading) {
             if (user) {
-                window.location.href = "/vendor/overview";
+                window.location.href = `${getVendorUrl()}/overview`;
             } else {
                 // Check if we have a token in the URL or storage first
                 const params = new URLSearchParams(window.location.search);

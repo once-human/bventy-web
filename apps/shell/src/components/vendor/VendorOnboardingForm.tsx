@@ -105,7 +105,7 @@ export function VendorOnboardingForm() {
                     Your vendor profile has been set up successfully.
                 </p>
                 <Button asChild className="mt-4">
-                    <Link href="/vendor/overview">Go to Dashboard</Link>
+                    <Link href="/overview">Go to Dashboard</Link>
                 </Button>
             </div>
         );

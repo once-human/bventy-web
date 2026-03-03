@@ -24,34 +24,34 @@ const sidebarGroups = [
     {
         label: "Workspace",
         items: [
-            { title: "Overview", href: "/vendor/overview", icon: LayoutDashboard },
-            { title: "Leads", href: "/vendor/leads", icon: Briefcase },
-            { title: "Messages", href: "/vendor/messages", icon: MessageSquare },
-            { title: "Calendar", href: "/vendor/calendar", icon: Calendar },
+            { title: "Overview", href: "/overview", icon: LayoutDashboard },
+            { title: "Leads", href: "/leads", icon: Briefcase },
+            { title: "Messages", href: "/messages", icon: MessageSquare },
+            { title: "Calendar", href: "/calendar", icon: Calendar },
         ]
     },
     {
         label: "Business",
         items: [
-            { title: "Services & Pricing", href: "/vendor/services", icon: Store },
-            { title: "Portfolio", href: "/vendor/portfolio", icon: Users },
-            { title: "Reviews", href: "/vendor/reviews", icon: Star },
-            { title: "Staff", href: "/vendor/staff", icon: Users },
+            { title: "Services & Pricing", href: "/services", icon: Store },
+            { title: "Portfolio", href: "/portfolio", icon: Users },
+            { title: "Reviews", href: "/reviews", icon: Star },
+            { title: "Staff", href: "/staff", icon: Users },
         ]
     },
     {
         label: "Insights",
         items: [
-            { title: "Performance", href: "/vendor/performance", icon: BarChart3 },
-            { title: "Earnings", href: "/vendor/earnings", icon: Wallet },
+            { title: "Performance", href: "/performance", icon: BarChart3 },
+            { title: "Earnings", href: "/earnings", icon: Wallet },
         ]
     },
     {
         label: "Settings",
         items: [
-            { title: "Business Profile", href: "/vendor/settings/profile", icon: UserCircle },
-            { title: "Account", href: "/vendor/settings/account", icon: Settings },
-            { title: "Notifications", href: "/vendor/settings/notifications", icon: Bell },
+            { title: "Business Profile", href: "/settings/profile", icon: UserCircle },
+            { title: "Account", href: "/settings/account", icon: Settings },
+            { title: "Notifications", href: "/settings/notifications", icon: Bell },
         ]
     }
 ];

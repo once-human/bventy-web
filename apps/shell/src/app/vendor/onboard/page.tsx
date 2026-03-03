@@ -49,7 +49,7 @@ export default function VendorOnboardingPage() {
                                 </div>
                             </div>
                             <Button variant="ghost" size="icon" asChild className="shrink-0">
-                                <Link href="/vendor/overview">
+                                <Link href="/overview">
                                     <X className="h-4 w-4" />
                                     <span className="sr-only">Close</span>
                                 </Link>

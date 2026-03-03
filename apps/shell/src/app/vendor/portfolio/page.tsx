@@ -182,7 +182,7 @@ export default function VendorDashboardPage() {
             <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
                 <div className="mb-6 flex items-center gap-4">
                     <Button variant="ghost" size="icon" asChild>
-                        <Link href="/vendor/overview">
+                        <Link href="/overview">
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
