@@ -19,8 +19,9 @@ import {
     Badge,
     Textarea
 } from "@bventy/ui";
-import { Loader2, Save, Mail, Bell, Edit2, Check, X } from "lucide-react";
+import { Loader2, Save, Mail, Bell, Edit2, Check, X, History } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function EmailManagementPage() {
     const [templates, setTemplates] = useState<any[]>([]);
@@ -102,11 +103,19 @@ export default function EmailManagementPage() {
 
     return (
         <div className="flex flex-col gap-8 pb-10">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Email & Notifications</h1>
-                <p className="text-muted-foreground mt-2">
-                    Manage system emails, templates, and platform-wide notification settings.
-                </p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Email & Notifications</h1>
+                    <p className="text-muted-foreground mt-2">
+                        Manage system emails, templates, and platform-wide notification settings.
+                    </p>
+                </div>
+                <Link href="/admin/email/logs">
+                    <Button variant="outline">
+                        <History className="h-4 w-4 mr-2" />
+                        View Send Logs
+                    </Button>
+                </Link>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
