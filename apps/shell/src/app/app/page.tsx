@@ -16,7 +16,7 @@ export default function AppPage() {
     useEffect(() => {
         if (!loading) {
             if (user) {
-                router.push("/dashboard");
+                router.push("/app/dashboard");
             } else {
                 // Check if we have a token in the URL or storage first
                 const params = new URLSearchParams(window.location.search);

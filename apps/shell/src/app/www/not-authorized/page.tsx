@@ -1,9 +1,9 @@
 "use client";
 
-import { Button  } from "@bventy/ui";
+import { Button } from "@bventy/ui";
 import Link from "next/link";
 import { ShieldAlert, LogOut } from "lucide-react";
-import { useAuth  } from "@bventy/services";
+import { useAuth } from "@bventy/services";
 
 export default function NotAuthorizedPage() {
     const { logout } = useAuth();
@@ -25,7 +25,7 @@ export default function NotAuthorizedPage() {
             </div>
             <div className="flex gap-4">
                 <Button asChild variant="outline">
-                    <Link href="/dashboard">Back to Dashboard</Link>
+                    <Link href="/vendor/overview">Back to Dashboard</Link>
                 </Button>
                 <Button variant="destructive" onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />

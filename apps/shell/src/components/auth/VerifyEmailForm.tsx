@@ -39,7 +39,7 @@ export function VerifyEmailForm() {
     // Redirect if already verified
     useEffect(() => {
         if (!authLoading && user?.email_verified) {
-            router.push("/dashboard");
+            router.push("/vendor/overview");
         }
     }, [user, authLoading, router]);
 

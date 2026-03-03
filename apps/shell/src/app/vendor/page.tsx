@@ -9,7 +9,7 @@ export default function RootPage() {
     useEffect(() => {
         if (!loading) {
             if (user) {
-                window.location.href = "/dashboard";
+                window.location.href = "/vendor/overview";
             } else {
                 // Check if we have a token in the URL or storage first
                 const params = new URLSearchParams(window.location.search);

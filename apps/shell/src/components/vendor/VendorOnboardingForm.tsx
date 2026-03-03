@@ -3,28 +3,30 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button  } from "@bventy/ui";
-import { Form,
+import { Button } from "@bventy/ui";
+import {
+    Form,
     FormControl,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
     FormDescription,
- } from "@bventy/ui";
-import { Input  } from "@bventy/ui";
-import { Textarea  } from "@bventy/ui";
-import { Select,
+} from "@bventy/ui";
+import { Input } from "@bventy/ui";
+import { Textarea } from "@bventy/ui";
+import {
+    Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
- } from "@bventy/ui";
+} from "@bventy/ui";
 import { useState } from "react";
-import { vendorService  } from "@bventy/services";
+import { vendorService } from "@bventy/services";
 import { useRouter } from "next/navigation";
 import { Loader2, CheckCircle2 } from "lucide-react";
-import { Alert, AlertDescription  } from "@bventy/ui";
+import { Alert, AlertDescription } from "@bventy/ui";
 import Link from "next/link";
 
 const formSchema = z.object({
@@ -103,7 +105,7 @@ export function VendorOnboardingForm() {
                     Your vendor profile has been set up successfully.
                 </p>
                 <Button asChild className="mt-4">
-                    <Link href="/vendor/dashboard">Go to Dashboard</Link>
+                    <Link href="/vendor/overview">Go to Dashboard</Link>
                 </Button>
             </div>
         );
