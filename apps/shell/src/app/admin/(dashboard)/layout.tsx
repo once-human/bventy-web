@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@bventy/services";
+import { useAuth, getAuthUrl, getAppUrl } from "@bventy/services";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
@@ -17,11 +17,11 @@ export default function AdminLayout({
     useEffect(() => {
         if (!loading) {
             if (!user) {
-                const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || "https://auth.bventy.in";
+                const authUrl = getAuthUrl();
                 const returnTo = encodeURIComponent(window.location.host);
-                window.location.href = `${AUTH_URL}/login?returnTo=${returnTo}`;
+                window.location.href = `${authUrl}/login?returnTo=${returnTo}`;
             } else if (!["admin", "super_admin"].includes(user.role)) {
-                router.push(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard`);
+                window.location.href = `${getAppUrl()}/dashboard`;
             }
         }
     }, [user, loading, router]);

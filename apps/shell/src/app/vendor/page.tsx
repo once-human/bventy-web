@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAuth } from "@bventy/services";
+import { useAuth, getAuthUrl } from "@bventy/services";
 
 export default function RootPage() {
     const { user, loading } = useAuth();
@@ -17,9 +17,9 @@ export default function RootPage() {
                     // AuthContext will handle it
                     return;
                 }
-                const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || "https://auth.bventy.in";
+                const authUrl = getAuthUrl();
                 const returnTo = encodeURIComponent(window.location.host);
-                window.location.href = `${AUTH_URL}/login?returnTo=${returnTo}`;
+                window.location.href = `${authUrl}/login?returnTo=${returnTo}`;
             }
         }
     }, [user, loading]);

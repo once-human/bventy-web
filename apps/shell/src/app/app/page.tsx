@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@bventy/services";
+import { useAuth, getAuthUrl } from "@bventy/services";
 import { Loader2 } from "lucide-react";
 
 /**
@@ -25,9 +25,9 @@ export default function AppPage() {
                     return;
                 }
                 // Only redirect if we are truly unauthenticated
-                const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || "https://auth.bventy.in";
+                const authUrl = getAuthUrl();
                 const returnTo = encodeURIComponent(window.location.host);
-                window.location.href = `${AUTH_URL}/login?returnTo=${returnTo}`;
+                window.location.href = `${authUrl}/login?returnTo=${returnTo}`;
             }
         }
     }, [user, loading, router]);

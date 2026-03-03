@@ -4,8 +4,15 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { UserProfile, userService } from "./services/user";
 import { authService } from "./services/auth";
 import { useRouter } from "next/navigation";
-
 import { usePostHog } from "posthog-js/react";
+import {
+    getAppUrl,
+    getAdminUrl,
+    getVendorUrl,
+    getAuthUrl,
+    ensureAbsolute,
+    redirectToLogin
+} from "./utils/redirects";
 
 interface AuthContextType {
     user: UserProfile | null;
@@ -45,8 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     useEffect(() => {
-        // Always attempt to fetch the user profile on mount.
-        // We rely entirely on the secure cookie for authentication.
         fetchUser();
     }, []);
 
@@ -54,9 +59,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await fetchUser();
 
         if (shouldRedirect) {
-            const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "";
-            const ADMIN_URL = process.env.NEXT_PUBLIC_ADMIN_URL || "";
-            const VENDOR_URL = process.env.NEXT_PUBLIC_VENDOR_URL || "";
+            const APP_URL = getAppUrl();
+            const ADMIN_URL = getAdminUrl();
+            const VENDOR_URL = getVendorUrl();
 
             // Re-fetch user to get the latest role
             const profile = await userService.getMe();
@@ -66,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const returnTo = params.get("returnTo");
 
             if (returnTo) {
-                window.location.href = returnTo;
+                window.location.href = ensureAbsolute(returnTo);
                 return;
             }
 
@@ -85,13 +90,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await authService.logout();
             setUser(null);
             posthog.reset();
-            const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || "";
-            window.location.href = `${AUTH_URL}/login`;
+            const authUrl = getAuthUrl();
+            window.location.href = `${authUrl}/login`;
         } catch (e) {
             console.error("Logout failed", e);
-            // Fallback: clear local state and redirect anyway if API fails
             setUser(null);
-            window.location.href = `${process.env.NEXT_PUBLIC_AUTH_URL}/login`;
+            const authUrl = getAuthUrl();
+            window.location.href = `${authUrl}/login`;
         }
     };
 

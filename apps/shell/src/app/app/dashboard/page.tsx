@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { userService, UserProfile, useAuth } from "@bventy/services";
+import { userService, UserProfile, useAuth, getAuthUrl, getAdminUrl, getVendorUrl } from "@bventy/services";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bventy/ui";
 import { Button } from "@bventy/ui";
 import { Loader2, Store, Calendar, ShieldCheck, Users, ArrowRight } from "lucide-react";
@@ -27,9 +27,9 @@ export default function DashboardPage() {
         if (authLoading) return;
 
         if (!profile) {
-            const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || "https://auth.bventy.in";
+            const authUrl = getAuthUrl();
             const returnTo = encodeURIComponent(window.location.host);
-            window.location.href = `${AUTH_URL}/login?returnTo=${returnTo}`;
+            window.location.href = `${authUrl}/login?returnTo=${returnTo}`;
             return;
         }
 
@@ -175,14 +175,14 @@ export default function DashboardPage() {
                         <CardContent className="mt-auto pt-4">
                             {profile.vendor_profile_exists ? (
                                 <Button className="w-full justify-between group" variant="outline" asChild>
-                                    <Link href={`${process.env.NEXT_PUBLIC_VENDOR_URL}/dashboard?token=${localStorage.getItem("token")}`}>
+                                    <Link href={`${getVendorUrl()}/dashboard?token=${localStorage.getItem("token")}`}>
                                         Vendor Dashboard
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                 </Button>
                             ) : (
                                 <Button className="w-full justify-between group" variant="outline" asChild>
-                                    <Link href={`${process.env.NEXT_PUBLIC_VENDOR_URL}/onboard?token=${localStorage.getItem("token")}`}>
+                                    <Link href={`${getVendorUrl()}/onboard?token=${localStorage.getItem("token")}`}>
                                         Become a Vendor
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
                             </CardHeader>
                             <CardContent className="mt-auto pt-4">
                                 <Button className="w-full justify-between group" variant="destructive" asChild>
-                                    <Link href={`${process.env.NEXT_PUBLIC_ADMIN_URL}/?token=${localStorage.getItem("token")}`}>
+                                    <Link href={`${getAdminUrl()}/?token=${localStorage.getItem("token")}`}>
                                         Admin Panel
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>

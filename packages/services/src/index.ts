@@ -9,3 +9,4 @@ export * from "./services/quote";
 export * from "./services/track";
 export * from "./services/user";
 export * from "./services/vendor";
+export * from "./utils/redirects";

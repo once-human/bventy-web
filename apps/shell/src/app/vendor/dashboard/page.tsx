@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { userService, UserProfile } from "@bventy/services";
 import { vendorService, VendorProfile } from "@bventy/services";
-import { quoteService } from "@bventy/services";
+import { quoteService, getAuthUrl, getWwwUrl } from "@bventy/services";
 import { Navbar } from "@bventy/ui";
 import { Footer } from "@bventy/ui";
 import { Button } from "@bventy/ui";
@@ -109,9 +109,9 @@ export default function VendorDashboardPage() {
                 }
             } catch (error) {
                 console.error(error);
-                const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || "https://auth.bventy.in";
+                const authUrl = getAuthUrl();
                 const returnTo = encodeURIComponent(window.location.host);
-                window.location.href = `${AUTH_URL}/login?returnTo=${returnTo}`;
+                window.location.href = `${authUrl}/login?returnTo=${returnTo}`;
             } finally {
                 setLoading(false);
             }
@@ -204,7 +204,7 @@ export default function VendorDashboardPage() {
                     <div className="ml-auto flex gap-2">
                         <Button variant="outline" asChild>
                             <a
-                                href={`${process.env.NEXT_PUBLIC_WWW_URL || "https://bventy.in"}/vendors/${vendor.slug}`}
+                                href={`${getWwwUrl()}/vendors/${vendor.slug}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
