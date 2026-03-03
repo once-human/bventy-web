@@ -69,7 +69,7 @@ export function VendorOnboardingForm() {
         try {
             await vendorService.createProfile(values);
             setSuccess(true);
-        } catch (err: any) {
+        } catch (error: unknown) { const err = error as any;
             // Check for 409 Conflict
             if (err.response && err.response.status === 409) {
                 // If 409, it means profile exists (or slug conflict).

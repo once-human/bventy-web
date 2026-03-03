@@ -71,7 +71,7 @@ export function VerifyEmailForm() {
             setTimeout(async () => {
                 await login(true); // This handles the role-based redirect to dashboard
             }, 1500);
-        } catch (err: any) {
+        } catch (error: unknown) { const err = error as any;
             if (err.response?.data?.error) {
                 setError(err.response.data.error);
             } else {
