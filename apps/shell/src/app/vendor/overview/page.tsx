@@ -10,10 +10,20 @@ import {
     Eye,
     ChevronRight,
     ArrowUpRight,
-    CheckCircle2
+    CheckCircle2,
+    Loader2
 } from "lucide-react";
+import useSWR from "swr";
+import { vendorService } from "@bventy/services";
 
 export default function OverviewPage() {
+    const { data: stats, isLoading } = useSWR("vendor-overview-stats", vendorService.getOverviewStats);
+
+    // Fallbacks if data isn't loaded yet
+    const requestCount = stats?.urgent_requests || 0;
+    const responseTime = stats?.avg_response_time ? stats.avg_response_time.toFixed(1) : 0;
+    const viewCount = stats?.profile_views || 0;
+    const bookings = stats?.upcoming_bookings || 0;
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
@@ -37,8 +47,12 @@ export default function OverviewPage() {
                         <Clock className="h-4 w-4 text-orange-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">12</div>
-                        <p className="text-xs text-muted-foreground">4 urgent requests</p>
+                        {isLoading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : (
+                            <>
+                                <div className="text-2xl font-bold">{requestCount}</div>
+                                <p className="text-xs text-muted-foreground">Urgent action needed</p>
+                            </>
+                        )}
                         <Button variant="link" className="mt-4 h-auto p-0 text-xs" asChild>
                             <Link href="/leads?tab=new">View all <ChevronRight className="ml-1 h-3 w-3" /></Link>
                         </Button>
@@ -52,8 +66,12 @@ export default function OverviewPage() {
                         <AlertCircle className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">5</div>
-                        <p className="text-xs text-muted-foreground">Average wait: 4 hours</p>
+                        {isLoading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : (
+                            <>
+                                <div className="text-2xl font-bold">{responseTime} <span className="text-base font-normal text-muted-foreground">hrs</span></div>
+                                <p className="text-xs text-muted-foreground">Average response time</p>
+                            </>
+                        )}
                         <Button variant="link" className="mt-4 h-auto p-0 text-xs" asChild>
                             <Link href="/messages">Open inbox <ChevronRight className="ml-1 h-3 w-3" /></Link>
                         </Button>
@@ -67,10 +85,14 @@ export default function OverviewPage() {
                         <Eye className="h-4 w-4 text-emerald-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">1,284</div>
-                        <p className="text-xs text-emerald-500 flex items-center">
-                            <ArrowUpRight className="mr-1 h-3 w-3" /> 12% from last week
-                        </p>
+                        {isLoading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : (
+                            <>
+                                <div className="text-2xl font-bold">{viewCount}</div>
+                                <p className="text-xs text-emerald-500 flex items-center">
+                                    <ArrowUpRight className="mr-1 h-3 w-3" /> Last 30 days
+                                </p>
+                            </>
+                        )}
                         <Button variant="link" className="mt-4 h-auto p-0 text-xs" asChild>
                             <Link href="/performance">Insights <ChevronRight className="ml-1 h-3 w-3" /></Link>
                         </Button>
@@ -89,17 +111,21 @@ export default function OverviewPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex items-center justify-between rounded-lg border p-4">
+                            {isLoading ? (
+                                <div className="flex justify-center p-4"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+                            ) : bookings === 0 ? (
+                                <div className="text-center p-4 text-sm text-muted-foreground">No upcoming bookings.</div>
+                            ) : (
+                                <div className="flex items-center justify-between rounded-lg border p-4">
                                     <div className="space-y-1">
-                                        <p className="font-medium">Corporate Annual Gala</p>
-                                        <p className="text-xs text-muted-foreground">March 15, 2026 • Grand Ballroom</p>
+                                        <p className="font-medium">You have {bookings} upcoming event(s)</p>
+                                        <p className="text-xs text-muted-foreground">Check calendar for details</p>
                                     </div>
                                     <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
                                         Confirmed
                                     </Badge>
                                 </div>
-                            ))}
+                            )}
                         </div>
                         <Button variant="outline" className="mt-4 w-full" asChild>
                             <Link href="/calendar">View Calendar</Link>

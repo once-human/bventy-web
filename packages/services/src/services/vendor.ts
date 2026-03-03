@@ -39,6 +39,23 @@ export interface Review {
     profile_image?: string;
 }
 
+export interface VendorOverviewStats {
+    urgent_requests: number;
+    avg_response_time: number;
+    upcoming_bookings: number;
+    profile_views: number;
+}
+
+export interface CalendarEvent {
+    id: string;
+    title: string;
+    start_time: string;
+    end_time: string;
+    is_all_day: boolean;
+    type: string;
+    details?: string;
+}
+
 export const vendorService = {
     createProfile: async (data: VendorProfileRequest): Promise<void> => {
         await api.post("/vendor/onboard", data);
@@ -76,5 +93,19 @@ export const vendorService = {
     checkReviewEligibility: async (vendorId: string): Promise<{ eligible: boolean }> => {
         const response = await api.get<{ eligible: boolean }>(`/vendors/${vendorId}/reviews/eligibility`);
         return response.data;
+    },
+    getOverviewStats: async (): Promise<VendorOverviewStats> => {
+        const response = await api.get<VendorOverviewStats>("/vendor/overview");
+        return response.data;
+    },
+    getCalendarEvents: async (startDate: string, endDate: string): Promise<CalendarEvent[]> => {
+        const response = await api.get<CalendarEvent[]>(`/vendor/calendar/events?start_date=${startDate}&end_date=${endDate}`);
+        return response.data || [];
+    },
+    createManualBlock: async (data: { title: string; start_time: string; end_time: string; is_all_day: boolean }): Promise<void> => {
+        await api.post("/vendor/calendar/blocks", data);
+    },
+    deleteManualBlock: async (id: string): Promise<void> => {
+        await api.delete(`/vendor/calendar/blocks/${id}`);
     }
 };

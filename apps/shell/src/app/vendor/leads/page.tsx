@@ -20,46 +20,66 @@ import {
     ChevronRight
 } from "lucide-react";
 
-const tabs = [
-    { label: "New", count: 4 },
-    { label: "In Negotiation", count: 2 },
-    { label: "Awaiting Organizer", count: 1 },
-    { label: "Confirmed", count: 8 },
-    { label: "Rejected", count: 0 },
-    { label: "Expired", count: 12 },
-];
+import Link from "next/link";
+import useSWR from "swr";
+import { quoteService, Quote } from "@bventy/services";
+import { formatDistanceToNow, format } from "date-fns";
 
-const leads = [
-    {
-        id: "L1",
-        event: "Corporate Anniversary Gala",
-        date: "2026-03-25",
-        budget: "₹25,000 - ₹35,000",
-        status: "New",
-        lastActivity: "2 hours ago",
-        organizer: "Acme Corp"
-    },
-    {
-        id: "L2",
-        event: "Kapur Wedding Reception",
-        date: "2026-04-12",
-        budget: "₹85,000 - ₹1,10,000",
-        status: "In Negotiation",
-        lastActivity: "1 day ago",
-        organizer: "Rajesh Kapur"
-    },
-    {
-        id: "L3",
-        event: "Tech Conference Afterparty",
-        date: "2026-03-30",
-        budget: "₹45,000 - ₹55,000",
-        status: "Awaiting Organizer",
-        lastActivity: "3 days ago",
-        organizer: "Startup Hub"
-    }
+const TABS = [
+    { id: "all", label: "All Leads" },
+    { id: "pending", label: "New Requests" },
+    { id: "responded", label: "In Negotiation" },
+    { id: "accepted", label: "Confirmed" },
+    { id: "archived", label: "Archived" },
 ];
 
 export default function LeadsPage() {
+    const { data: quotes, isLoading } = useSWR("vendor-quotes", quoteService.getQuoteRequests);
+    const [activeTab, setActiveTab] = React.useState("all");
+
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case "pending": return "New Request";
+            case "responded": return "Responded";
+            case "revision_requested": return "Revision Requested";
+            case "accepted": return "Confirmed Booking";
+            case "rejected": return "Declined";
+            default: return status;
+        }
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "pending": return "bg-blue-500 hover:bg-blue-600";
+            case "accepted": return "bg-emerald-500 hover:bg-emerald-600";
+            case "rejected":
+            case "archived": return "bg-zinc-500 hover:bg-zinc-600 text-white";
+            default: return "";
+        }
+    };
+
+    const filteredQuotes = React.useMemo(() => {
+        if (!quotes) return [];
+        if (activeTab === "all") return quotes;
+
+        return quotes.filter((q: Quote) => {
+            if (activeTab === "pending") return q.status === "pending";
+            if (activeTab === "responded") return ["responded", "revision_requested"].includes(q.status);
+            if (activeTab === "accepted") return q.status === "accepted";
+            if (activeTab === "archived") return ["rejected", "archived"].includes(q.status);
+            return true;
+        });
+    }, [quotes, activeTab]);
+
+    const getTabCount = (tabId: string) => {
+        if (!quotes) return 0;
+        if (tabId === "all") return quotes.length;
+        if (tabId === "pending") return quotes.filter((q: Quote) => q.status === "pending").length;
+        if (tabId === "responded") return quotes.filter((q: Quote) => ["responded", "revision_requested"].includes(q.status)).length;
+        if (tabId === "accepted") return quotes.filter((q: Quote) => q.status === "accepted").length;
+        if (tabId === "archived") return quotes.filter((q: Quote) => ["rejected", "archived"].includes(q.status)).length;
+        return 0;
+    };
     return (
         <div className="space-y-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -79,17 +99,18 @@ export default function LeadsPage() {
 
             <div className="flex overflow-x-auto pb-1 no-scrollbar border-b">
                 <div className="flex gap-8">
-                    {tabs.map((tab) => (
+                    {TABS.map((tab) => (
                         <button
-                            key={tab.label}
-                            className={`flex items-center gap-2 border-b-2 pb-4 text-sm font-medium transition-colors ${tab.label === "New"
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`flex items-center gap-2 border-b-2 pb-4 text-sm font-medium transition-colors ${activeTab === tab.id
                                 ? "border-primary text-primary"
                                 : "border-transparent text-muted-foreground hover:text-foreground"
                                 }`}
                         >
                             {tab.label}
                             <Badge variant="secondary" className="h-5 rounded-full px-2 text-[10px]">
-                                {tab.count}
+                                {getTabCount(tab.id)}
                             </Badge>
                         </button>
                     ))}
@@ -109,42 +130,55 @@ export default function LeadsPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {leads.map((lead) => (
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center">
+                                    <div className="flex items-center justify-center text-muted-foreground">
+                                        Loading leads...
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ) : filteredQuotes.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                    No leads found in this category.
+                                </TableCell>
+                            </TableRow>
+                        ) : filteredQuotes.map((lead: Quote) => (
                             <TableRow key={lead.id} className="cursor-pointer group transition-colors hover:bg-muted/50">
                                 <TableCell>
                                     <div className="space-y-1">
-                                        <p className="font-semibold group-hover:text-primary transition-colors">{lead.event}</p>
-                                        <p className="text-xs text-muted-foreground">{lead.organizer}</p>
+                                        <p className="font-semibold group-hover:text-primary transition-colors">{lead.event_title}</p>
+                                        <p className="text-xs text-muted-foreground">{lead.organizer_name}</p>
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <Calendar className="h-3 w-3 text-muted-foreground" />
-                                        {lead.date}
+                                    <div className="flex flex-col gap-1 text-sm">
+                                        <div className="flex items-center gap-2 text-muted-foreground text-xs"><Calendar className="h-3 w-3" /> Event Date (To be fetched if included)</div>
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <div className="font-medium text-sm">{lead.budget}</div>
+                                    <div className="font-medium text-sm">{lead.budget_range || "Not specified"}</div>
                                 </TableCell>
                                 <TableCell>
                                     <Badge
-                                        variant={lead.status === "New" ? "default" : "secondary"}
-                                        className={lead.status === "New" ? "bg-blue-500 hover:bg-blue-600" : ""}
+                                        variant={lead.status === "pending" ? "default" : "secondary"}
+                                        className={getStatusColor(lead.status)}
                                     >
-                                        {lead.status}
+                                        {getStatusLabel(lead.status)}
                                     </Badge>
                                 </TableCell>
                                 <TableCell>
-                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                        <Clock className="h-3 w-3" />
-                                        {lead.lastActivity}
+                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground truncate max-w-[150px]">
+                                        <Clock className="h-3 w-3 shrink-0" />
+                                        {formatDistanceToNow(new Date(lead.created_at || lead.responded_at || new Date()), { addSuffix: true })}
                                     </div>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <Button variant="ghost" size="icon" asChild>
-                                        <a href={`/vendor/leads/${lead.id}`}>
+                                        <Link href={`/leads/${lead.id}`}>
                                             <ChevronRight className="h-4 w-4" />
-                                        </a>
+                                        </Link>
                                     </Button>
                                 </TableCell>
                             </TableRow>
