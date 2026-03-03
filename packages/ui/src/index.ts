@@ -28,3 +28,5 @@ export * from "./layout/Navbar";
 export * from "./layout/Footer";
 export * from "./vendor/VendorCard";
 export * from "./vendor/ReviewSection";
+export * from "./vendor/VendorSidebar";
+export * from "./layout/VendorLayout";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { VendorOnboardingForm } from "@/components/vendor/VendorOnboardingForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bventy/ui";

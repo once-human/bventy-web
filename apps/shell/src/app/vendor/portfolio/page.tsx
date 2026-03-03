@@ -12,9 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@bven
 import { Input } from "@bventy/ui";
 import { Textarea } from "@bventy/ui";
 import { Label } from "@bventy/ui";
-import { Separator } from "@bventy/ui";
 import { Badge } from "@bventy/ui";
-import { Loader2, ArrowLeft, Store, Save, ExternalLink, Phone, Mail, MessageCircle, X, Archive } from "lucide-react";
+import { Loader2, ArrowLeft, Store, ExternalLink, Phone, Mail, X } from "lucide-react";
 import { toast } from "sonner";
 import { FileUpload } from "@bventy/ui";
 import { GalleryUpload } from "@/components/vendor/GalleryUpload";
@@ -95,9 +94,7 @@ export default function VendorDashboardPage() {
                     } catch (err) {
                         console.error("Failed to fetch quote requests", err);
                     }
-
                 } catch (err: any) {
-                    console.error("Failed to fetch vendor profile", err);
                     // If vendor profile not found (404), redirect to onboarding
                     // This handles cases where user flag says true but profile is missing
                     if (err.response && err.response.status === 404) {
@@ -127,10 +124,7 @@ export default function VendorDashboardPage() {
             await vendorService.updateProfile(formData);
             toast.success("Vendor profile updated successfully");
             // Optional: Refresh data to be sure
-            const updated = await vendorService.getMyProfile();
-            setVendor(updated);
         } catch (error: any) {
-            console.error("Failed to update profile", error);
             const errMsg = error.response?.data?.error || "Failed to update profile.";
             toast.error(errMsg);
         } finally {
@@ -157,14 +151,9 @@ export default function VendorDashboardPage() {
     };
 
     const handleContactVendor = async (quote: any) => {
-        setSelectedQuote(quote);
-        setContactLoading(true);
         setIsContactOpen(true);
         try {
-            const info = await quoteService.getQuoteContact(quote.id);
-            setContactInfo(info);
         } catch (error: any) {
-            console.error("Failed to fetch contact info", error);
             const msg = error.response?.data?.error || "Failed to fetch contact information.";
             toast.error(msg);
             setIsContactOpen(false);
@@ -362,7 +351,7 @@ export default function VendorDashboardPage() {
                                         </div>
                                     )}
                                     <p className="text-xs text-muted-foreground mt-4 text-center">
-                                        If not set, we'll use your personal profile picture or initials.
+                                        If not set, we&apos;ll use your personal profile picture or initials.
                                     </p>
                                 </CardContent>
                             </Card>
