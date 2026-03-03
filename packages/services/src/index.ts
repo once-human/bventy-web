@@ -1,5 +1,6 @@
 export * from "./api";
 export * from "./AuthContext";
+export * from "./hooks/useWebSocket";
 export * from "./services/admin";
 export * from "./services/auth";
 export * from "./services/event";
@@ -9,4 +10,6 @@ export * from "./services/quote";
 export * from "./services/track";
 export * from "./services/user";
 export * from "./services/vendor";
+export * from "./services/messaging"
 export * from "./utils/redirects";
+export * from "./utils/websocket";
