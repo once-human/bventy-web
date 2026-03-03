@@ -47,4 +47,7 @@ export const adminService = {
     updatePlatformSetting: async (key: string, value: string): Promise<void> => {
         await api.put("/admin/email/settings", { key, value });
     },
+    deleteUser: async (id: string): Promise<void> => {
+        await api.delete(`/admin/users/${id}`);
+    },
 };

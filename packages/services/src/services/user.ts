@@ -12,6 +12,7 @@ export interface UserProfile {
     profile_image_url?: string;
     vendor_profile_exists: boolean;
     email_verified: boolean;
+    created_at?: string | Date;
     // organizer_profile_exists is deprecated in V8
     groups: any[]; // We will define Group type later
     permissions: string[];
