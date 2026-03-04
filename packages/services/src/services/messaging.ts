@@ -19,7 +19,7 @@ export interface ChatMessage {
     id: string;
     sender_user_id: string;
     sender_name: string | null;
-    message_type: 'text' | 'attachment' | 'system' | 'quote_card' | 'status_update';
+    message_type: 'text' | 'attachment' | 'system' | 'quote_card' | 'status_update' | 'quote_response' | 'quote_accepted' | 'quote_rejected' | 'quote_revision_requested';
     body: string | null;
     attachment_url: string | null;
     attachment_type: string | null;

@@ -184,6 +184,28 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
         }
     };
 
+    const handleQuoteResponseAction = async (action: 'accept' | 'reject' | 'revision', message?: string) => {
+        setIsSubmittingQuote(true);
+        try {
+            if (action === 'accept') {
+                await quoteService.acceptQuote(quoteId);
+                toast.success("Quote accepted! Chat unlocked.");
+            } else if (action === 'revision') {
+                await quoteService.requestRevision(quoteId, message || '');
+                toast.success("Revision requested");
+            } else if (action === 'reject') {
+                await quoteService.rejectQuote(quoteId);
+                toast.success("Quote rejected");
+            }
+            if (onQuoteResponded) onQuoteResponded();
+        } catch (error: any) {
+            console.error(`Failed to ${action} quote:`, error);
+            toast.error(`Operation failed`);
+        } finally {
+            setIsSubmittingQuote(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="flex flex-col h-[500px] border border-border rounded-lg bg-card overflow-hidden">
@@ -301,6 +323,74 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                                 </div>
                                                             )}
                                                         </div>
+                                                    </div>
+                                                </div>
+                                            ) : msg.message_type === 'quote_response' && msg.system_payload ? (
+                                                <div className={`px-4 py-4 shadow-md text-sm w-full max-w-[400px] border-2 ${isMe ? 'bg-primary/5 border-primary/20 rounded-tl-xl rounded-tr-md rounded-bl-xl rounded-br-sm' : 'bg-card border-border rounded-tr-xl rounded-tl-md rounded-br-xl rounded-bl-sm'}`}>
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center justify-between border-b pb-2">
+                                                            <div className="flex items-center gap-2 font-bold text-lg">
+                                                                <FileIcon className="h-5 w-5 text-primary" />
+                                                                <span>Quote Response</span>
+                                                            </div>
+                                                            <div className="text-xl font-black text-primary">
+                                                                ₹{msg.system_payload.quoted_price}
+                                                            </div>
+                                                        </div>
+
+                                                        {msg.system_payload.vendor_response && (
+                                                            <div className="text-muted-foreground italic bg-muted/30 p-3 rounded-lg border border-border/50">
+                                                                "{msg.system_payload.vendor_response}"
+                                                            </div>
+                                                        )}
+
+                                                        {msg.system_payload.attachment_url && (
+                                                            <Button variant="outline" size="sm" className="w-full gap-2" asChild>
+                                                                <a href={msg.system_payload.attachment_url} target="_blank" rel="noopener noreferrer">
+                                                                    <Paperclip className="h-4 w-4" />
+                                                                    View Proposal Document
+                                                                </a>
+                                                            </Button>
+                                                        )}
+
+                                                        {!isMe && otherPartyRole === 'vendor' && quoteStatus === 'responded' && (
+                                                            <div className="grid grid-cols-2 gap-2 pt-2">
+                                                                <Button
+                                                                    variant="default"
+                                                                    size="sm"
+                                                                    className="bg-green-600 hover:bg-green-700"
+                                                                    onClick={() => handleQuoteResponseAction('accept')}
+                                                                    disabled={isSubmittingQuote}
+                                                                >
+                                                                    {isSubmittingQuote ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
+                                                                    Accept Quote
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => {
+                                                                        const msg = prompt("What revisions would you like to request?");
+                                                                        if (msg) handleQuoteResponseAction('revision', msg);
+                                                                    }}
+                                                                    disabled={isSubmittingQuote}
+                                                                >
+                                                                    Request Revision
+                                                                </Button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ) : msg.message_type.startsWith('quote_') && msg.system_payload ? (
+                                                <div className="flex flex-col items-center my-2 w-full">
+                                                    <div className={`px-4 py-2 rounded-full text-xs font-semibold border flex items-center gap-2 ${msg.message_type === 'quote_accepted' ? 'bg-green-50 border-green-200 text-green-700' :
+                                                        msg.message_type === 'quote_rejected' ? 'bg-red-50 border-red-200 text-red-700' :
+                                                            'bg-amber-50 border-amber-200 text-amber-700'
+                                                        }`}>
+                                                        {msg.message_type === 'quote_accepted' ? <Check className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                                                        <span>
+                                                            Quote {msg.message_type.split('_')[1].replace('requested', 'Requested')}
+                                                            {msg.system_payload.message && `: ${msg.system_payload.message}`}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             ) : (
