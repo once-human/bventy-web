@@ -67,6 +67,14 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
         }
     }, [conversationId, currentUserId]);
 
+    // Debug: Log all unique message types
+    useEffect(() => {
+        if (messages.length > 0) {
+            const types = Array.from(new Set(messages.map(m => m.message_type)));
+            console.log(`[DEBUG] Current conversation messages: ${messages.length}, Types: ${types.join(', ')}`);
+        }
+    }, [messages]);
+
     // Handle incoming websocket messages
     useEffect(() => {
         if (!lastMessage) return;
@@ -323,7 +331,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                             {msg.system_payload.deadline && (
                                                                 <div>
                                                                     <span className="text-muted-foreground">Deadline: </span>
-                                                                    <span className="font-medium">{format(new Date(msg.system_payload.deadline), 'PP')}</span>
+                                                                    <span className="font-medium">{hasMounted ? format(new Date(msg.system_payload.deadline), 'PP') : '...'}</span>
                                                                 </div>
                                                             )}
                                                             {msg.system_payload.special_requirements && (
@@ -389,7 +397,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                         )}
                                                     </div>
                                                 </div>
-                                            ) : msg.message_type.startsWith('quote_') && msg.system_payload ? (
+                                            ) : msg.message_type.startsWith('quote_') ? (
                                                 <div className="flex flex-col items-center my-2 w-full">
                                                     <div className={`px-4 py-2 rounded-full text-xs font-semibold border flex items-center gap-2 ${msg.message_type === 'quote_accepted' ? 'bg-green-50 border-green-200 text-green-700' :
                                                         msg.message_type === 'quote_rejected' ? 'bg-red-50 border-red-200 text-red-700' :
@@ -397,8 +405,9 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                         }`}>
                                                         {msg.message_type === 'quote_accepted' ? <Check className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
                                                         <span>
-                                                            Quote {msg.message_type.split('_')[1].replace('requested', 'Requested')}
-                                                            {msg.system_payload.message && `: ${msg.system_payload.message}`}
+                                                            {msg.message_type === 'quote_response' ? 'Quote Recieved' : `Quote ${msg.message_type.split('_')[1].replace('requested', 'Requested')}`}
+                                                            {msg.system_payload?.message && `: ${msg.system_payload.message}`}
+                                                            {!msg.system_payload && msg.body && `: ${msg.body}`}
                                                         </span>
                                                     </div>
                                                 </div>
