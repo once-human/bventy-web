@@ -9,7 +9,7 @@ import { trackService } from "@bventy/services";
 import { Button } from "@bventy/ui";
 import { Navbar } from "@bventy/ui";
 import { Footer } from "@bventy/ui";
-import { Loader2, MapPin, BadgeCheck, MessageCircle, Plus, Check, FileText } from "lucide-react";
+import { Loader2, MapPin, BadgeCheck, MessageCircle, Plus, Check, FileText, ShieldCheck } from "lucide-react";
 import { Badge } from "@bventy/ui";
 import { Input } from "@bventy/ui";
 import { Textarea } from "@bventy/ui";
@@ -43,6 +43,7 @@ export default function VendorProfilePage() {
     const router = useRouter();
     const { user } = useAuth();
     const [vendor, setVendor] = useState<VendorProfile | null>(null);
+    const [details, setDetails] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const isMe = user?.id && vendor?.owner_user_id && user.id.toLowerCase() === vendor.owner_user_id.toLowerCase();
@@ -71,9 +72,13 @@ export default function VendorProfilePage() {
         const fetchVendor = async () => {
             try {
                 if (typeof params.slug === "string") {
-                    const data = await vendorService.getVendorBySlug(params.slug);
-                    setVendor(data);
-                    trackService.trackVendorView(data.id);
+                    const [vendorData, detailsData] = await Promise.all([
+                        vendorService.getVendorBySlug(params.slug),
+                        vendorService.getPublicVendorDetails(params.slug).catch(() => null)
+                    ]);
+                    setVendor(vendorData);
+                    setDetails(detailsData);
+                    trackService.trackVendorView(vendorData.id);
                 }
             } catch (err) {
                 console.error("Failed to fetch vendor", err);
@@ -253,6 +258,74 @@ export default function VendorProfilePage() {
                                     {vendor.bio}
                                 </p>
                             </div>
+
+                            {/* Services Section */}
+                            {details?.services && details.services.length > 0 && (
+                                <div>
+                                    <h3 className="text-xl font-semibold mb-4">Services & Pricing</h3>
+                                    <div className="space-y-3">
+                                        {details.services.map((service: any, idx: number) => (
+                                            <div key={idx} className="flex justify-between items-start p-4 rounded-lg border bg-card">
+                                                <div>
+                                                    <p className="font-medium text-lg capitalize">{service.name}</p>
+                                                    {service.description && <p className="text-sm text-muted-foreground mt-1">{service.description}</p>}
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-bold text-primary">₹{service.price.toLocaleString()}</p>
+                                                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{service.unit}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {details.pricing_rules && (
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {details.pricing_rules.weekend_premium_enabled && (
+                                                <Badge variant="outline" className="text-[10px] border-primary/20 bg-primary/5">
+                                                    Weekend Premium Applies
+                                                </Badge>
+                                            )}
+                                            {details.pricing_rules.last_minute_booking_enabled && (
+                                                <Badge variant="outline" className="text-[10px] border-primary/20 bg-primary/5">
+                                                    Last-minute Surcharge
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Cancellation Policy */}
+                            {details?.cancellation_policy && (
+                                <div>
+                                    <h3 className="text-xl font-semibold mb-4">Policies</h3>
+                                    <div className="p-4 rounded-lg border border-orange-100 bg-orange-50/10">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <ShieldCheck className="h-4 w-4 text-orange-600" />
+                                            <p className="font-semibold text-sm capitalize">{details.cancellation_policy.type} Cancellation Policy</p>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground italic">
+                                            {details.cancellation_policy.type === 'flexible' && "Full refund up to 24 hours before event."}
+                                            {details.cancellation_policy.type === 'moderate' && "Full refund up to 14 days before event. 50% refund after that. No refund within 48 hours."}
+                                            {details.cancellation_policy.type === 'strict' && "No refund for cancellations within 30 days of the event."}
+                                            {details.cancellation_policy.type === 'custom' && (details.cancellation_policy.text || "Custom terms defined by vendor.")}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Service Areas */}
+                            {details?.service_areas && details.service_areas.length > 0 && (
+                                <div>
+                                    <h3 className="text-xl font-semibold mb-4">Service Areas</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {details.service_areas.map((area: string, idx: number) => (
+                                            <Badge key={idx} variant="secondary" className="px-3 py-1">
+                                                {area}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Gallery Section */}
                             {vendor.gallery_images && vendor.gallery_images.length > 0 && (

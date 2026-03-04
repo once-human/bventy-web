@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     Card,
     CardContent,
@@ -13,7 +13,20 @@ import {
     TableCell,
     TableHead,
     TableHeader,
-    TableRow
+    TableRow,
+    Input,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    Textarea,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    Label
 } from "@bventy/ui";
 import {
     Plus,
@@ -22,25 +35,172 @@ import {
     ShieldCheck,
     MapPin,
     LayoutGrid,
-    Settings2
+    Settings2,
+    Loader2
 } from "lucide-react";
+import { vendorService, VendorServiceItem, VendorPricingRules, VendorCancellationPolicy, VendorServiceArea } from "@bventy/services";
+import { toast } from "sonner";
 
 export default function ServicesPricingPage() {
+    const [services, setServices] = useState<VendorServiceItem[]>([]);
+    const [rules, setRules] = useState<VendorPricingRules | null>(null);
+    const [policy, setPolicy] = useState<VendorCancellationPolicy | null>(null);
+    const [areas, setAreas] = useState<VendorServiceArea[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Modal states
+    const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+    const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+    const [isAreaModalOpen, setIsAreaModalOpen] = useState(false);
+
+    // Form states
+    const [editingService, setEditingService] = useState<VendorServiceItem | null>(null);
+    const [serviceForm, setServiceForm] = useState({
+        name: "",
+        base_price: 0,
+        price_unit: "/ Plate",
+        status: "active",
+        description: ""
+    });
+    const [areaName, setAreaName] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
+
+    const loadData = async () => {
+        try {
+            setIsLoading(true);
+            const [s, r, p, a] = await Promise.all([
+                vendorService.getServices(),
+                vendorService.getPricingRules(),
+                vendorService.getCancellationPolicy(),
+                vendorService.getServiceAreas()
+            ]);
+            setServices(s);
+            setRules(r);
+            setPolicy(p);
+            setAreas(a);
+        } catch (err) {
+            console.error("Failed to load services data:", err);
+            toast.error("Failed to load your services and pricing data");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const handleSaveService = async () => {
+        try {
+            setIsSaving(true);
+            if (editingService) {
+                await vendorService.updateService(editingService.id, serviceForm);
+                toast.success("Service updated successfully");
+            } else {
+                await vendorService.addService(serviceForm);
+                toast.success("Service added successfully");
+            }
+            setIsServiceModalOpen(false);
+            setEditingService(null);
+            setServiceForm({ name: "", base_price: 0, price_unit: "/ Plate", status: "active", description: "" });
+            loadData();
+        } catch (err) {
+            toast.error("Failed to save service");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleDeleteService = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this service?")) return;
+        try {
+            await vendorService.deleteService(id);
+            toast.success("Service deleted");
+            loadData();
+        } catch (err) {
+            toast.error("Failed to delete service");
+        }
+    };
+
+    const toggleRule = async (key: keyof VendorPricingRules) => {
+        if (!rules) return;
+        try {
+            const newRules = { ...rules, [key]: !rules[key] };
+            setRules(newRules); // Optimistic update
+            await vendorService.updatePricingRules({ [key]: newRules[key] });
+        } catch (err) {
+            toast.error("Failed to update pricing rule");
+            loadData();
+        }
+    };
+
+    const handleSavePolicy = async () => {
+        if (!policy) return;
+        try {
+            setIsSaving(true);
+            await vendorService.updateCancellationPolicy(policy);
+            toast.success("Cancellation policy updated");
+            setIsPolicyModalOpen(false);
+        } catch (err) {
+            toast.error("Failed to update policy");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleAddArea = async () => {
+        if (!areaName.trim()) return;
+        try {
+            setIsSaving(true);
+            await vendorService.addServiceArea(areaName);
+            setAreaName("");
+            setIsAreaModalOpen(false);
+            loadData();
+            toast.success("Service area added");
+        } catch (err) {
+            toast.error("Failed to add area");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleDeleteArea = async (id: string) => {
+        try {
+            await vendorService.deleteServiceArea(id);
+            loadData();
+            toast.success("Area removed");
+        } catch (err) {
+            toast.error("Failed to remove area");
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="h-[60vh] flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 pb-10">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Services & Pricing</h1>
                     <p className="text-muted-foreground">Define your services, packages, and booking rules.</p>
                 </div>
-                <Button size="sm">
+                <Button size="sm" onClick={() => {
+                    setEditingService(null);
+                    setServiceForm({ name: "", base_price: 0, price_unit: "/ Plate", status: "active", description: "" });
+                    setIsServiceModalOpen(true);
+                }}>
                     <Plus className="mr-2 h-4 w-4" /> Add New Service
                 </Button>
             </div>
 
             <div className="grid gap-8">
                 {/* Services List */}
-                <Card className="shadow-sm">
+                <Card className="shadow-sm border-border/40">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-lg">Services List</CardTitle>
                         <LayoutGrid className="h-4 w-4 text-muted-foreground" />
@@ -48,7 +208,7 @@ export default function ServicesPricingPage() {
                     <CardContent className="p-0">
                         <Table>
                             <TableHeader>
-                                <TableRow>
+                                <TableRow className="hover:bg-transparent">
                                     <TableHead>Service Name</TableHead>
                                     <TableHead>Base Price</TableHead>
                                     <TableHead>Status</TableHead>
@@ -56,27 +216,50 @@ export default function ServicesPricingPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {[
-                                    { name: "Full Wedding Catering", price: "₹1,500 / Plate", status: "Active" },
-                                    { name: "Corporate Lunch Buffet", price: "₹850 / Plate", status: "Active" },
-                                    { name: "Cocktail Party Snacks", price: "₹650 / Plate", status: "Draft" },
-                                ].map((service, i) => (
-                                    <TableRow key={i}>
-                                        <TableCell className="font-medium">{service.name}</TableCell>
-                                        <TableCell>{service.price}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={service.status === "Active" ? "default" : "secondary"}>
-                                                {service.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8"><Edit2 className="h-3.5 w-3.5" /></Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
-                                            </div>
+                                {services.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                            No services defined. Add your first service to get started.
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                ) : (
+                                    services.map((service) => (
+                                        <TableRow key={service.id} className="group transition-colors hover:bg-muted/30">
+                                            <TableCell className="font-medium">
+                                                <div>
+                                                    <p>{service.name}</p>
+                                                    {service.description && <p className="text-[10px] text-muted-foreground max-w-xs truncate">{service.description}</p>}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>₹{service.base_price.toLocaleString()} <span className="text-xs text-muted-foreground">{service.price_unit}</span></TableCell>
+                                            <TableCell>
+                                                <Badge variant={service.status === "active" ? "default" : "secondary"} className="capitalize">
+                                                    {service.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/10 hover:text-primary" onClick={() => {
+                                                        setEditingService(service);
+                                                        setServiceForm({
+                                                            name: service.name,
+                                                            base_price: service.base_price,
+                                                            price_unit: service.price_unit,
+                                                            status: service.status,
+                                                            description: service.description
+                                                        });
+                                                        setIsServiceModalOpen(true);
+                                                    }}>
+                                                        <Edit2 className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDeleteService(service.id)}>
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
                             </TableBody>
                         </Table>
                     </CardContent>
@@ -84,36 +267,42 @@ export default function ServicesPricingPage() {
 
                 <div className="grid gap-6 md:grid-cols-2">
                     {/* Pricing Rules */}
-                    <Card className="shadow-sm">
+                    <Card className="shadow-sm border-border/40">
                         <CardHeader>
                             <CardTitle className="text-lg flex items-center gap-2">
                                 <Settings2 className="h-4 w-4" /> Pricing Rules
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex items-center justify-between rounded-lg border p-3">
+                            <div className="flex items-center justify-between rounded-xl border border-border/40 p-4 transition-colors hover:bg-muted/10">
                                 <div className="space-y-0.5">
-                                    <p className="text-sm font-medium">Weekend Premium</p>
-                                    <p className="text-xs text-muted-foreground">+15% on Fri, Sat, Sun</p>
+                                    <p className="text-sm font-semibold">Weekend Premium</p>
+                                    <p className="text-xs text-muted-foreground">Apply surcharge on Fri, Sat, Sun</p>
                                 </div>
-                                <div className="h-5 w-10 rounded-full bg-primary relative cursor-pointer">
-                                    <div className="absolute right-1 top-1 h-3 w-3 bg-white rounded-full" />
+                                <div
+                                    onClick={() => toggleRule('weekend_premium_enabled')}
+                                    className={`h-6 w-11 rounded-full relative cursor-pointer transition-colors duration-200 ${rules?.weekend_premium_enabled ? 'bg-primary' : 'bg-muted'}`}
+                                >
+                                    <div className={`absolute top-1 h-4 w-4 bg-white rounded-full shadow-sm transition-all duration-200 ${rules?.weekend_premium_enabled ? 'right-1' : 'left-1'}`} />
                                 </div>
                             </div>
-                            <div className="flex items-center justify-between rounded-lg border p-3">
+                            <div className="flex items-center justify-between rounded-xl border border-border/40 p-4 transition-colors hover:bg-muted/10">
                                 <div className="space-y-0.5">
-                                    <p className="text-sm font-medium">Last Minute Booking</p>
-                                    <p className="text-xs text-muted-foreground">+20% for bookings within 7 days</p>
+                                    <p className="text-sm font-semibold">Last Minute Booking</p>
+                                    <p className="text-xs text-muted-foreground">Surcharge for bookings within 7 days</p>
                                 </div>
-                                <div className="h-5 w-10 rounded-full bg-muted relative cursor-pointer">
-                                    <div className="absolute left-1 top-1 h-3 w-3 bg-white rounded-full" />
+                                <div
+                                    onClick={() => toggleRule('last_minute_booking_enabled')}
+                                    className={`h-6 w-11 rounded-full relative cursor-pointer transition-colors duration-200 ${rules?.last_minute_booking_enabled ? 'bg-primary' : 'bg-muted'}`}
+                                >
+                                    <div className={`absolute top-1 h-4 w-4 bg-white rounded-full shadow-sm transition-all duration-200 ${rules?.last_minute_booking_enabled ? 'right-1' : 'left-1'}`} />
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
                     {/* Cancellation Policy */}
-                    <Card className="shadow-sm border-orange-100 bg-orange-50/20">
+                    <Card className="shadow-sm border-orange-100 bg-orange-50/10">
                         <CardHeader>
                             <CardTitle className="text-lg flex items-center gap-2">
                                 <ShieldCheck className="h-4 w-4 text-orange-600" /> Cancellation Policy
@@ -121,16 +310,23 @@ export default function ServicesPricingPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-1">
-                                <p className="text-sm font-semibold">Moderate Policy</p>
-                                <p className="text-xs text-muted-foreground">Full refund up to 14 days before event. 50% refund after that. No refund within 48 hours.</p>
+                                <p className="text-sm font-bold capitalize">{policy?.policy_type} Policy</p>
+                                <p className="text-xs text-muted-foreground italic">
+                                    {policy?.policy_type === 'flexible' && "Full refund up to 24 hours before event."}
+                                    {policy?.policy_type === 'moderate' && "Full refund up to 14 days before event. 50% refund after that. No refund within 48 hours."}
+                                    {policy?.policy_type === 'strict' && "No refund for cancellations within 30 days of the event."}
+                                    {policy?.policy_type === 'custom' && (policy.custom_text || "Custom terms defined by vendor.")}
+                                </p>
                             </div>
-                            <Button variant="outline" size="sm" className="w-full">Edit Policy</Button>
+                            <Button variant="outline" size="sm" className="w-full border-orange-200 hover:bg-orange-100/50 hover:text-orange-700" onClick={() => setIsPolicyModalOpen(true)}>
+                                Edit Policy
+                            </Button>
                         </CardContent>
                     </Card>
                 </div>
 
                 {/* Service Areas */}
-                <Card className="shadow-sm">
+                <Card className="shadow-sm border-border/40">
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
                             <MapPin className="h-4 w-4" /> Service Areas
@@ -138,16 +334,171 @@ export default function ServicesPricingPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-wrap gap-2">
-                            {["Mumbai Central", "Andheri", "Bandra", "Juhu", "Powai", "Navi Mumbai"].map((city) => (
-                                <Badge key={city} variant="secondary" className="px-3 py-1 flex gap-1 items-center hover:bg-muted transition-colors">
-                                    {city} <Trash2 className="h-3 w-3 ml-1 text-muted-foreground cursor-pointer hover:text-destructive" />
+                            {areas.length === 0 && <p className="text-xs text-muted-foreground">No specific areas defined. All locations accepted by default.</p>}
+                            {areas.map((area) => (
+                                <Badge key={area.id} variant="secondary" className="px-3 py-1.5 flex gap-2 items-center hover:bg-muted transition-colors border-border/40 text-xs font-medium">
+                                    {area.name}
+                                    <Trash2
+                                        className="h-3 w-3 text-muted-foreground cursor-pointer hover:text-destructive transition-colors"
+                                        onClick={() => handleDeleteArea(area.id)}
+                                    />
                                 </Badge>
                             ))}
-                            <Button variant="ghost" size="sm" className="h-7 text-[10px] border border-dashed">+ Add Area</Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 text-[11px] border border-dashed border-border/60 rounded-full hover:border-primary/40 hover:bg-primary/5 transition-all"
+                                onClick={() => setIsAreaModalOpen(true)}
+                            >
+                                <Plus className="h-3 w-3 mr-1" /> Add Area
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Service Dialog */}
+            <Dialog open={isServiceModalOpen} onOpenChange={setIsServiceModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{editingService ? "Edit Service" : "Add New Service"}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Service Name</Label>
+                            <Input
+                                placeholder="e.g. Wedding Catering"
+                                value={serviceForm.name}
+                                onChange={e => setServiceForm({ ...serviceForm, name: e.target.value })}
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Base Price (₹)</Label>
+                                <Input
+                                    type="number"
+                                    value={serviceForm.base_price}
+                                    onChange={e => setServiceForm({ ...serviceForm, base_price: Number(e.target.value) })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Unit</Label>
+                                <Select value={serviceForm.price_unit} onValueChange={v => setServiceForm({ ...serviceForm, price_unit: v })}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="/ Plate">/ Plate</SelectItem>
+                                        <SelectItem value="/ Hour">/ Hour</SelectItem>
+                                        <SelectItem value="/ Day">/ Day</SelectItem>
+                                        <SelectItem value="Fixed">Fixed Price</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Description</Label>
+                            <Textarea
+                                placeholder="Details about this service..."
+                                value={serviceForm.description}
+                                onChange={e => setServiceForm({ ...serviceForm, description: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Status</Label>
+                            <Select value={serviceForm.status} onValueChange={v => setServiceForm({ ...serviceForm, status: v })}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">Active</SelectItem>
+                                    <SelectItem value="draft">Draft</SelectItem>
+                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsServiceModalOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSaveService} disabled={isSaving}>
+                            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Save Service
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Policy Dialog */}
+            <Dialog open={isPolicyModalOpen} onOpenChange={setIsPolicyModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Cancellation Policy</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Policy Type</Label>
+                            <Select
+                                value={policy?.policy_type}
+                                onValueChange={v => setPolicy(prev => prev ? { ...prev, policy_type: v } : null)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="flexible">Flexible (24h)</SelectItem>
+                                    <SelectItem value="moderate">Moderate (Default)</SelectItem>
+                                    <SelectItem value="strict">Strict (30 days)</SelectItem>
+                                    <SelectItem value="custom">Custom Policy</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        {policy?.policy_type === 'custom' && (
+                            <div className="space-y-2">
+                                <Label>Custom Text</Label>
+                                <Textarea
+                                    placeholder="Enter your custom terms..."
+                                    value={policy.custom_text}
+                                    onChange={e => setPolicy(prev => prev ? { ...prev, custom_text: e.target.value } : null)}
+                                />
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsPolicyModalOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSavePolicy} disabled={isSaving}>
+                            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Update Policy
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Area Dialog */}
+            <Dialog open={isAreaModalOpen} onOpenChange={setIsAreaModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Add Service Area</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>City / Locality Name</Label>
+                            <Input
+                                placeholder="e.g. South Mumbai"
+                                value={areaName}
+                                onChange={e => setAreaName(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleAddArea()}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsAreaModalOpen(false)}>Cancel</Button>
+                        <Button onClick={handleAddArea} disabled={isSaving}>
+                            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Add Area
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

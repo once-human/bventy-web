@@ -88,6 +88,48 @@ export interface ManualLeadPayload {
     contact_info?: string;
 }
 
+export interface VendorServiceItem {
+    id: string;
+    name: string;
+    base_price: number;
+    price_unit: string;
+    status: string;
+    description: string;
+}
+
+export interface VendorPricingRules {
+    weekend_premium_enabled: boolean;
+    weekend_premium_percentage: number;
+    last_minute_booking_enabled: boolean;
+    last_minute_booking_percentage: number;
+    last_minute_days: number;
+}
+
+export interface VendorCancellationPolicy {
+    policy_type: string;
+    custom_text: string;
+}
+
+export interface VendorServiceArea {
+    id: string;
+    name: string;
+}
+
+export interface PublicVendorDetails {
+    services: {
+        name: string;
+        price: number;
+        unit: string;
+        description: string;
+    }[];
+    pricing_rules: VendorPricingRules;
+    cancellation_policy: {
+        type: string;
+        text: string;
+    };
+    service_areas: string[];
+}
+
 export const vendorService = {
     createProfile: async (data: VendorProfileRequest): Promise<void> => {
         await api.post("/vendor/onboard", data);
@@ -161,5 +203,48 @@ export const vendorService = {
     },
     updateVendorProfile: async (data: Partial<VendorProfile>): Promise<void> => {
         await api.put("/vendor/me", data);
+    },
+
+    // Services & Pricing
+    getServices: async (): Promise<VendorServiceItem[]> => {
+        const response = await api.get<VendorServiceItem[]>("/vendor/services");
+        return response.data || [];
+    },
+    addService: async (service: Omit<VendorServiceItem, 'id'>): Promise<void> => {
+        await api.post("/vendor/services", service);
+    },
+    updateService: async (id: string, service: Partial<VendorServiceItem>): Promise<void> => {
+        await api.put(`/vendor/services/${id}`, service);
+    },
+    deleteService: async (id: string): Promise<void> => {
+        await api.delete(`/vendor/services/${id}`);
+    },
+    getPricingRules: async (): Promise<VendorPricingRules> => {
+        const response = await api.get<VendorPricingRules>("/vendor/pricing-rules");
+        return response.data;
+    },
+    updatePricingRules: async (rules: Partial<VendorPricingRules>): Promise<void> => {
+        await api.put("/vendor/pricing-rules", rules);
+    },
+    getCancellationPolicy: async (): Promise<VendorCancellationPolicy> => {
+        const response = await api.get<VendorCancellationPolicy>("/vendor/cancellation-policy");
+        return response.data;
+    },
+    updateCancellationPolicy: async (policy: VendorCancellationPolicy): Promise<void> => {
+        await api.put("/vendor/cancellation-policy", policy);
+    },
+    getServiceAreas: async (): Promise<VendorServiceArea[]> => {
+        const response = await api.get<VendorServiceArea[]>("/vendor/service-areas");
+        return response.data || [];
+    },
+    addServiceArea: async (areaName: string): Promise<void> => {
+        await api.post("/vendor/service-areas", { area_name: areaName });
+    },
+    deleteServiceArea: async (id: string): Promise<void> => {
+        await api.delete(`/vendor/service-areas/${id}`);
+    },
+    getPublicVendorDetails: async (slug: string): Promise<PublicVendorDetails> => {
+        const response = await api.get<PublicVendorDetails>(`/vendors/slug/${slug}/details`);
+        return response.data;
     }
 }
