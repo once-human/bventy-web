@@ -42,6 +42,7 @@ export interface Review {
 export interface TentativeHold {
     id: string;
     title: string;
+    status: string;
     expires_in: string;
     created_at: string;
 }
@@ -128,5 +129,10 @@ export const vendorService = {
     },
     rejectHold: async (id: string): Promise<void> => {
         await api.patch(`/quotes/vendor/reject/${id}`);
+    },
+
+    getQuoteDetail: async (id: string): Promise<any> => {
+        const { data } = await api.get(`/quotes/${id}`);
+        return data;
     }
 };

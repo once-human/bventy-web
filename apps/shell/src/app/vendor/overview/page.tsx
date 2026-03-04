@@ -178,26 +178,39 @@ export default function OverviewPage() {
                                     holds.map((hold) => (
                                         <div key={hold.id} className="flex items-center justify-between rounded-lg border p-4">
                                             <div className="space-y-1">
-                                                <p className="font-medium">{hold.title}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-medium">{hold.title}</p>
+                                                    {hold.status !== 'pending' && (
+                                                        <Badge variant="outline" className="capitalize text-[10px] h-4 px-1">
+                                                            {hold.status.replace('_', ' ')}
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                                 <p className="text-xs text-muted-foreground">{hold.expires_in}</p>
                                             </div>
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => handleAction(hold.id, 'reject')}
-                                                    disabled={actionId === hold.id}
-                                                >
-                                                    {actionId === hold.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Reject"}
+                                            {hold.status === 'pending' ? (
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => handleAction(hold.id, 'reject')}
+                                                        disabled={actionId === hold.id}
+                                                    >
+                                                        {actionId === hold.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Reject"}
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => handleAction(hold.id, 'confirm')}
+                                                        disabled={actionId === hold.id}
+                                                    >
+                                                        {actionId === hold.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Confirm"}
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <Button size="sm" variant="outline" asChild>
+                                                    <Link href={`/leads/${hold.id}`}>View Details</Link>
                                                 </Button>
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() => handleAction(hold.id, 'confirm')}
-                                                    disabled={actionId === hold.id}
-                                                >
-                                                    {actionId === hold.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Confirm"}
-                                                </Button>
-                                            </div>
+                                            )}
                                         </div>
                                     ))
                                 )}
