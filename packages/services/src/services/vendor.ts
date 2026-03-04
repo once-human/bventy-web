@@ -31,6 +31,7 @@ export interface VendorProfile {
     is_accepting_bookings: boolean;
     views_count?: number;
     password?: string;
+    owner_user_id?: string;
 }
 
 export interface Review {

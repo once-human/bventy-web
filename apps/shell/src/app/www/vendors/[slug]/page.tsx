@@ -45,6 +45,7 @@ export default function VendorProfilePage() {
     const [vendor, setVendor] = useState<VendorProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const isMe = user?.id === vendor?.owner_user_id;
 
     // Shortlist state
     const [events, setEvents] = useState<Event[]>([]);
@@ -305,12 +306,22 @@ export default function VendorProfilePage() {
                         <div className="space-y-6">
                             <div className="sticky top-24 rounded-xl border bg-card p-6 shadow-sm space-y-4">
                                 <div>
-                                    <h3 className="font-semibold text-lg mb-1">Request Quote</h3>
+                                    <h3 className="font-semibold text-lg mb-1">
+                                        {isMe ? "Manage Profile" : "Request Quote"}
+                                    </h3>
                                     <p className="text-sm text-muted-foreground mb-4">
-                                        Get a customized pricing quote for your event.
+                                        {isMe
+                                            ? "You are viewing your own public profile. You can manage your settings from the dashboard."
+                                            : "Get a customized pricing quote for your event."}
                                     </p>
 
-                                    {user ? (
+                                    {isMe ? (
+                                        <Button className="w-full" size="lg" asChild>
+                                            <Link href="/vendor/overview">
+                                                Go to Dashboard
+                                            </Link>
+                                        </Button>
+                                    ) : user ? (
                                         <Dialog open={quoteDialogOpen} onOpenChange={setQuoteDialogOpen}>
                                             <DialogTrigger asChild>
                                                 <Button
@@ -429,73 +440,75 @@ export default function VendorProfilePage() {
 
                                 </div>
 
-                                <div className="pt-4 border-t">
-                                    <h3 className="font-semibold text-lg mb-1">Shortlist</h3>
-                                    <p className="text-sm text-muted-foreground mb-4">
-                                        Save this vendor to one of your events.
-                                    </p>
-                                    {user ? (
-                                        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                                            <DialogTrigger asChild>
-                                                <Button variant="outline" className="w-full">
-                                                    <Plus className="mr-2 h-4 w-4" /> Add to Event
-                                                </Button>
-                                            </DialogTrigger>
-                                            <DialogContent className={isCreatingEventInShortlist ? "sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-y-auto" : "sm:max-w-[425px]"}>
-                                                <DialogHeader>
-                                                    <DialogTitle>Shortlist Vendor</DialogTitle>
-                                                    <DialogDescription>
-                                                        Select an event to add <strong>{vendor.business_name}</strong> to.
-                                                    </DialogDescription>
-                                                </DialogHeader>
-                                                {isCreatingEventInShortlist ? (
-                                                    <div className="py-4 border rounded-md p-4 bg-muted/20">
-                                                        <h4 className="font-semibold mb-3">Create New Event</h4>
-                                                        <InlineCreateEventForm
-                                                            onSuccess={handleEventCreatedInShortlist}
-                                                            onCancel={() => setIsCreatingEventInShortlist(false)}
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <div className="py-4">
-                                                        <Select onValueChange={setSelectedEventId} value={selectedEventId}>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Select an event" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                <div
-                                                                    className="flex items-center text-sm px-2 py-1.5 cursor-pointer text-primary hover:bg-muted font-medium transition-colors"
-                                                                    onClick={() => setIsCreatingEventInShortlist(true)}
-                                                                >
-                                                                    <Plus className="h-4 w-4 mr-2" />
-                                                                    Create new event
-                                                                </div>
-                                                                <SelectSeparator />
-                                                                {events.map((event) => (
-                                                                    <SelectItem key={event.id} value={event.id}>
-                                                                        {event.title}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-                                                )}
-                                                {!isCreatingEventInShortlist && (
-                                                    <DialogFooter>
-                                                        <Button onClick={handleShortlist} disabled={!selectedEventId || shortlistLoading}>
-                                                            {shortlistLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                            Add to Shortlist
-                                                        </Button>
-                                                    </DialogFooter>
-                                                )}
-                                            </DialogContent>
-                                        </Dialog>
-                                    ) : (
-                                        <Button variant="outline" className="w-full" asChild>
-                                            <Link href={`${process.env.NEXT_PUBLIC_AUTH_URL}/login?redirect=/vendors`}>Login to Shortlist</Link>
-                                        </Button>
-                                    )}
-                                </div>
+                                {!isMe && (
+                                    <div className="pt-4 border-t">
+                                        <h3 className="font-semibold text-lg mb-1">Shortlist</h3>
+                                        <p className="text-sm text-muted-foreground mb-4">
+                                            Save this vendor to one of your events.
+                                        </p>
+                                        {user ? (
+                                            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                                <DialogTrigger asChild>
+                                                    <Button variant="outline" className="w-full">
+                                                        <Plus className="mr-2 h-4 w-4" /> Add to Event
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className={isCreatingEventInShortlist ? "sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-y-auto" : "sm:max-w-[425px]"}>
+                                                    <DialogHeader>
+                                                        <DialogTitle>Shortlist Vendor</DialogTitle>
+                                                        <DialogDescription>
+                                                            Select an event to add <strong>{vendor.business_name}</strong> to.
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    {isCreatingEventInShortlist ? (
+                                                        <div className="py-4 border rounded-md p-4 bg-muted/20">
+                                                            <h4 className="font-semibold mb-3">Create New Event</h4>
+                                                            <InlineCreateEventForm
+                                                                onSuccess={handleEventCreatedInShortlist}
+                                                                onCancel={() => setIsCreatingEventInShortlist(false)}
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="py-4">
+                                                            <Select onValueChange={setSelectedEventId} value={selectedEventId}>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Select an event" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <div
+                                                                        className="flex items-center text-sm px-2 py-1.5 cursor-pointer text-primary hover:bg-muted font-medium transition-colors"
+                                                                        onClick={() => setIsCreatingEventInShortlist(true)}
+                                                                    >
+                                                                        <Plus className="h-4 w-4 mr-2" />
+                                                                        Create new event
+                                                                    </div>
+                                                                    <SelectSeparator />
+                                                                    {events.map((event) => (
+                                                                        <SelectItem key={event.id} value={event.id}>
+                                                                            {event.title}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                    )}
+                                                    {!isCreatingEventInShortlist && (
+                                                        <DialogFooter>
+                                                            <Button onClick={handleShortlist} disabled={!selectedEventId || shortlistLoading}>
+                                                                {shortlistLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                                Add to Shortlist
+                                                            </Button>
+                                                        </DialogFooter>
+                                                    )}
+                                                </DialogContent>
+                                            </Dialog>
+                                        ) : (
+                                            <Button variant="outline" className="w-full" asChild>
+                                                <Link href={`${process.env.NEXT_PUBLIC_AUTH_URL}/login?redirect=/vendors`}>Login to Shortlist</Link>
+                                            </Button>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
