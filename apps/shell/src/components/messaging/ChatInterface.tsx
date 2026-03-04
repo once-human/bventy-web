@@ -341,29 +341,29 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                     ) : (
                                         <div className={`flex flex-col max-w-[85%] sm:max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
                                             {msg.message_type === 'quote_card' && msg.system_payload ? (
-                                                <div className={`p-4 shadow-sm border-2 w-full max-w-[400px] ${isMe ? 'bg-primary/5 border-primary/10 rounded-2xl rounded-tr-sm' : 'bg-muted/30 border-border rounded-2xl rounded-tl-sm'}`}>
+                                                <div className={`p-4 shadow-sm border w-full max-w-[400px] ${isMe ? 'bg-primary/5 border-primary/10 rounded-2xl rounded-tr-sm' : 'bg-muted/30 border-border rounded-2xl rounded-tl-sm'}`}>
                                                     <div className="space-y-3">
                                                         <div className="flex items-center gap-2 pb-2 border-b border-border">
                                                             <div className="p-1.5 bg-primary/10 rounded-md">
                                                                 <FileText className="h-4 w-4 text-primary" />
                                                             </div>
-                                                            <span className="font-bold text-sm tracking-tight text-foreground">Request Context</span>
+                                                            <span className="font-semibold text-sm tracking-tight text-foreground">Request Context</span>
                                                         </div>
 
                                                         <div className="space-y-2.5">
                                                             <div className="flex items-center gap-3 text-sm">
                                                                 <Banknote className="h-4 w-4 text-muted-foreground shrink-0" />
                                                                 <div className="flex flex-col">
-                                                                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Budget Range</span>
-                                                                    <span className="font-bold text-foreground">₹{msg.system_payload.budget_range || 'Not specified'}</span>
+                                                                    <span className="text-[10px] font-medium text-muted-foreground">Budget Range</span>
+                                                                    <span className="font-semibold text-foreground">₹{msg.system_payload.budget_range || 'Not specified'}</span>
                                                                 </div>
                                                             </div>
 
                                                             <div className="flex items-center gap-3 text-sm">
                                                                 <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
                                                                 <div className="flex flex-col">
-                                                                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Event Deadline</span>
-                                                                    <span className="font-bold text-foreground">
+                                                                    <span className="text-[10px] font-medium text-muted-foreground">Event Deadline</span>
+                                                                    <span className="font-semibold text-foreground">
                                                                         {hasMounted && msg.system_payload.deadline ? format(new Date(msg.system_payload.deadline), 'PPP') : '...'}
                                                                     </span>
                                                                 </div>
@@ -371,9 +371,8 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
 
                                                             {msg.system_payload.special_requirements && (
                                                                 <div className="flex gap-3 text-sm pt-1">
-                                                                    <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                                                                     <div className="flex flex-col">
-                                                                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Special Requirements</span>
+                                                                        <span className="text-[10px] font-medium text-muted-foreground">Special Requirements</span>
                                                                         <p className="text-muted-foreground leading-relaxed italic border-l-2 border-primary/20 pl-2 mt-1">
                                                                             "{msg.system_payload.special_requirements}"
                                                                         </p>
@@ -384,7 +383,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                     </div>
                                                 </div>
                                             ) : msg.message_type === 'quote_response' && msg.system_payload ? (
-                                                <div className={`p-5 shadow-lg border-2 w-full max-w-[420px] relative overflow-hidden ${isMe ? 'bg-primary/5 border-primary/20 rounded-2xl rounded-tr-sm' : 'bg-card border-border rounded-2xl rounded-tl-sm'}`}>
+                                                <div className={`p-5 shadow-md border w-full max-w-[420px] relative overflow-hidden ${isMe ? 'bg-primary/5 border-primary/20 rounded-2xl rounded-tr-sm' : 'bg-card border-border rounded-2xl rounded-tl-sm'}`}>
                                                     {/* Decorative corner accent */}
                                                     <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-full -mr-8 -mt-8" />
 
@@ -395,13 +394,13 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                                     <FileIcon className="h-5 w-5 text-primary" />
                                                                 </div>
                                                                 <div className="flex flex-col">
-                                                                    <span className="font-black text-base tracking-tight italic uppercase">Official Quote</span>
+                                                                    <span className="font-bold text-sm tracking-tight">Official Quote</span>
                                                                     <span className="text-[10px] text-muted-foreground font-medium">Click to view details</span>
                                                                 </div>
                                                             </div>
                                                             <div className="text-right">
-                                                                <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">Total Amount</span>
-                                                                <div className="text-2xl font-black text-primary leading-none">
+                                                                <span className="text-[10px] text-muted-foreground font-semibold">Total Amount</span>
+                                                                <div className="text-xl font-bold text-primary leading-none">
                                                                     ₹{msg.system_payload.quoted_price}
                                                                 </div>
                                                             </div>
@@ -409,7 +408,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
 
                                                         {msg.system_payload.vendor_response && (
                                                             <div className="bg-muted/40 p-3.5 rounded-xl border border-border/50 relative">
-                                                                <div className="absolute -top-2 left-3 bg-background px-2 text-[9px] font-bold text-primary uppercase tracking-widest border border-border rounded-full">
+                                                                <div className="absolute -top-2 left-3 bg-background px-2 text-[9px] font-semibold text-primary border border-border rounded-full">
                                                                     Vendor Message
                                                                 </div>
                                                                 <p className="text-xs text-foreground leading-relaxed italic">
@@ -454,7 +453,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                 </div>
                                             ) : msg.message_type.startsWith('quote_') ? (
                                                 <div className="flex flex-col items-center my-4 w-full">
-                                                    <div className={`px-5 py-2.5 rounded-full text-xs font-bold border-2 shadow-sm flex items-center gap-2.5 transition-all hover:scale-[1.02] ${msg.message_type === 'quote_accepted' ? 'bg-green-50 border-green-200 text-green-700' :
+                                                    <div className={`px-5 py-2 rounded-full text-xs font-semibold border shadow-sm flex items-center gap-2.5 transition-all hover:scale-[1.02] ${msg.message_type === 'quote_accepted' ? 'bg-green-50 border-green-200 text-green-700' :
                                                         msg.message_type === 'quote_rejected' ? 'bg-red-50 border-red-200 text-red-700' :
                                                             'bg-amber-50 border-amber-200 text-amber-700'
                                                         }`}>
@@ -627,9 +626,9 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
 
             {/* Revision Request Modal */}
             <Dialog open={isRevisionModalOpen} onOpenChange={setIsRevisionModalOpen}>
-                <DialogContent className="sm:max-w-[500px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
+                <DialogContent className="sm:max-w-[500px] rounded-2xl p-0 overflow-hidden border-none shadow-xl">
                     <DialogHeader className="p-6 pb-0">
-                        <DialogTitle className="text-2xl font-black italic uppercase tracking-tight flex items-center gap-2">
+                        <DialogTitle className="text-xl font-bold flex items-center gap-2">
                             <FileText className="h-6 w-6 text-primary" />
                             Request Revision
                         </DialogTitle>
@@ -640,7 +639,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
 
                     <div className="p-6 space-y-4">
                         <div className="space-y-2">
-                            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
+                            <label className="text-xs font-semibold text-muted-foreground ml-1">
                                 Revision Message
                             </label>
                             <Textarea
