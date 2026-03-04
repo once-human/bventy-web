@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Card,
     CardContent,
@@ -73,24 +73,38 @@ export default function LeadDetailPage() {
         );
     }
 
-    if (error || !lead) {
+    // Progressive approach: if lead is missing but no error, keep loading or skeleton
+    // If error, show error but maybe we can still show a bit of UI?
+    // For now, if we have NO lead, we show the error.
+    if (!lead && error) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-                <p className="text-muted-foreground">Failed to load lead details.</p>
+                <p className="text-muted-foreground font-medium">Unable to load lead details.</p>
+                <p className="text-sm text-muted-foreground max-w-md text-center">There might be a temporary issue with this lead's data. Please try again or contact support if the issue persists.</p>
                 <Button asChild variant="outline">
-                    <Link href="/leads">Back to Leads</Link>
+                    <Link href="/vendor/leads">Back to Leads</Link>
                 </Button>
             </div>
         );
     }
 
+    // Safety fallback for rendering parts even if API returned incomplete data
+    const safeLead = lead || {
+        id: id,
+        status: "pending",
+        event: { title: "Lead Details", event_date: null, city: "TBD", guest_count: null, event_type: null },
+        organizer: { full_name: "Organizer" }
+    };
+
+    const statusLabel = (safeLead.status || "pending").replace(/_/g, " ");
+
     const timeline = [
-        { status: "Lead Received", time: lead.created_at, active: true },
-        lead.responded_at && { status: "Quote Submitted", time: lead.responded_at, active: true },
-        lead.revision_requested_at && { status: "Revision Requested", time: lead.revision_requested_at, active: true },
-        lead.accepted_at && { status: "Booking Confirmed", time: lead.accepted_at, active: true },
-        lead.rejected_at && { status: "Lead Declined", time: lead.rejected_at, active: true },
-        !lead.responded_at && lead.status === 'pending' && { status: "Awaiting Quote Submission", time: "Pending", active: false }
+        { status: "Lead Received", time: safeLead.created_at, active: true },
+        safeLead.responded_at && { status: "Quote Submitted", time: safeLead.responded_at, active: true },
+        safeLead.revision_requested_at && { status: "Revision Requested", time: safeLead.revision_requested_at, active: true },
+        safeLead.accepted_at && { status: "Booking Confirmed", time: safeLead.accepted_at, active: true },
+        safeLead.rejected_at && { status: "Lead Declined", time: safeLead.rejected_at, active: true },
+        !safeLead.responded_at && safeLead.status === 'pending' && { status: "Awaiting Quote Submission", time: "Pending", active: false }
     ].filter(Boolean) as { status: string; time: string; active: boolean }[];
 
     return (
@@ -100,12 +114,12 @@ export default function LeadDetailPage() {
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{lead.event.title}</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">{safeLead.event.title || "Untitled Event"}</h1>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Lead ID: #{lead.id.slice(0, 8).toUpperCase()}</span>
+                        <span>Lead ID: #{safeLead.id.slice(0, 8).toUpperCase()}</span>
                         <span>•</span>
                         <Badge variant="outline" className="capitalize">
-                            {lead.status.replace('_', ' ')}
+                            {statusLabel}
                         </Badge>
                     </div>
                 </div>
@@ -125,21 +139,21 @@ export default function LeadDetailPage() {
                                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</p>
                                     <div className="flex items-center gap-2 font-medium">
                                         <Calendar className="h-4 w-4 text-primary" />
-                                        {format(new Date(lead.event.event_date), "MMMM d, yyyy")}
+                                        {safeLead.event.event_date ? format(new Date(safeLead.event.event_date), "MMMM d, yyyy") : "TBD"}
                                     </div>
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Location</p>
                                     <div className="flex items-center gap-2 font-medium">
                                         <MapPin className="h-4 w-4 text-primary" />
-                                        {lead.event.city || "TBD"}
+                                        {safeLead.event.city || "TBD"}
                                     </div>
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Guests</p>
                                     <div className="flex items-center gap-2 font-medium">
                                         <Users className="h-4 w-4 text-primary" />
-                                        Approx. {lead.event.guest_count || "N/A"}
+                                        {safeLead.event.guest_count ? `Approx. ${safeLead.event.guest_count}` : "Not specified"}
                                     </div>
                                 </div>
                             </div>
@@ -147,34 +161,35 @@ export default function LeadDetailPage() {
                             <div className="space-y-4">
                                 <h4 className="font-semibold text-sm">Description</h4>
                                 <p className="text-sm text-muted-foreground leading-relaxed">
-                                    {lead.message || (lead.event.event_type ? `Request for ${lead.event.event_type}` : "No description provided.")}
+                                    {safeLead.message || (safeLead.event.event_type ? `Request for ${safeLead.event.event_type}` : "No description provided.")}
                                 </p>
                             </div>
                         </CardContent>
                     </Card>
 
-                    {/* Quote Timeline */}
+                    {/* Timeline */}
                     <Card className="shadow-sm">
                         <CardHeader>
-                            <CardTitle>Quote Timeline</CardTitle>
+                            <CardTitle>Lead Timeline</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-8">
-                            {timeline.map((step, idx) => (
-                                <div key={idx} className="relative pl-8">
-                                    {idx < timeline.length - 1 && (
-                                        <div className="absolute left-3 top-6 bottom-[-24px] w-px bg-slate-200 dark:bg-slate-800" />
-                                    )}
-                                    <div className={`absolute left-0 top-0 h-6 w-6 rounded-full border-2 bg-background flex items-center justify-center ${step.active ? "border-primary" : "border-muted"}`}>
-                                        {step.active && <div className="h-2 w-2 rounded-full bg-primary" />}
+                        <CardContent>
+                            <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                                {timeline.map((item, index) => (
+                                    <div key={index} className="relative flex items-center justify-between gap-6">
+                                        <div className="flex items-center gap-6">
+                                            <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-background z-10 ${item.active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                                                {item.active ? <CheckCircle2 className="h-5 w-5" /> : <div className="h-2 w-2 rounded-full bg-current" />}
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-semibold">{item.status}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {item.time && item.time !== "Pending" ? format(new Date(item.time), "MMM d, h:mm a") : item.time}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <p className={`text-sm font-semibold ${step.active ? "text-foreground" : "text-muted-foreground"}`}>{step.status}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {step.time === "Pending" ? "Pending" : format(new Date(step.time), "MMM d, h:mm a")}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -188,14 +203,14 @@ export default function LeadDetailPage() {
                         <CardContent className="grid gap-3">
                             <Button
                                 className="w-full"
-                                disabled={!!isActioning || (lead.status !== 'pending' && lead.status !== 'revision_requested')}
+                                disabled={!!isActioning || (safeLead.status !== 'pending' && safeLead.status !== 'revision_requested')}
                                 onClick={() => handleAction('confirm')}
                             >
                                 {isActioning === 'confirm' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-                                {lead.status === 'pending' ? 'Confirm Availability' : 'Resubmit Quote'}
+                                {safeLead.status === 'pending' ? 'Confirm Availability' : 'Resubmit Quote'}
                             </Button>
                             <Button variant="outline" className="w-full" asChild disabled={!!isActioning}>
-                                <Link href="/messages">
+                                <Link href="/vendor/messages">
                                     <MessageSquare className="mr-2 h-4 w-4" /> Message Organizer
                                 </Link>
                             </Button>
@@ -203,7 +218,7 @@ export default function LeadDetailPage() {
                             <Button
                                 variant="ghost"
                                 className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                disabled={!!isActioning || lead.status === 'rejected' || lead.status === 'accepted'}
+                                disabled={!!isActioning || safeLead.status === 'rejected' || safeLead.status === 'accepted'}
                                 onClick={() => handleAction('reject')}
                             >
                                 {isActioning === 'reject' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <XCircle className="mr-2 h-4 w-4" />}
@@ -213,7 +228,7 @@ export default function LeadDetailPage() {
                     </Card>
 
                     {/* Internal Notes */}
-                    <InternalNotesCard quoteId={id} initialNotes={lead.internal_notes || ""} />
+                    <InternalNotesCard quoteId={id} initialNotes={safeLead.internal_notes || ""} />
                 </div>
             </div>
         </div>
@@ -223,6 +238,11 @@ export default function LeadDetailPage() {
 function InternalNotesCard({ quoteId, initialNotes }: { quoteId: string; initialNotes: string }) {
     const [notes, setNotes] = useState(initialNotes);
     const [isSaving, setIsSaving] = useState(false);
+
+    // Sync state when initialNotes changes (e.g. after SWR revalidation)
+    useEffect(() => {
+        setNotes(initialNotes);
+    }, [initialNotes]);
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -263,3 +283,4 @@ function InternalNotesCard({ quoteId, initialNotes }: { quoteId: string; initial
         </Card>
     );
 }
+
