@@ -89,6 +89,11 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                 return [...prev, newMessage];
             });
 
+            // If it's a quote-related message, trigger a refresh of the conversation status
+            if (newMessage.message_type.startsWith('quote_')) {
+                if (onQuoteResponded) onQuoteResponded();
+            }
+
             // If it's from the other person, mark it as read
             if (newMessage.sender_user_id !== currentUserId) {
                 messagingService.markAsRead(conversationId).catch(console.error);
@@ -405,7 +410,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                         }`}>
                                                         {msg.message_type === 'quote_accepted' ? <Check className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
                                                         <span>
-                                                            {msg.message_type === 'quote_response' ? 'Quote Recieved' : `Quote ${msg.message_type.split('_')[1].replace('requested', 'Requested')}`}
+                                                            {msg.message_type === 'quote_response' ? 'Quote Received' : `Quote ${msg.message_type.split('_')[1].replace('requested', 'Requested')}`}
                                                             {msg.system_payload?.message && `: ${msg.system_payload.message}`}
                                                             {!msg.system_payload && msg.body && `: ${msg.body}`}
                                                         </span>
