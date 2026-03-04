@@ -519,12 +519,57 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
 
                                                     <div className="relative">
                                                         <div
-                                                            className={`px-5 py-3 text-sm shadow-sm transition-all duration-200 ${isMe
+                                                            className={`flex flex-col gap-2 p-1.5 shadow-sm transition-all duration-200 ${isMe
                                                                 ? 'bg-primary text-primary-foreground rounded-tl-2xl rounded-tr-md rounded-bl-2xl rounded-br-sm'
                                                                 : 'bg-muted border border-border text-foreground rounded-tr-2xl rounded-tl-md rounded-br-2xl rounded-bl-sm'
                                                                 } ${hoveredMessageId === msg.id ? 'scale-[1.01] shadow-md border-primary/20' : ''}`}
                                                         >
-                                                            {msg.body}
+                                                            {/* Attachment Rendering */}
+                                                            {msg.attachment_url && (
+                                                                <div className="overflow-hidden rounded-xl bg-background/10">
+                                                                    {msg.attachment_type?.startsWith('image/') || (msg.attachment_url.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)) ? (
+                                                                        <a
+                                                                            href={msg.attachment_url}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="block group/img relative"
+                                                                        >
+                                                                            <img
+                                                                                src={msg.attachment_url}
+                                                                                alt="Attachment"
+                                                                                className="max-w-full h-auto max-h-[300px] object-cover rounded-lg transition-transform hover:scale-[1.02]"
+                                                                            />
+                                                                            <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/5 transition-colors rounded-lg" />
+                                                                        </a>
+                                                                    ) : (
+                                                                        <a
+                                                                            href={msg.attachment_url}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className={`flex items-center gap-3 p-3 rounded-lg border border-border/20 hover:bg-background/20 transition-colors ${isMe ? 'bg-primary-foreground/10' : 'bg-muted-foreground/10'}`}
+                                                                        >
+                                                                            <div className="p-2 bg-background/20 rounded-lg">
+                                                                                <FileIcon className="h-5 w-5" />
+                                                                            </div>
+                                                                            <div className="flex flex-col min-w-0">
+                                                                                <span className="text-xs font-medium truncate max-w-[150px]">
+                                                                                    {msg.attachment_url.split('/').pop() || 'Attachment'}
+                                                                                </span>
+                                                                                <span className="text-[10px] opacity-70 uppercase tracking-tighter">
+                                                                                    {msg.attachment_url.endsWith('.pdf') ? 'PDF Document' : 'File'}
+                                                                                </span>
+                                                                            </div>
+                                                                        </a>
+                                                                    )}
+                                                                </div>
+                                                            )}
+
+                                                            {/* Message Body */}
+                                                            {msg.body && (
+                                                                <div className={`px-3.5 py-1.5 ${msg.attachment_url ? 'pt-0' : ''}`}>
+                                                                    {msg.body}
+                                                                </div>
+                                                            )}
                                                         </div>
 
                                                         {/* Reaction Picker anchored to the Smile icon's vicinity */}
