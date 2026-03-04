@@ -15,6 +15,11 @@ export interface Conversation {
     quote_status?: "pending" | "responded" | "accepted" | "rejected" | "revision_requested" | "archived";
 }
 
+export interface MessageReaction {
+    reaction: string;
+    user_id: string;
+}
+
 export interface ChatMessage {
     id: string;
     sender_user_id: string;
@@ -28,6 +33,7 @@ export interface ChatMessage {
     edited_at: string | null;
     deleted_at: string | null;
     is_read: boolean;
+    reactions?: MessageReaction[];
 }
 
 export interface SendMessagePayload {
@@ -59,5 +65,11 @@ export const messagingService = {
     // Mark messages in a conversation as read
     markAsRead: async (conversationId: string): Promise<void> => {
         await api.patch(`/conversations/${conversationId}/read`);
+    },
+
+    // Toggle a reaction on a message
+    toggleReaction: async (conversationId: string, messageId: string, reaction: string): Promise<any> => {
+        const response = await api.post(`/conversations/${conversationId}/messages/${messageId}/reactions`, { reaction });
+        return response.data;
     }
 };

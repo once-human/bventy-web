@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChatMessage, messagingService, useWebSocket, quoteService, mediaService } from '@bventy/services';
-import { Send, Paperclip, Lock, Check, CheckCheck, Loader2, FileIcon, X, Calendar, Banknote, FileText, Info } from 'lucide-react';
+import { ChatMessage, messagingService, useWebSocket, quoteService, mediaService, MessageReaction } from '@bventy/services';
+import { Send, Paperclip, Lock, Check, CheckCheck, Loader2, FileIcon, X, Calendar, Banknote, FileText, Info, Smile, MoreHorizontal } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Button,
     Input,
@@ -28,11 +29,14 @@ interface ChatInterfaceProps {
     onQuoteResponded?: () => void;
 }
 
+const REACTION_OPTIONS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
+
 export function ChatInterface({ conversationId, currentUserId, chatLocked, otherPartyName, otherPartyRole, quoteId, quoteStatus, onQuoteResponded }: ChatInterfaceProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [inputValue, setInputValue] = useState('');
     const [isSending, setIsSending] = useState(false);
+    const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
 
     // Quote Response State
     const [quotePrice, setQuotePrice] = useState('');
@@ -54,6 +58,13 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
         setIsRevisionModalOpen(false);
         setRevisionText('');
     };
+
+    // Scroll to bottom on load and new messages
+    useEffect(() => {
+        if (hasMounted && messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
+        }
+    }, [messages, hasMounted]);
 
     const fetchMessages = async () => {
         if (!conversationId) return;
@@ -119,10 +130,13 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
             if (newMessage.sender_user_id !== currentUserId) {
                 messagingService.markAsRead(conversationId).catch(console.error);
             }
-        } else if (lastMessage.type === 'message_read') {
-            // Handle read receipt updates
             setMessages(prev => prev.map(m =>
                 m.id === lastMessage.payload.message_id ? { ...m, is_read: true } : m
+            ));
+        } else if (lastMessage.type === 'reaction_updated') {
+            const { message_id, reactions } = lastMessage.payload;
+            setMessages(prev => prev.map(m =>
+                m.id === message_id ? { ...m, reactions } : m
             ));
         }
     }, [lastMessage, conversationId, currentUserId]);
@@ -158,33 +172,12 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
         setInputValue('');
 
         try {
-            // Optimistic update
-            const tempId = `temp-${Date.now()}`;
-            const optimisticMsg: ChatMessage = {
-                id: tempId,
-                sender_user_id: currentUserId,
-                sender_name: 'You', // Or actual name if passed
-                message_type: 'text',
-                body: trimmed,
-                attachment_url: null,
-                attachment_type: null,
-                system_payload: null,
-                created_at: new Date().toISOString(),
-                edited_at: null,
-                deleted_at: null,
-                is_read: false
-            };
-
-            setMessages(prev => [...prev, optimisticMsg]);
-
-            const res = await messagingService.sendMessage(conversationId, {
+            // We rely on the WebSocket broadcast to add the message to the UI.
+            // This prevents duplication once and for all.
+            await messagingService.sendMessage(conversationId, {
                 message_type: 'text',
                 body: trimmed
             });
-
-            // Swap temp ID with real ID
-            setMessages(prev => prev.map(m => m.id === tempId ? { ...m, id: res.message_id } : m));
-
         } catch (error: any) {
             console.error('Error sending message:', error);
             if (error?.response?.status === 403 && error?.response?.data?.error === "Email verification required.") {
@@ -193,11 +186,34 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
             } else {
                 toast.error('Failed to send message');
             }
-            // Revert optimistic update
+            // Restore input on failure
             setInputValue(trimmed);
-            setMessages(prev => prev.filter(m => !m.id.startsWith('temp-')));
         } finally {
             setIsSending(false);
+        }
+    };
+
+    const handleToggleReaction = async (messageId: string, emoji: string) => {
+        try {
+            // Optimistic update
+            setMessages(prev => prev.map(msg => {
+                if (msg.id !== messageId) return msg;
+                const existingReactions = msg.reactions || [];
+                const hasReacted = existingReactions.some(r => r.reaction === emoji && r.user_id === currentUserId);
+
+                let newReactions;
+                if (hasReacted) {
+                    newReactions = existingReactions.filter(r => !(r.reaction === emoji && r.user_id === currentUserId));
+                } else {
+                    newReactions = [...existingReactions, { reaction: emoji, user_id: currentUserId }];
+                }
+                return { ...msg, reactions: newReactions };
+            }));
+
+            await messagingService.toggleReaction(conversationId, messageId, emoji);
+        } catch (error) {
+            console.error('Failed to toggle reaction:', error);
+            toast.error('Failed to update reaction');
         }
     };
 
@@ -341,17 +357,17 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                     ) : (
                                         <div className={`flex flex-col max-w-[85%] sm:max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
                                             {msg.message_type === 'quote_card' && msg.system_payload ? (
-                                                <div className={`p-5 border border-border/40 w-full max-w-[380px] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] ${isMe ? 'bg-primary/5 rounded-2xl rounded-tr-sm' : 'bg-muted/20 rounded-2xl rounded-tl-sm'}`}>
-                                                    <div className="space-y-4">
-                                                        <div className="flex items-center justify-between pb-3 border-b border-border/50">
-                                                            <div className="flex items-center gap-2">
-                                                                <FileText className="h-4 w-4 text-primary opacity-70" />
-                                                                <span className="font-medium text-sm tracking-tight text-foreground/80">Request Context</span>
+                                                <div className={`p-6 border border-border/40 w-full max-w-[400px] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] ${isMe ? 'bg-primary/5 rounded-2xl rounded-tr-sm' : 'bg-muted/20 rounded-2xl rounded-tl-sm'}`}>
+                                                    <div className="space-y-6">
+                                                        <div className="flex items-center justify-between pb-3 border-b border-border/50 gap-6">
+                                                            <div className="flex items-center gap-3 min-w-0">
+                                                                <FileText className="h-4 w-4 text-primary opacity-60 shrink-0" />
+                                                                <span className="font-semibold text-sm tracking-tight text-foreground/90 truncate">Request Context</span>
                                                             </div>
-                                                            <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-widest">Details</span>
+                                                            <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] shrink-0 whitespace-nowrap">Details</span>
                                                         </div>
 
-                                                        <div className="grid grid-cols-1 gap-y-4">
+                                                        <div className="grid grid-cols-1 gap-y-6 pt-1">
                                                             <div className="flex flex-col gap-1">
                                                                 <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Budget Range</span>
                                                                 <span className="text-sm font-medium text-foreground/90">
@@ -366,9 +382,9 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                             </div>
 
                                                             {msg.system_payload.special_requirements && (
-                                                                <div className="flex flex-col gap-2 pt-1">
-                                                                    <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Special Requirements</span>
-                                                                    <p className="text-xs text-muted-foreground/80 leading-relaxed italic border-l border-primary/20 pl-3">
+                                                                <div className="flex flex-col gap-2 pt-2 border-t border-border/30 mt-1">
+                                                                    <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Special Requirements</span>
+                                                                    <p className="text-xs text-muted-foreground/80 leading-relaxed italic bg-muted/30 p-2.5 rounded-lg border-l-2 border-primary/20">
                                                                         "{msg.system_payload.special_requirements}"
                                                                     </p>
                                                                 </div>
@@ -377,20 +393,20 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                     </div>
                                                 </div>
                                             ) : msg.message_type === 'quote_response' && msg.system_payload ? (
-                                                <div className={`p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 w-full max-w-[360px] relative overflow-hidden bg-card ${isMe ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm'}`}>
-                                                    <div className="bg-primary/[0.03] px-5 py-4 border-b border-border/40 flex items-center justify-between">
-                                                        <div className="flex items-center gap-2.5">
-                                                            <div className="p-1.5 bg-primary/10 rounded-md">
+                                                <div className={`p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 w-full max-w-[380px] relative overflow-hidden bg-card ${isMe ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm'}`}>
+                                                    <div className="bg-primary/[0.03] px-6 py-5 border-b border-border/40 flex items-center justify-between gap-6">
+                                                        <div className="flex items-center gap-3.5 min-w-0">
+                                                            <div className="p-2 bg-primary/10 rounded-xl shrink-0">
                                                                 <FileIcon className="h-4 w-4 text-primary" />
                                                             </div>
-                                                            <span className="font-semibold text-sm tracking-tight text-foreground/90">Official Quote</span>
+                                                            <span className="font-bold text-sm tracking-tight text-foreground/90 truncate">Official Quote</span>
                                                         </div>
-                                                        <Badge variant="outline" className="bg-background text-[9px] h-5 px-1.5 font-medium tracking-tighter uppercase border-border/60">
+                                                        <Badge variant="outline" className="bg-background text-[9px] h-5 px-2.5 font-bold tracking-tighter uppercase border-border/60 shrink-0 whitespace-nowrap">
                                                             #{quoteId.slice(0, 5)}
                                                         </Badge>
                                                     </div>
 
-                                                    <div className="p-5 space-y-5">
+                                                    <div className="p-6 space-y-6">
                                                         <div className="flex flex-col items-center justify-center py-2 text-center">
                                                             <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-[0.2em] mb-1">Total Amount</span>
                                                             <div className="text-3xl font-semibold tracking-tight text-foreground">
@@ -465,12 +481,64 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                 </div>
                                             ) : (
                                                 <div
-                                                    className={`px-4 py-2 text-sm shadow-sm ${isMe
-                                                        ? 'bg-primary text-primary-foreground rounded-tl-xl rounded-tr-md rounded-bl-xl rounded-br-sm'
-                                                        : 'bg-muted border border-border text-foreground rounded-tr-xl rounded-tl-md rounded-br-xl rounded-bl-sm'
-                                                        }`}
+                                                    className="relative group"
+                                                    onMouseEnter={() => setHoveredMessageId(msg.id)}
+                                                    onMouseLeave={() => setHoveredMessageId(null)}
                                                 >
-                                                    {msg.body}
+                                                    <div
+                                                        className={`px-5 py-3 text-sm shadow-sm transition-all duration-200 ${isMe
+                                                            ? 'bg-primary text-primary-foreground rounded-tl-2xl rounded-tr-md rounded-bl-2xl rounded-br-sm'
+                                                            : 'bg-muted border border-border text-foreground rounded-tr-2xl rounded-tl-md rounded-br-2xl rounded-bl-sm'
+                                                            } ${hoveredMessageId === msg.id ? 'scale-[1.01] shadow-md border-primary/20' : ''}`}
+                                                    >
+                                                        {msg.body}
+                                                    </div>
+
+                                                    {/* Reaction Picker on Hover */}
+                                                    <AnimatePresence>
+                                                        {hoveredMessageId === msg.id && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                animate={{ opacity: 1, y: -45, scale: 1 }}
+                                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                className={`absolute ${isMe ? 'right-0' : 'left-0'} z-50 bg-background/95 backdrop-blur-md border border-border shadow-2xl rounded-full p-1.5 flex items-center gap-1.5`}
+                                                            >
+                                                                {REACTION_OPTIONS.map((emoji) => {
+                                                                    const hasReacted = msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId);
+                                                                    return (
+                                                                        <motion.button
+                                                                            key={emoji}
+                                                                            whileHover={{ scale: 1.3 }}
+                                                                            whileTap={{ scale: 0.9 }}
+                                                                            onClick={() => handleToggleReaction(msg.id, emoji)}
+                                                                            className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${hasReacted ? 'bg-primary/20 scale-110' : 'hover:bg-muted'}`}
+                                                                        >
+                                                                            {emoji}
+                                                                        </motion.button>
+                                                                    );
+                                                                })}
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+
+                                                    {/* Displayed Reactions */}
+                                                    {msg.reactions && msg.reactions.length > 0 && (
+                                                        <div className={`flex flex-wrap gap-1.5 mt-2 mb-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                                            {Array.from(new Set(msg.reactions.map(r => r.reaction))).map(emoji => (
+                                                                <button
+                                                                    key={emoji}
+                                                                    onClick={() => handleToggleReaction(msg.id, emoji)}
+                                                                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] border transition-all active:scale-95 ${msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId)
+                                                                        ? 'bg-primary/10 border-primary/30 text-primary font-bold'
+                                                                        : 'bg-muted/50 border-border text-muted-foreground'
+                                                                        }`}
+                                                                >
+                                                                    <span>{emoji}</span>
+                                                                    <span className="opacity-80">{msg.reactions?.filter(r => r.reaction === emoji).length}</span>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
 
@@ -595,7 +663,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                             placeholder="Type a message..."
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
-                            className="flex-1 h-11 rounded-full px-4 border-muted-foreground/20 focus-visible:ring-primary focus-visible:ring-offset-0 bg-muted/20"
+                            className="flex-1 h-11 rounded-full px-5 border-border/40 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 bg-muted/5 text-sm placeholder:text-muted-foreground/40 transition-all shadow-none"
                             disabled={isSending}
                         />
                         <Button
