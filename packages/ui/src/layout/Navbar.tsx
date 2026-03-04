@@ -13,7 +13,7 @@ import {
     DropdownMenuTrigger,
 } from "@bventy/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@bventy/ui";
-import { User, LogOut, LayoutDashboard, ShieldCheck, MessageSquare, ExternalLink } from "lucide-react";
+import { User, LogOut, LayoutDashboard, ShieldCheck, MessageSquare } from "lucide-react";
 
 const WWW_URL = process.env.NEXT_PUBLIC_WWW_URL || "";
 const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || "";
@@ -48,14 +48,6 @@ export function Navbar() {
                                     <span className="hidden lg:inline">Messages</span>
                                 </Link>
                             </Button>
-                            {user.vendor_profile_exists && user.vendor_slug && (
-                                <Button variant="outline" size="sm" asChild className="text-sm font-medium gap-2 border-primary/20 hover:bg-primary/5 hover:text-primary transition-all">
-                                    <Link href={`${WWW_URL}/vendors/${user.vendor_slug}`} target="_blank">
-                                        <ExternalLink className="h-4 w-4" />
-                                        <span className="hidden lg:inline">View Public Profile</span>
-                                    </Link>
-                                </Button>
-                            )}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="relative h-9 w-9 gap-2 rounded-full ring-offset-background transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">

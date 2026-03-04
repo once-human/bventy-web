@@ -41,6 +41,10 @@ export interface Review {
     created_at: string;
     organizer_name: string;
     profile_image?: string;
+    reply_text?: string;
+    replied_at?: string;
+    helpful_count: number;
+    is_public: boolean;
 }
 
 export interface TentativeHold {
@@ -163,9 +167,20 @@ export const vendorService = {
         if (!data.portfolio_files) data.portfolio_files = [];
         return data;
     },
-    getVendorReviews: async (vendorId: string): Promise<Review[]> => {
-        const response = await api.get<Review[]>(`/vendors/${vendorId}/reviews`);
+    getVendorReviews: async (vendorId: string, params?: { rating?: number; has_reply?: boolean; sort?: string }): Promise<Review[]> => {
+        const queryParams = new URLSearchParams();
+        if (params?.rating) queryParams.append("rating", params.rating.toString());
+        if (params?.has_reply !== undefined) queryParams.append("has_reply", params.has_reply.toString());
+        if (params?.sort) queryParams.append("sort", params.sort);
+
+        const response = await api.get<Review[]>(`/vendors/${vendorId}/reviews?${queryParams.toString()}`);
         return response.data || [];
+    },
+    likeReview: async (reviewId: string): Promise<void> => {
+        await api.post(`/reviews/${reviewId}/like`);
+    },
+    replyToReview: async (reviewId: string, replyText: string): Promise<void> => {
+        await api.post(`/reviews/${reviewId}/reply`, { reply_text: replyText });
     },
     submitReview: async (vendorId: string, rating: number, comment: string, quoteId?: string): Promise<void> => {
         await api.post(`/vendors/${vendorId}/reviews`, { rating, comment, quote_id: quoteId });

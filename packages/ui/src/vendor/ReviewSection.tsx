@@ -1,24 +1,25 @@
 "use client";
-"use client";
 
 import { useState, useEffect } from "react";
-import { Review, vendorService  } from "@bventy/services";
-import { Star, MessageSquare, User, Loader2, Plus, Calendar } from "lucide-react";
-import { Button  } from "@bventy/ui";
-import { Textarea  } from "@bventy/ui";
+import { Review, vendorService } from "@bventy/services";
+import { Star, MessageSquare, User, Loader2, Plus, Calendar, ThumbsUp, CheckCircle2 } from "lucide-react";
+import { Button } from "@bventy/ui";
+import { Textarea } from "@bventy/ui";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dialog,
+import {
+    Dialog,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
- } from "@bventy/ui";
-import { Label  } from "@bventy/ui";
-import { useAuth  } from "@bventy/services";
+} from "@bventy/ui";
+import { Label } from "@bventy/ui";
+import { useAuth } from "@bventy/services";
+import { Badge } from "@bventy/ui";
 
 interface ReviewSectionProps {
     vendorId: string;
@@ -67,6 +68,16 @@ export function ReviewSection({ vendorId, vendorName }: ReviewSectionProps) {
         }
     }, [vendorId, user]);
 
+    const handleLike = async (reviewId: string) => {
+        try {
+            await vendorService.likeReview(reviewId);
+            toast.success("Helpful mark added!");
+            fetchReviews();
+        } catch (err) {
+            toast.error("Failed to like review");
+        }
+    };
+
     const handleSubmitReview = async () => {
         if (rating < 1) {
             toast.error("Please select a rating");
@@ -80,7 +91,7 @@ export function ReviewSection({ vendorId, vendorName }: ReviewSectionProps) {
             setComment("");
             setRating(5);
             fetchReviews();
-            fetchEligibility(); // Refresh eligibility (though likely they only review once)
+            fetchEligibility();
         } catch (error: any) {
             toast.error(error.response?.data?.error || "Failed to submit review");
         } finally {
@@ -209,9 +220,35 @@ export function ReviewSection({ vendorId, vendorName }: ReviewSectionProps) {
                                     </div>
                                     {renderStars(review.rating)}
                                 </div>
-                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                <p className="text-muted-foreground text-sm leading-relaxed italic">
                                     "{review.comment}"
                                 </p>
+
+                                <div className="flex items-center gap-4 pt-1">
+                                    <button
+                                        onClick={() => handleLike(review.id)}
+                                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors"
+                                    >
+                                        <ThumbsUp className={`h-3 w-3 ${review.helpful_count > 0 ? "fill-primary text-primary" : ""}`} />
+                                        Helpful {review.helpful_count > 0 && `(${review.helpful_count})`}
+                                    </button>
+                                </div>
+
+                                {review.reply_text && (
+                                    <motion.div
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="mt-4 p-4 rounded-lg bg-muted/40 border-l-2 border-primary space-y-2"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant="outline" className="text-[10px] font-bold border-primary/20 bg-primary/5 text-primary">Vendor Response</Badge>
+                                            <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                                        </div>
+                                        <p className="text-xs text-muted-foreground leading-relaxed italic">
+                                            "{review.reply_text}"
+                                        </p>
+                                    </motion.div>
+                                )}
                             </motion.div>
                         ))}
                     </AnimatePresence>

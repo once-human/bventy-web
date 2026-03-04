@@ -11,14 +11,16 @@ import {
     ChevronRight,
     ArrowUpRight,
     CheckCircle2,
-    Loader2
+    Loader2,
+    ExternalLink
 } from "lucide-react";
 import useSWR, { useSWRConfig } from "swr";
-import { vendorService } from "@bventy/services";
+import { vendorService, useAuth } from "@bventy/services";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
 export default function OverviewPage() {
+    const { user } = useAuth();
     const { mutate } = useSWRConfig();
     const { data: stats, isLoading } = useSWR("vendor-overview-stats", vendorService.getOverviewStats);
     const [actionId, setActionId] = useState<string | null>(null);
@@ -87,8 +89,16 @@ export default function OverviewPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
                     <p className="text-muted-foreground">Manage your business activity and action items.</p>
                 </div>
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 rounded-xl border bg-card/50 backdrop-blur-sm p-3 shadow-sm">
+                <div className="flex items-center gap-3">
+                    {user?.vendor_slug && (
+                        <Button variant="outline" size="sm" asChild className="h-10 gap-2 border-primary/20 hover:bg-primary/5 hover:text-primary transition-all shadow-sm">
+                            <a href={`${process.env.NEXT_PUBLIC_WWW_URL}/vendors/${user.vendor_slug}`} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="h-4 w-4" />
+                                <span className="hidden md:inline">View Public Profile</span>
+                            </a>
+                        </Button>
+                    )}
+                    <div className="flex items-center gap-3 rounded-xl border bg-card/50 backdrop-blur-sm p-3 shadow-sm h-14">
                         <div className="space-y-0.5">
                             <div className="text-sm font-semibold">Accepting Bookings</div>
                             <div className="text-[10px] text-muted-foreground">Toggle your marketplace status</div>
