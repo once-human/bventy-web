@@ -10,19 +10,32 @@ import {
     TableCell,
     TableHead,
     TableHeader,
-    TableRow
+    TableRow,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    Input,
+    Label,
+    Textarea
 } from "@bventy/ui";
 import {
     Filter,
     Calendar,
     IndianRupee,
     Clock,
-    ChevronRight
+    ChevronRight,
+    Plus,
+    Loader2
 } from "lucide-react";
+import { toast } from "sonner";
 
 import Link from "next/link";
+import { useSWRConfig } from "swr";
 import useSWR from "swr";
-import { quoteService, Quote } from "@bventy/services";
+import { quoteService, Quote, vendorService } from "@bventy/services";
 import { formatDistanceToNow, format } from "date-fns";
 
 const TABS = [
@@ -34,8 +47,46 @@ const TABS = [
 ];
 
 export default function LeadsPage() {
+    const { mutate } = useSWRConfig();
     const { data: quotes, isLoading } = useSWR("vendor-quotes", quoteService.getQuoteRequests);
     const [activeTab, setActiveTab] = React.useState("all");
+    const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+    const [form, setForm] = React.useState({
+        event_title: "",
+        event_date: "",
+        event_type: "",
+        organizer: "",
+        budget: "",
+        notes: "",
+        contact_info: ""
+    });
+
+    const handleCreateManualLead = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            await vendorService.createManualLead(form);
+            toast.success("Manual lead created successfully");
+            setIsCreateModalOpen(false);
+            setForm({
+                event_title: "",
+                event_date: "",
+                event_type: "",
+                organizer: "",
+                budget: "",
+                notes: "",
+                contact_info: ""
+            });
+            mutate("vendor-quotes");
+        } catch (error) {
+            toast.error("Failed to create manual lead");
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const getStatusLabel = (status: string) => {
         switch (status) {
@@ -91,8 +142,8 @@ export default function LeadsPage() {
                     <Button variant="outline" size="sm">
                         <Filter className="mr-2 h-4 w-4" /> Filter
                     </Button>
-                    <Button size="sm">
-                        <IndianRupee className="mr-2 h-4 w-4" /> Create Manual Lead
+                    <Button size="sm" onClick={() => setIsCreateModalOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" /> Create Manual Lead
                     </Button>
                 </div>
             </div>
@@ -154,7 +205,11 @@ export default function LeadsPage() {
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-1 text-sm">
-                                        <div className="flex items-center gap-2 text-muted-foreground text-xs"><Calendar className="h-3 w-3" /> Event Date (To be fetched if included)</div>
+                                        <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                                            <Calendar className="h-3 w-3" />
+                                            {lead.event_date ? format(new Date(lead.event_date), "MMM d, yyyy") : "TBD"}
+                                        </div>
+                                        {lead.event_type && <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60">{lead.event_type}</p>}
                                     </div>
                                 </TableCell>
                                 <TableCell>
@@ -186,6 +241,101 @@ export default function LeadsPage() {
                     </TableBody>
                 </Table>
             </Card>
+
+            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle>Create Manual Lead</DialogTitle>
+                        <DialogDescription>
+                            Record business from external sources like WhatsApp, Instagram, or Phone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleCreateManualLead} className="space-y-4 py-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2 col-span-2">
+                                <Label htmlFor="event_title">Event Title</Label>
+                                <Input
+                                    id="event_title"
+                                    placeholder="e.g. Smith Wedding"
+                                    value={form.event_title}
+                                    onChange={(e) => setForm({ ...form, event_title: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="organizer">Organizer Name</Label>
+                                <Input
+                                    id="organizer"
+                                    placeholder="Mr. Smith"
+                                    value={form.organizer}
+                                    onChange={(e) => setForm({ ...form, organizer: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="event_date">Event Date</Label>
+                                <Input
+                                    id="event_date"
+                                    type="date"
+                                    value={form.event_date}
+                                    onChange={(e) => setForm({ ...form, event_date: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="event_type">Event Type</Label>
+                                <Input
+                                    id="event_type"
+                                    placeholder="e.g. Wedding"
+                                    value={form.event_type}
+                                    onChange={(e) => setForm({ ...form, event_type: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="budget">Budget / Price</Label>
+                                <Input
+                                    id="budget"
+                                    placeholder="e.g. ₹50,000"
+                                    value={form.budget}
+                                    onChange={(e) => setForm({ ...form, budget: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="contact_info">Contact Info (Phone/Email)</Label>
+                            <Input
+                                id="contact_info"
+                                placeholder="+91 98765 43210"
+                                value={form.contact_info}
+                                onChange={(e) => setForm({ ...form, contact_info: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="notes">Internal Notes</Label>
+                            <Textarea
+                                id="notes"
+                                placeholder="Any specific requirements or details..."
+                                value={form.notes}
+                                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                            />
+                        </div>
+                        <DialogFooter className="pt-4">
+                            <Button variant="outline" type="button" onClick={() => setIsCreateModalOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...
+                                    </>
+                                ) : (
+                                    "Save Lead"
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

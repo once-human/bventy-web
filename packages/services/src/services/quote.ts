@@ -35,6 +35,8 @@ export interface Quote {
     contact_expires_at?: string;
     archived_at?: string;
     revision_message?: string;
+    event_date?: string;
+    event_type?: string;
 }
 
 export interface QuoteContact {

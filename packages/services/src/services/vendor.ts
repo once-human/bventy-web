@@ -72,6 +72,16 @@ export interface CalendarEvent {
     details?: string;
 }
 
+export interface ManualLeadPayload {
+    event_title: string;
+    event_date: string;
+    event_type?: string;
+    organizer: string;
+    budget?: string;
+    notes?: string;
+    contact_info?: string;
+}
+
 export const vendorService = {
     createProfile: async (data: VendorProfileRequest): Promise<void> => {
         await api.post("/vendor/onboard", data);
@@ -138,5 +148,9 @@ export const vendorService = {
 
     updateInternalNotes: async (id: string, notes: string): Promise<void> => {
         await api.patch(`/quotes/${id}/notes`, { notes });
+    },
+    createManualLead: async (data: ManualLeadPayload): Promise<{ quote_id: string }> => {
+        const response = await api.post<{ quote_id: string }>("/quotes/manual", data);
+        return response.data;
     }
 };
