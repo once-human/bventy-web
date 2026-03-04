@@ -104,7 +104,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
             <CardFooter className="pt-0">
                 <Button asChild className="w-full font-semibold" variant={isOwner ? "default" : (isUnavailable ? "ghost" : "outline")}>
                     <Link href={`/vendors/${vendor.slug}`}>
-                        {isOwner ? "Manage Your Profile" : "View Profile"}
+                        {isOwner ? "View Your Profile" : "View Profile"}
                     </Link>
                 </Button>
             </CardFooter>

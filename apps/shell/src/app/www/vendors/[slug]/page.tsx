@@ -317,7 +317,7 @@ export default function VendorProfilePage() {
 
                                     {isMe ? (
                                         <Button className="w-full" size="lg" asChild>
-                                            <Link href="/vendor/overview">
+                                            <Link href={`${process.env.NEXT_PUBLIC_VENDOR_URL}/overview`}>
                                                 Go to Dashboard
                                             </Link>
                                         </Button>
