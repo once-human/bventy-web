@@ -29,4 +29,5 @@ export * from "./layout/Footer";
 export * from "./vendor/VendorCard";
 export * from "./vendor/ReviewSection";
 export * from "./vendor/VendorSidebar";
+export * from "./vendor/ConfirmPasswordModal";
 export * from "./layout/VendorLayout";

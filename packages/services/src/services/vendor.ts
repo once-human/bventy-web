@@ -30,6 +30,7 @@ export interface VendorProfile {
     review_count: number;
     is_accepting_bookings: boolean;
     views_count?: number;
+    password?: string;
 }
 
 export interface Review {
@@ -160,4 +161,4 @@ export const vendorService = {
     updateVendorProfile: async (data: Partial<VendorProfile>): Promise<void> => {
         await api.put("/vendor/me", data);
     }
-};
+}

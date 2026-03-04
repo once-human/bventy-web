@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from "@bventy/ui";
+import { Card, CardContent, CardHeader, CardTitle, Button, Badge, ConfirmPasswordModal } from "@bventy/ui";
 import Link from "next/link";
 import {
     Calendar,
@@ -23,6 +23,7 @@ export default function OverviewPage() {
     const { data: stats, isLoading } = useSWR("vendor-overview-stats", vendorService.getOverviewStats);
     const [actionId, setActionId] = useState<string | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
     // Fallbacks if data isn't loaded yet
     const requestCount = stats?.urgent_requests || 0;
@@ -33,15 +34,25 @@ export default function OverviewPage() {
     const bookings = stats?.upcoming_bookings || [];
     const holds = stats?.tentative_holds || [];
 
-    const handleToggleAvailability = async () => {
+    const handleToggleAvailability = async (password?: string) => {
+        // If turning OFF, require password confirmation
+        if (isAcceptingBookings && !password) {
+            setIsPasswordModalOpen(true);
+            return;
+        }
+
         setIsUpdating(true);
         try {
-            await vendorService.updateVendorProfile({ is_accepting_bookings: !isAcceptingBookings });
+            await vendorService.updateVendorProfile({
+                is_accepting_bookings: !isAcceptingBookings,
+                password: password
+            });
             toast.success(`Bookings ${!isAcceptingBookings ? "enabled" : "disabled"} successfully`);
             mutate("vendor-overview-stats");
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to toggle availability:", error);
-            toast.error("Failed to update availability");
+            const errorMsg = error.response?.data?.error || "Failed to update availability";
+            toast.error(errorMsg);
         } finally {
             setIsUpdating(false);
         }
@@ -267,6 +278,15 @@ export default function OverviewPage() {
                     </Card>
                 </div>
             </div>
+
+            <ConfirmPasswordModal
+                isOpen={isPasswordModalOpen}
+                onClose={() => setIsPasswordModalOpen(false)}
+                onConfirm={handleToggleAvailability}
+                title="Disable Bookings"
+                description="Are you sure you want to stop accepting new bookings? Please confirm with your password."
+                actionLabel="Disable Bookings"
+            />
         </div>
     );
 }
