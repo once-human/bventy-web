@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import { VendorProfile  } from "@bventy/services";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle  } from "@bventy/ui";
-import { Badge  } from "@bventy/ui";
+import { VendorProfile } from "@bventy/services";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@bventy/ui";
+import { Badge } from "@bventy/ui";
 import { CheckCircle2, MapPin, Store, Star } from "lucide-react";
-import { Button  } from "@bventy/ui";
+import { Button } from "@bventy/ui";
 import Image from "next/image";
 
 interface VendorCardProps {
@@ -19,8 +19,10 @@ export function VendorCard({ vendor }: VendorCardProps) {
     const brandImage = vendor.portfolio_image_url || vendor.owner_profile_image;
     const initials = (vendor.owner_full_name || vendor.business_name || "V").charAt(0).toUpperCase();
 
+    const isUnavailable = vendor.is_accepting_bookings === false;
+
     return (
-        <Card className="flex h-full flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-muted/50 group bg-card/50 backdrop-blur-sm">
+        <Card className={`flex h-full flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-muted/50 group bg-card/50 backdrop-blur-sm ${isUnavailable ? "grayscale opacity-80" : ""}`}>
             {/* Cover Image */}
             <div className="relative aspect-video w-full bg-muted/50 dark:bg-muted/20 overflow-hidden">
                 {coverImage ? (
@@ -33,6 +35,13 @@ export function VendorCard({ vendor }: VendorCardProps) {
                 ) : (
                     <div className="flex h-full w-full items-center justify-center bg-slate-100 dark:bg-slate-900">
                         <Store className="h-10 w-10 text-muted-foreground/20" />
+                    </div>
+                )}
+                {isUnavailable && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[2px]">
+                        <Badge variant="secondary" className="bg-white/90 text-black font-bold text-[10px] tracking-tight">
+                            TEMPORARILY UNAVAILABLE
+                        </Badge>
                     </div>
                 )}
             </div>
@@ -89,7 +98,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
                 </p>
             </CardContent>
             <CardFooter className="pt-0">
-                <Button asChild className="w-full font-semibold" variant="outline">
+                <Button asChild className="w-full font-semibold" variant={isUnavailable ? "ghost" : "outline"}>
                     <Link href={`/vendors/${vendor.slug}`}>View Profile</Link>
                 </Button>
             </CardFooter>

@@ -28,6 +28,8 @@ export interface VendorProfile {
     portfolio_files?: any[]; // JSONB array
     average_rating: number;
     review_count: number;
+    is_accepting_bookings: boolean;
+    views_count?: number;
 }
 
 export interface Review {
@@ -56,10 +58,12 @@ export interface UpcomingBooking {
 
 export interface VendorOverviewStats {
     urgent_requests: number;
+    pending_responses: number;
     avg_response_time: number;
     upcoming_bookings: UpcomingBooking[];
     profile_views: number;
     tentative_holds: TentativeHold[];
+    is_accepting_bookings: boolean;
 }
 
 export interface CalendarEvent {
@@ -152,5 +156,8 @@ export const vendorService = {
     createManualLead: async (data: ManualLeadPayload): Promise<{ quote_id: string }> => {
         const response = await api.post<{ quote_id: string }>("/quotes/manual", data);
         return response.data;
+    },
+    updateVendorProfile: async (data: Partial<VendorProfile>): Promise<void> => {
+        await api.put("/vendor/me", data);
     }
 };

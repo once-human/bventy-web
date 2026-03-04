@@ -313,10 +313,20 @@ export default function VendorProfilePage() {
                                     {user ? (
                                         <Dialog open={quoteDialogOpen} onOpenChange={setQuoteDialogOpen}>
                                             <DialogTrigger asChild>
-                                                <Button className="w-full mb-3" size="lg">
-                                                    <FileText className="mr-2 h-5 w-5" /> Request Quote
+                                                <Button
+                                                    className="w-full mb-1"
+                                                    size="lg"
+                                                    disabled={!vendor.is_accepting_bookings}
+                                                >
+                                                    <FileText className="mr-2 h-5 w-5" />
+                                                    {vendor.is_accepting_bookings ? "Request Quote" : "Not Accepting Bookings"}
                                                 </Button>
                                             </DialogTrigger>
+                                            {!vendor.is_accepting_bookings && (
+                                                <p className="text-[10px] text-center text-muted-foreground uppercase font-bold tracking-tighter mb-3">
+                                                    Currently not accepting new requests
+                                                </p>
+                                            )}
                                             <DialogContent className={isCreatingEventInQuote ? "sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-y-auto" : "sm:max-w-[425px]"}>
                                                 <DialogHeader>
                                                     <DialogTitle>Request a Quote</DialogTitle>

@@ -22,13 +22,30 @@ export default function OverviewPage() {
     const { mutate } = useSWRConfig();
     const { data: stats, isLoading } = useSWR("vendor-overview-stats", vendorService.getOverviewStats);
     const [actionId, setActionId] = useState<string | null>(null);
+    const [isUpdating, setIsUpdating] = useState(false);
 
     // Fallbacks if data isn't loaded yet
     const requestCount = stats?.urgent_requests || 0;
-    const responseTime = stats?.avg_response_time ? stats.avg_response_time.toFixed(1) : 0;
+    const pendingResponses = stats?.pending_responses || 0;
+    const avgResponseTime = stats?.avg_response_time ? stats.avg_response_time.toFixed(1) : 0;
+    const isAcceptingBookings = stats?.is_accepting_bookings ?? true;
     const viewCount = stats?.profile_views || 0;
     const bookings = stats?.upcoming_bookings || [];
     const holds = stats?.tentative_holds || [];
+
+    const handleToggleAvailability = async () => {
+        setIsUpdating(true);
+        try {
+            await vendorService.updateVendorProfile({ is_accepting_bookings: !isAcceptingBookings });
+            toast.success(`Bookings ${!isAcceptingBookings ? "enabled" : "disabled"} successfully`);
+            mutate("vendor-overview-stats");
+        } catch (error) {
+            console.error("Failed to toggle availability:", error);
+            toast.error("Failed to update availability");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
 
     const handleAction = async (id: string, action: 'confirm' | 'reject') => {
         setActionId(id);
@@ -51,54 +68,72 @@ export default function OverviewPage() {
 
     return (
         <div className="space-y-8">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
                     <p className="text-muted-foreground">Manage your business activity and action items.</p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-1.5 text-sm">
-                        <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-                        Available for Bookings
+                    <div className="flex items-center gap-3 rounded-xl border bg-card/50 backdrop-blur-sm p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                            <div className="text-sm font-semibold">Accepting Bookings</div>
+                            <div className="text-[10px] text-muted-foreground">Toggle your marketplace status</div>
+                        </div>
+                        <Button
+                            variant={isAcceptingBookings ? "default" : "outline"}
+                            size="sm"
+                            className={`h-8 px-3 font-bold transition-all ${isAcceptingBookings ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
+                            onClick={handleToggleAvailability}
+                            disabled={isUpdating}
+                        >
+                            {isUpdating ? <Loader2 className="h-3 w-3 animate-spin" /> : (
+                                <div className="flex items-center gap-2">
+                                    <span className={`flex h-1.5 w-1.5 rounded-full ${isAcceptingBookings ? "bg-white animate-pulse" : "bg-muted-foreground"}`} />
+                                    {isAcceptingBookings ? "ONLINE" : "OFFLINE"}
+                                </div>
+                            )}
+                        </Button>
                     </div>
                 </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {/* Pending Quote Requests */}
-                <Card className="shadow-sm">
+                {/* Urgent Actions */}
+                <Card className="shadow-sm border-orange-500/20 bg-orange-50/10 dark:bg-orange-950/5">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Pending Quote Requests</CardTitle>
-                        <Clock className="h-4 w-4 text-orange-500" />
+                        <CardTitle className="text-sm font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">Urgent Actions</CardTitle>
+                        <AlertCircle className="h-4 w-4 text-orange-500" />
                     </CardHeader>
                     <CardContent>
                         {isLoading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : (
                             <>
-                                <div className="text-2xl font-bold">{requestCount}</div>
-                                <p className="text-xs text-muted-foreground">Urgent action needed</p>
+                                <div className="text-3xl font-bold">{requestCount}</div>
+                                <p className="text-xs text-muted-foreground mt-1">Requiring immediate attention</p>
                             </>
                         )}
-                        <Button variant="link" className="mt-4 h-auto p-0 text-xs" asChild>
-                            <Link href="/leads?tab=new">View all <ChevronRight className="ml-1 h-3 w-3" /></Link>
+                        <Button variant="link" className="mt-4 h-auto p-0 text-xs text-orange-600 dark:text-orange-400 font-bold" asChild>
+                            <Link href="/leads?tab=new">VIEW URGENT <ChevronRight className="ml-1 h-3 w-3" /></Link>
                         </Button>
                     </CardContent>
                 </Card>
 
-                {/* Awaiting Response */}
+                {/* Pending Responses */}
                 <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Awaiting Response</CardTitle>
-                        <AlertCircle className="h-4 w-4 text-blue-500" />
+                        <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Pending Responses</CardTitle>
+                        <Clock className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
                         {isLoading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : (
                             <>
-                                <div className="text-2xl font-bold">{responseTime} <span className="text-base font-normal text-muted-foreground">hrs</span></div>
-                                <p className="text-xs text-muted-foreground">Average response time</p>
+                                <div className="text-3xl font-bold">{pendingResponses}</div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Avg response: <span className="font-bold text-foreground">{avgResponseTime}h</span>
+                                </p>
                             </>
                         )}
-                        <Button variant="link" className="mt-4 h-auto p-0 text-xs" asChild>
-                            <Link href="/messages">Open inbox <ChevronRight className="ml-1 h-3 w-3" /></Link>
+                        <Button variant="link" className="mt-4 h-auto p-0 text-xs font-bold" asChild>
+                            <Link href="/messages">OPEN INBOX <ChevronRight className="ml-1 h-3 w-3" /></Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -106,20 +141,20 @@ export default function OverviewPage() {
                 {/* Profile Views */}
                 <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Profile Views</CardTitle>
+                        <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Profile Reach</CardTitle>
                         <Eye className="h-4 w-4 text-emerald-500" />
                     </CardHeader>
                     <CardContent>
                         {isLoading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : (
                             <>
-                                <div className="text-2xl font-bold">{viewCount}</div>
-                                <p className="text-xs text-emerald-500 flex items-center">
-                                    <ArrowUpRight className="mr-1 h-3 w-3" /> Last 30 days
+                                <div className="text-3xl font-bold">{viewCount}</div>
+                                <p className="text-xs text-emerald-500 flex items-center font-medium mt-1">
+                                    <ArrowUpRight className="mr-1 h-3 w-3" /> Total impressions
                                 </p>
                             </>
                         )}
-                        <Button variant="link" className="mt-4 h-auto p-0 text-xs" asChild>
-                            <Link href="/performance">Insights <ChevronRight className="ml-1 h-3 w-3" /></Link>
+                        <Button variant="link" className="mt-4 h-auto p-0 text-xs font-bold" asChild>
+                            <Link href="/performance">VIEW INSIGHTS <ChevronRight className="ml-1 h-3 w-3" /></Link>
                         </Button>
                     </CardContent>
                 </Card>
