@@ -109,7 +109,9 @@ function UserDetailsModal({ user, open, onClose, onDelete, onRoleChange, onVerif
                         <div className="flex items-center gap-2 text-sm">
                             <Shield className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">Verification:</span>
-                            {user.email_verified ? (
+                            {user.role === "super_admin" ? (
+                                <Badge variant="default" className="bg-blue-600 hover:bg-blue-700">System Verified</Badge>
+                            ) : user.email_verified ? (
                                 <Badge variant="default" className="bg-green-500 hover:bg-green-600">Verified</Badge>
                             ) : (
                                 <Badge variant="destructive">Unverified</Badge>
@@ -117,7 +119,7 @@ function UserDetailsModal({ user, open, onClose, onDelete, onRoleChange, onVerif
                         </div>
                     </div>
 
-                    {canManageUsers && (
+                    {canManageUsers && user.role !== "super_admin" && (
                         <div className="flex flex-col gap-2 border-t pt-4">
                             <h3 className="text-sm font-semibold">Verification Controls</h3>
                             <p className="text-xs text-muted-foreground">Manually override the email verification status for this user.</p>
@@ -339,7 +341,9 @@ export default function AdminUsersPage() {
                                         <Badge variant="outline" className="capitalize">
                                             {user.role}
                                         </Badge>
-                                        {user.email_verified ? (
+                                        {user.role === "super_admin" ? (
+                                            <Shield className="h-4 w-4 text-blue-500" />
+                                        ) : user.email_verified ? (
                                             <Check className="h-4 w-4 text-green-500" />
                                         ) : (
                                             <Shield className="h-4 w-4 text-muted-foreground opacity-50" />
@@ -406,7 +410,7 @@ export default function AdminUsersPage() {
                 onVerify={handleVerifyUser}
                 onUnverify={handleUnverifyUser}
                 canManageRoles={canManageRoles}
-                canManageUsers={canManageUsers && !!selectedUser && canDeleteUser(selectedUser)}
+                canManageUsers={canManageUsers && !!selectedUser}
             />
         </div>
     );
