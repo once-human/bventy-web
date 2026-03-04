@@ -210,7 +210,7 @@ export default function LeadDetailPage() {
                                 {safeLead.status === 'pending' ? 'Confirm Availability' : 'Resubmit Quote'}
                             </Button>
                             <Button variant="outline" className="w-full" asChild disabled={!!isActioning}>
-                                <Link href="/vendor/messages">
+                                <Link href={safeLead.conversation_id ? `/vendor/messages?id=${safeLead.conversation_id}` : "/vendor/messages"}>
                                     <MessageSquare className="mr-2 h-4 w-4" /> Message Organizer
                                 </Link>
                             </Button>
@@ -218,7 +218,7 @@ export default function LeadDetailPage() {
                             <Button
                                 variant="ghost"
                                 className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                disabled={!!isActioning || safeLead.status === 'rejected' || safeLead.status === 'accepted'}
+                                disabled={!!isActioning || safeLead.status === 'rejected'}
                                 onClick={() => handleAction('reject')}
                             >
                                 {isActioning === 'reject' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <XCircle className="mr-2 h-4 w-4" />}
