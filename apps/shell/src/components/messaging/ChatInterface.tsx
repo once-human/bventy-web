@@ -171,7 +171,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         const trimmed = inputValue.trim();
-        if (!trimmed || isSending || chatLocked) return;
+        if ((!trimmed && !attachmentUrl) || isSending || chatLocked) return;
 
         setIsSending(true);
         setInputValue('');
@@ -293,6 +293,15 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
 
     return (
         <div className="flex flex-col h-full border border-border rounded-lg bg-card overflow-hidden shadow-sm">
+            {/* Hidden File Input for Attachments */}
+            <input
+                type="file"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="application/pdf,image/*"
+            />
+
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border bg-muted/20">
                 <div className="flex items-center gap-3">
@@ -619,13 +628,6 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                         onChange={e => setQuoteMessage(e.target.value)}
                                         className="flex-1"
                                         disabled={isSubmittingQuote || isUploading}
-                                    />
-                                    <input
-                                        type="file"
-                                        className="hidden"
-                                        ref={fileInputRef}
-                                        onChange={handleFileChange}
-                                        accept="application/pdf,image/*"
                                     />
                                     <Button
                                         type="button"
