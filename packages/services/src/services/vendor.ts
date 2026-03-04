@@ -134,5 +134,9 @@ export const vendorService = {
     getQuoteDetail: async (id: string): Promise<any> => {
         const { data } = await api.get(`/quotes/${id}`);
         return data;
+    },
+
+    updateInternalNotes: async (id: string, notes: string): Promise<void> => {
+        await api.patch(`/quotes/${id}/notes`, { notes });
     }
 };

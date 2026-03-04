@@ -213,21 +213,53 @@ export default function LeadDetailPage() {
                     </Card>
 
                     {/* Internal Notes */}
-                    <Card className="shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="text-sm">Internal Notes</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <textarea
-                                disabled={true}
-                                className="w-full min-h-[100px] rounded-md border bg-transparent p-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary opacity-50 cursor-not-allowed"
-                                placeholder="Notes feature coming soon..."
-                            />
-                            <Button variant="secondary" size="sm" className="w-full" disabled={true}>Save Note</Button>
-                        </CardContent>
-                    </Card>
+                    <InternalNotesCard quoteId={id} initialNotes={lead.internal_notes || ""} />
                 </div>
             </div>
         </div>
+    );
+}
+
+function InternalNotesCard({ quoteId, initialNotes }: { quoteId: string; initialNotes: string }) {
+    const [notes, setNotes] = useState(initialNotes);
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            await vendorService.updateInternalNotes(quoteId, notes);
+            toast.success("Notes saved successfully");
+            mutate([`quote-detail`, quoteId]);
+        } catch (err) {
+            console.error("Failed to save notes:", err);
+            toast.error("Failed to save notes");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return (
+        <Card className="shadow-sm">
+            <CardHeader>
+                <CardTitle className="text-sm">Internal Notes</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    className="w-full min-h-[120px] rounded-md border bg-transparent p-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="Add private notes for your team (not visible to organizer)..."
+                />
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full"
+                    disabled={isSaving || notes === initialNotes}
+                    onClick={handleSave}
+                >
+                    {isSaving ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : "Save Note"}
+                </Button>
+            </CardContent>
+        </Card>
     );
 }
