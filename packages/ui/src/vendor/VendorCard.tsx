@@ -102,7 +102,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
                 </p>
             </CardContent>
             <CardFooter className="pt-0">
-                <Button asChild className="w-full font-semibold" variant={isOwner ? "default" : (isUnavailable ? "ghost" : "outline")}>
+                <Button asChild className="w-full font-semibold" variant={isUnavailable ? "ghost" : "outline"}>
                     <Link href={`/vendors/${vendor.slug}`}>
                         {isOwner ? "View Your Profile" : "View Profile"}
                     </Link>
