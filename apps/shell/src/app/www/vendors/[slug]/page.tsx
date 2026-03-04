@@ -45,7 +45,7 @@ export default function VendorProfilePage() {
     const [vendor, setVendor] = useState<VendorProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
-    const isMe = user?.id === vendor?.owner_user_id;
+    const isMe = user?.id && vendor?.owner_user_id && user.id.toLowerCase() === vendor.owner_user_id.toLowerCase();
 
     // Shortlist state
     const [events, setEvents] = useState<Event[]>([]);

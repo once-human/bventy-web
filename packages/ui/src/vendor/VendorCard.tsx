@@ -14,7 +14,7 @@ interface VendorCardProps {
 
 export function VendorCard({ vendor }: VendorCardProps) {
     const { user } = useAuth();
-    const isOwner = user?.id === vendor.owner_user_id;
+    const isOwner = user?.id && vendor.owner_user_id && user.id.toLowerCase() === vendor.owner_user_id.toLowerCase();
 
     const images = vendor.gallery_images || [];
     const coverImage = images.length > 0 ? images[0] : null;
