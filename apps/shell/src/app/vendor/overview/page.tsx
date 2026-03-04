@@ -51,7 +51,10 @@ export default function OverviewPage() {
             mutate("vendor-overview-stats");
         } catch (error: any) {
             console.error("Failed to toggle availability:", error);
-            const errorMsg = error.response?.data?.error || "Failed to update availability";
+            const errorMsg = error.response?.data?.error ||
+                error.response?.data?.message ||
+                error.message ||
+                "Failed to update availability";
             toast.error(errorMsg);
         } finally {
             setIsUpdating(false);
@@ -94,7 +97,7 @@ export default function OverviewPage() {
                             variant={isAcceptingBookings ? "default" : "outline"}
                             size="sm"
                             className={`h-8 px-3 font-bold transition-all ${isAcceptingBookings ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
-                            onClick={handleToggleAvailability}
+                            onClick={() => handleToggleAvailability()}
                             disabled={isUpdating}
                         >
                             {isUpdating ? <Loader2 className="h-3 w-3 animate-spin" /> : (
