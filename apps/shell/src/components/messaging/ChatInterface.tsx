@@ -495,7 +495,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                 >
                                                     {/* Smile Trigger Icon */}
                                                     <div
-                                                        className={`transition-all duration-300 ${hoveredMessageId === msg.id ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}
+                                                        className={`transition-all duration-300 ${hoveredMessageId === msg.id && activeReactionPickerId !== msg.id ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}
                                                         onMouseEnter={() => setActiveReactionPickerId(msg.id)}
                                                     >
                                                         <button
@@ -519,10 +519,10 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                         <AnimatePresence>
                                                             {activeReactionPickerId === msg.id && (
                                                                 <motion.div
-                                                                    initial={{ opacity: 0, scale: 0.5, x: isMe ? -20 : 20, y: 10 }}
-                                                                    animate={{ opacity: 1, scale: 1, x: isMe ? -10 : 10, y: -50 }}
+                                                                    initial={{ opacity: 0, scale: 0.5, x: isMe ? -40 : 40, y: 10 }}
+                                                                    animate={{ opacity: 1, scale: 1, x: isMe ? -80 : 80, y: -45 }}
                                                                     exit={{ opacity: 0, scale: 0.5, y: 10 }}
-                                                                    className={`absolute ${isMe ? 'left-0 origin-bottom-left' : 'right-0 origin-bottom-right'} z-50 bg-background/95 backdrop-blur-md border border-border shadow-2xl rounded-full p-1.5 flex items-center gap-1`}
+                                                                    className={`absolute ${isMe ? 'right-full' : 'left-full'} z-50 bg-background/95 backdrop-blur-md border border-border shadow-2xl rounded-full p-1.5 flex items-center gap-1`}
                                                                 >
                                                                     {REACTION_OPTIONS.map((emoji, idx) => {
                                                                         const hasReacted = msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId);
