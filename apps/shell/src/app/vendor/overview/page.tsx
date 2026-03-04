@@ -16,6 +16,7 @@ import {
 import useSWR, { useSWRConfig } from "swr";
 import { vendorService } from "@bventy/services";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 export default function OverviewPage() {
     const { mutate } = useSWRConfig();
@@ -26,7 +27,7 @@ export default function OverviewPage() {
     const requestCount = stats?.urgent_requests || 0;
     const responseTime = stats?.avg_response_time ? stats.avg_response_time.toFixed(1) : 0;
     const viewCount = stats?.profile_views || 0;
-    const bookings = stats?.upcoming_bookings || 0;
+    const bookings = stats?.upcoming_bookings || [];
     const holds = stats?.tentative_holds || [];
 
     const handleAction = async (id: string, action: 'confirm' | 'reject') => {
@@ -137,18 +138,22 @@ export default function OverviewPage() {
                         <div className="space-y-4">
                             {isLoading ? (
                                 <div className="flex justify-center p-4"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
-                            ) : bookings === 0 ? (
+                            ) : bookings.length === 0 ? (
                                 <div className="text-center p-4 text-sm text-muted-foreground">No upcoming bookings.</div>
                             ) : (
-                                <div className="flex items-center justify-between rounded-lg border p-4">
-                                    <div className="space-y-1">
-                                        <p className="font-medium">You have {bookings} upcoming event(s)</p>
-                                        <p className="text-xs text-muted-foreground">Check calendar for details</p>
+                                bookings.map((booking) => (
+                                    <div key={booking.id} className="flex items-center justify-between rounded-lg border p-4">
+                                        <div className="space-y-1">
+                                            <p className="font-medium">{booking.title}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {format(new Date(booking.event_date), "PPP")}
+                                            </p>
+                                        </div>
+                                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                                            Confirmed
+                                        </Badge>
                                     </div>
-                                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                                        Confirmed
-                                    </Badge>
-                                </div>
+                                ))
                             )}
                         </div>
                         <Button variant="outline" className="mt-4 w-full" asChild>

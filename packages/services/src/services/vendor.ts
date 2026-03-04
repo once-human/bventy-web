@@ -46,10 +46,17 @@ export interface TentativeHold {
     created_at: string;
 }
 
+export interface UpcomingBooking {
+    id: string;
+    title: string;
+    event_date: string;
+    status: string;
+}
+
 export interface VendorOverviewStats {
     urgent_requests: number;
     avg_response_time: number;
-    upcoming_bookings: number;
+    upcoming_bookings: UpcomingBooking[];
     profile_views: number;
     tentative_holds: TentativeHold[];
 }
