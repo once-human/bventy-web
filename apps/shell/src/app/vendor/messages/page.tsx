@@ -23,6 +23,11 @@ export default function MessagesPage() {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeConvId, setActiveConvId] = useState<string | null>(null);
+    const [hasMounted, setHasMounted] = useState(false);
+
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
 
     useEffect(() => {
         const load = async () => {
@@ -81,9 +86,11 @@ export default function MessagesPage() {
                             const isActive = chat.id === activeConvId;
                             const otherName = chat.organizer_name || "Organizer";
                             const initial = otherName.charAt(0).toUpperCase();
-                            const timeLabel = chat.last_message_at
-                                ? formatDistanceToNow(new Date(chat.last_message_at), { addSuffix: true })
-                                : formatDistanceToNow(new Date(chat.created_at), { addSuffix: true });
+                            const timeLabel = hasMounted
+                                ? (chat.last_message_at
+                                    ? formatDistanceToNow(new Date(chat.last_message_at), { addSuffix: true })
+                                    : formatDistanceToNow(new Date(chat.created_at), { addSuffix: true }))
+                                : "...";
 
                             return (
                                 <div

@@ -29,34 +29,39 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
     const [isSubmittingQuote, setIsSubmittingQuote] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isVerificationRequired, setIsVerificationRequired] = useState(false);
+    const [hasMounted, setHasMounted] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { lastMessage, isConnected } = useWebSocket(conversationId);
 
-    // Initial Fetch
-    useEffect(() => {
-        const fetchMessages = async () => {
-            try {
-                const data = await messagingService.getMessages(conversationId);
-                setMessages(data);
+    const fetchMessages = async () => {
+        if (!conversationId) return;
+        setIsLoading(true);
+        try {
+            const data = await messagingService.getMessages(conversationId);
+            setMessages(data);
 
-                // Mark unread messages as read
-                if (data.some(m => !m.is_read && m.sender_user_id !== currentUserId)) {
-                    await messagingService.markAsRead(conversationId);
-                }
-            } catch (error: any) {
-                console.error('Failed to fetch messages:', error);
-                if (error?.response?.status === 403 && error?.response?.data?.error === "Email verification required.") {
-                    setIsVerificationRequired(true);
-                } else {
-                    toast.error('Failed to load chat history');
-                }
-            } finally {
-                setIsLoading(false);
+            // Mark unread messages as read
+            if (data.some(m => !m.is_read && m.sender_user_id !== currentUserId)) {
+                await messagingService.markAsRead(conversationId);
             }
-        };
+        } catch (error: any) {
+            console.error('Failed to fetch messages:', error);
+            if (error?.response?.status === 403 && error?.response?.data?.error === "Email verification required.") {
+                setIsVerificationRequired(true);
+            } else {
+                toast.error('Failed to load chat history');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
+
+    useEffect(() => {
         if (conversationId) {
             fetchMessages();
         }
@@ -170,6 +175,8 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
         try {
             await quoteService.respondToQuote(quoteId, Number(quotePrice), quoteMessage, attachmentUrl || undefined);
             toast.success("Quote submitted to Organizer");
+            // Refresh local state
+            await fetchMessages();
             if (onQuoteResponded) onQuoteResponded();
         } catch (error: any) {
             console.error('Failed to respond to quote:', error);
@@ -197,6 +204,8 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                 await quoteService.rejectQuote(quoteId);
                 toast.success("Quote rejected");
             }
+            // Refresh messages locally
+            await fetchMessages();
             if (onQuoteResponded) onQuoteResponded();
         } catch (error: any) {
             console.error(`Failed to ${action} quote:`, error);
@@ -282,7 +291,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                 {showDateSeparator && (
                                     <div className="flex justify-center my-4">
                                         <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
-                                            {format(new Date(msg.created_at), 'MMM d, yyyy')}
+                                            {hasMounted ? format(new Date(msg.created_at), 'MMM d, yyyy') : 'Loading date...'}
                                         </span>
                                     </div>
                                 )}
@@ -405,7 +414,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                             )}
 
                                             <div className={`flex items-center gap-1 mt-1 px-1 text-[10px] text-muted-foreground bg-background/80 backdrop-blur-sm rounded-full py-0.5`}>
-                                                <span>{format(new Date(msg.created_at), 'HH:mm')}</span>
+                                                <span>{hasMounted ? format(new Date(msg.created_at), 'HH:mm') : '--:--'}</span>
                                                 {isMe && (
                                                     <span className="ml-1 text-primary/80">
                                                         {msg.is_read ? <CheckCheck className="h-3 w-3 inline-block" /> : <Check className="h-3 w-3 inline-block" />}

@@ -25,6 +25,11 @@ export default function OrganizerMessagesPage() {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeConvId, setActiveConvId] = useState<string | null>(null);
+    const [hasMounted, setHasMounted] = useState(false);
+
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
 
     const load = async () => {
         try {
@@ -99,9 +104,11 @@ export default function OrganizerMessagesPage() {
                                 const isActive = chat.id === activeConvId;
                                 const otherName = chat.vendor_name || "Vendor";
                                 const initial = otherName.charAt(0).toUpperCase();
-                                const timeLabel = chat.last_message_at
-                                    ? formatDistanceToNow(new Date(chat.last_message_at), { addSuffix: true })
-                                    : formatDistanceToNow(new Date(chat.created_at), { addSuffix: true });
+                                const timeLabel = hasMounted
+                                    ? (chat.last_message_at
+                                        ? formatDistanceToNow(new Date(chat.last_message_at), { addSuffix: true })
+                                        : formatDistanceToNow(new Date(chat.created_at), { addSuffix: true }))
+                                    : "...";
 
                                 return (
                                     <div
