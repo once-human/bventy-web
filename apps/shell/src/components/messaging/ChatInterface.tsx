@@ -519,8 +519,8 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                         <AnimatePresence>
                                                             {activeReactionPickerId === msg.id && (
                                                                 <motion.div
-                                                                    initial={{ opacity: 0, scale: 0.5, x: isMe ? -40 : 40, y: 10 }}
-                                                                    animate={{ opacity: 1, scale: 1, x: isMe ? -80 : 80, y: -45 }}
+                                                                    initial={{ opacity: 0, scale: 0.5, x: isMe ? -20 : 20, y: 10 }}
+                                                                    animate={{ opacity: 1, scale: 1, x: isMe ? -20 : 20, y: -45 }}
                                                                     exit={{ opacity: 0, scale: 0.5, y: 10 }}
                                                                     className={`absolute ${isMe ? 'right-full' : 'left-full'} z-50 bg-background/95 backdrop-blur-md border border-border shadow-2xl rounded-full p-1.5 flex items-center gap-1`}
                                                                 >
