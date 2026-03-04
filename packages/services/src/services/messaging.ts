@@ -9,10 +9,15 @@ export interface Conversation {
     last_message_at: string;
     created_at: string;
     event_title: string;
+    event_type?: string;
     vendor_name: string;
+    vendor_category?: string;
     organizer_name: string | null;
     unread_count: number;
     quote_status?: "pending" | "responded" | "accepted" | "rejected" | "revision_requested" | "archived";
+    last_message?: string;
+    online?: boolean;
+    other_user_id?: string;
 }
 
 export interface MessageReaction {
