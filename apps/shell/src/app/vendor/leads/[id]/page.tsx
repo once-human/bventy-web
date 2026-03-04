@@ -82,7 +82,7 @@ export default function LeadDetailPage() {
                 <p className="text-muted-foreground font-medium">Unable to load lead details.</p>
                 <p className="text-sm text-muted-foreground max-w-md text-center">There might be a temporary issue with this lead's data. Please try again or contact support if the issue persists.</p>
                 <Button asChild variant="outline">
-                    <Link href="/vendor/leads">Back to Leads</Link>
+                    <Link href="/leads">Back to Leads</Link>
                 </Button>
             </div>
         );
@@ -210,7 +210,7 @@ export default function LeadDetailPage() {
                                 {safeLead.status === 'pending' ? 'Confirm Availability' : 'Resubmit Quote'}
                             </Button>
                             <Button variant="outline" className="w-full" asChild disabled={!!isActioning}>
-                                <Link href={safeLead.conversation_id ? `/vendor/messages?id=${safeLead.conversation_id}` : "/vendor/messages"}>
+                                <Link href={safeLead.conversation_id ? `/messages?id=${safeLead.conversation_id}` : "/messages"}>
                                     <MessageSquare className="mr-2 h-4 w-4" /> Message Organizer
                                 </Link>
                             </Button>
