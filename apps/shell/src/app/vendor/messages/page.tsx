@@ -10,7 +10,9 @@ import {
 import {
     Archive,
     Filter,
-    MessageSquareOff
+    MessageSquareOff,
+    Search,
+    SlidersHorizontal
 } from "lucide-react";
 import { messagingService, Conversation } from "@bventy/services";
 import { useAuth } from "@bventy/services";
@@ -51,17 +53,26 @@ export default function MessagesPage() {
         <div className="flex h-[calc(100vh-8rem)] overflow-hidden rounded-xl border bg-card shadow-sm">
             {/* Sidebar */}
             <div className="w-80 flex-col border-r hidden md:flex">
-                <div className="p-4 border-b space-y-4 bg-muted/10">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold">Inbox</h2>
-                        <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted">
+                <div className="p-4 border-b space-y-4">
+                    <div className="flex items-center justify-between px-1">
+                        <h2 className="text-xl font-bold tracking-tight">Messages</h2>
+                        <div className="flex gap-2 text-muted-foreground">
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <Archive className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted">
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <Filter className="h-4 w-4" />
                             </Button>
                         </div>
+                    </div>
+
+                    <div className="relative px-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                        <input
+                            type="text"
+                            placeholder="Search messages..."
+                            className="w-full h-10 bg-muted/50 border-none rounded-lg pl-9 pr-4 text-sm focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                        />
                     </div>
                 </div>
 
@@ -96,37 +107,33 @@ export default function MessagesPage() {
                                 <div
                                     key={chat.id}
                                     onClick={() => setActiveConvId(chat.id)}
-                                    className={`p-4 flex gap-3 cursor-pointer transition-colors border-b border-border/50 ${isActive ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/50"}`}
+                                    className={`px-4 py-5 flex gap-3 cursor-pointer transition-all border-b border-border/40 ${isActive ? "bg-muted/50" : "hover:bg-muted/30"}`}
                                 >
-                                    <div className="relative">
-                                        <Avatar className="h-10 w-10 border border-border/50">
-                                            <AvatarFallback className={`${isActive ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'}`}>
-                                                {initial}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        {chat.unread_count > 0 && (
-                                            <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 flex items-center justify-center text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
-                                                {chat.unread_count > 9 ? '9+' : chat.unread_count}
-                                            </div>
-                                        )}
+                                    <div className="relative shrink-0">
+                                        <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm font-semibold text-slate-500">
+                                            {initial}
+                                        </div>
                                     </div>
-                                    <div className="flex-1 min-w-0 space-y-1">
+                                    <div className="flex-1 min-w-0 space-y-0.5">
                                         <div className="flex items-center justify-between">
-                                            <p className={`text-sm truncate ${isActive || chat.unread_count > 0 ? 'font-semibold' : 'font-medium'}`}>
+                                            <p className="text-sm font-bold text-foreground/90 truncate">
                                                 {otherName}
                                             </p>
-                                            <span className={`text-[10px] whitespace-nowrap ${chat.unread_count > 0 ? 'text-primary font-bold' : 'text-muted-foreground'}`}>
-                                                {timeLabel}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                                    {timeLabel.replace('about ', '').replace(' ago', '')}
+                                                </span>
+                                                {chat.unread_count > 0 && (
+                                                    <div className="h-2 w-2 rounded-full bg-black dark:bg-white" />
+                                                )}
+                                            </div>
                                         </div>
-                                        <p className="text-xs font-semibold text-primary/80 truncate">
+                                        <p className="text-[11px] font-medium text-slate-500 truncate mt-0.5">
                                             {chat.event_title}
                                         </p>
-                                        <div className="flex items-center justify-between mt-1">
-                                            <p className={`text-xs truncate ${chat.unread_count > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                                                {chat.chat_locked ? '🔒 Chat locked' : 'View conversation'}
-                                            </p>
-                                        </div>
+                                        <p className="text-[11px] text-slate-400 truncate mt-1">
+                                            {chat.chat_locked ? 'Chat locked' : 'Can we adjust the appetizers?'}
+                                        </p>
                                     </div>
                                 </div>
                             );
@@ -136,27 +143,29 @@ export default function MessagesPage() {
             </div>
 
             {/* Main Chat Interface */}
-            <div className="flex-1 bg-muted/10 h-full p-0 sm:p-4">
-                {!activeConvId || !activeConv || !user ? (
-                    <div className="h-full flex flex-col items-center justify-center text-muted-foreground border border-border rounded-xl bg-card shadow-sm">
-                        <MessageSquareOff className="h-10 w-10 mb-4 opacity-50" />
-                        <p>Select a conversation to start messaging</p>
-                    </div>
-                ) : (
+            {/* Content */}
+            {!activeConvId || !activeConv || !user ? (
+                <div className="h-full flex flex-col items-center justify-center text-muted-foreground border-border bg-white p-12">
+                    <MessageSquareOff className="h-10 w-10 mb-4 opacity-10" strokeWidth={1.5} />
+                    <p className="text-sm font-medium">Select a conversation to start messaging</p>
+                </div>
+            ) : (
+                <div className="h-full bg-white dark:bg-slate-950 overflow-hidden">
                     <ChatInterface
                         conversationId={activeConv.id}
                         currentUserId={user.id}
                         chatLocked={activeConv.chat_locked}
                         otherPartyName={activeConv.organizer_name || "Organizer"}
                         otherPartyRole="organizer"
+                        eventTitle={activeConv.event_title}
                         quoteId={activeConv.quote_id}
                         quoteStatus={activeConv.quote_status}
                         onQuoteResponded={() => {
                             messagingService.getConversations().then(data => setConversations(data));
                         }}
                     />
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 }

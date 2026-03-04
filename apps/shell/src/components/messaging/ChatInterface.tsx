@@ -24,6 +24,7 @@ interface ChatInterfaceProps {
     chatLocked: boolean;
     otherPartyName: string;
     otherPartyRole: 'vendor' | 'organizer';
+    eventTitle?: string;
     quoteId: string;
     quoteStatus?: string;
     onQuoteResponded?: () => void;
@@ -31,7 +32,7 @@ interface ChatInterfaceProps {
 
 const REACTION_OPTIONS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
 
-export function ChatInterface({ conversationId, currentUserId, chatLocked, otherPartyName, otherPartyRole, quoteId, quoteStatus, onQuoteResponded }: ChatInterfaceProps) {
+export function ChatInterface({ conversationId, currentUserId, chatLocked, otherPartyName, otherPartyRole, eventTitle, quoteId, quoteStatus, onQuoteResponded }: ChatInterfaceProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [inputValue, setInputValue] = useState('');
@@ -303,21 +304,29 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
             />
 
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border bg-muted/20">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-white">
                 <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                    <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm font-semibold text-slate-500 shrink-0">
                         {otherPartyName.charAt(0).toUpperCase()}
                     </div>
-                    <div>
-                        <h3 className="font-medium">{otherPartyName}</h3>
-                        <p className="text-xs text-muted-foreground capitalize">{otherPartyRole}</p>
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-base leading-none">{otherPartyName}</h3>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                            <p className="text-[11px] font-medium text-primary truncate leading-none">{eventTitle || "Wedding Reception"}</p>
+                            <span className="text-[10px] text-muted-foreground opacity-30">•</span>
+                            <div className="flex items-center gap-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                <span className="text-[11px] font-medium text-emerald-500">Online</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-300'} transition-colors duration-300`} title={isConnected ? 'Connected' : 'Disconnected'} />
-                    <span className="text-xs text-muted-foreground hidden sm:inline-block">
-                        {isConnected ? 'Real-time active' : 'Connecting...'}
-                    </span>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                        <MoreHorizontal className="h-5 w-5 rotate-90" />
+                    </Button>
                 </div>
             </div>
 
@@ -343,7 +352,6 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                         const isMe = msg.sender_user_id === currentUserId;
                         const isSystem = msg.message_type === 'system';
 
-                        // Add date separators if needed (simple check against previous message date)
                         let showDateSeparator = false;
                         if (idx === 0) {
                             showDateSeparator = true;
@@ -356,285 +364,66 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                         return (
                             <React.Fragment key={msg.id}>
                                 {showDateSeparator && (
-                                    <div className="flex justify-center my-4">
-                                        <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
-                                            {hasMounted ? format(new Date(msg.created_at), 'MMM d, yyyy') : 'Loading date...'}
+                                    <div className="flex justify-center my-8">
+                                        <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-md uppercase tracking-widest border border-slate-100">
+                                            {hasMounted ? (new Date(msg.created_at).toDateString() === new Date().toDateString() ? 'Today' : format(new Date(msg.created_at), 'MMM d, yyyy')) : '...'}
                                         </span>
                                     </div>
                                 )}
                                 <div className={`flex flex-col ${isSystem ? 'items-center my-6' : isMe ? 'items-end' : 'items-start'}`}>
-
                                     {isSystem ? (
-                                        <div className="max-w-[85%] bg-muted border border-border text-center px-4 py-3 rounded-lg text-sm text-foreground space-y-2 relative">
-                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                {msg.body?.includes("locked") || msg.body?.includes("expired") ? <Lock className="h-4 w-4" /> : null}
-                                                <span>{msg.body}</span>
-                                            </div>
+                                        <div className="max-w-[85%] bg-slate-50 border border-slate-100 text-center px-4 py-2 rounded-lg text-[11px] font-medium text-slate-400 italic">
+                                            {msg.body}
                                         </div>
                                     ) : (
-                                        <div className={`flex flex-col max-w-[85%] sm:max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
-                                            {msg.message_type === 'quote_card' && msg.system_payload ? (
-                                                <div className={`p-5 border border-border/40 w-full max-w-[390px] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] ${isMe ? 'bg-primary/5 rounded-2xl rounded-tr-sm' : 'bg-muted/20 rounded-2xl rounded-tl-sm'}`}>
-                                                    <div className="space-y-4">
-                                                        <div className="flex items-center justify-between pb-3 border-b border-border/50 gap-3">
-                                                            <div className="flex items-center gap-2.5 min-w-0">
-                                                                <FileText className="h-4 w-4 text-primary opacity-60 shrink-0" />
-                                                                <span className="font-semibold text-sm tracking-tight text-foreground/90 truncate">Request Context</span>
-                                                            </div>
-                                                            <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.15em] shrink-0 whitespace-nowrap">Details</span>
-                                                        </div>
-
-                                                        <div className="grid grid-cols-1 gap-y-4 pt-1">
-                                                            <div className="flex flex-col gap-1">
-                                                                <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Budget Range</span>
-                                                                <span className="text-sm font-medium text-foreground/90">
-                                                                    {msg.system_payload.budget_range || 'Not specified'}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex items-center justify-between">
-                                                                <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-widest">Deadline</span>
-                                                                <span className="text-sm font-medium text-foreground/90">
-                                                                    {hasMounted && msg.system_payload.deadline ? format(new Date(msg.system_payload.deadline), 'PPP') : '...'}
-                                                                </span>
-                                                            </div>
-
-                                                            {msg.system_payload.special_requirements && (
-                                                                <div className="flex flex-col gap-2 pt-2 border-t border-border/30 mt-1">
-                                                                    <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Special Requirements</span>
-                                                                    <p className="text-xs text-muted-foreground/80 leading-relaxed italic bg-muted/30 p-2.5 rounded-lg border-l-2 border-primary/20">
-                                                                        "{msg.system_payload.special_requirements}"
-                                                                    </p>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ) : msg.message_type === 'quote_response' && msg.system_payload ? (
-                                                <div className={`p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 w-full max-w-[370px] relative overflow-hidden bg-card ${isMe ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm'}`}>
-                                                    <div className="bg-primary/[0.03] px-5 py-4 border-b border-border/40 flex items-center justify-between gap-4">
-                                                        <div className="flex items-center gap-3 min-w-0">
-                                                            <div className="p-2 bg-primary/10 rounded-xl shrink-0">
-                                                                <FileIcon className="h-4 w-4 text-primary" />
-                                                            </div>
-                                                            <span className="font-bold text-sm tracking-tight text-foreground/90 truncate">Official Quote</span>
-                                                        </div>
-                                                        <Badge variant="outline" className="bg-background text-[9px] h-5 px-2 font-bold tracking-tighter uppercase border-border/60 shrink-0 whitespace-nowrap">
-                                                            #{quoteId.slice(0, 5)}
-                                                        </Badge>
-                                                    </div>
-
-                                                    <div className="p-5 space-y-5">
-                                                        <div className="flex flex-col items-center justify-center py-2 text-center">
-                                                            <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-[0.2em] mb-1">Total Amount</span>
-                                                            <div className="text-3xl font-semibold tracking-tight text-foreground">
-                                                                ₹{msg.system_payload.quoted_price}
-                                                            </div>
-                                                        </div>
-
-                                                        {msg.system_payload.vendor_response && (
-                                                            <div className="bg-muted/30 p-4 rounded-xl border border-border/30">
-                                                                <p className="text-xs text-muted-foreground/90 leading-relaxed">
-                                                                    {msg.system_payload.vendor_response}
-                                                                </p>
-                                                            </div>
-                                                        )}
-
-                                                        {msg.system_payload.attachment_url && (
-                                                            <Button variant="outline" size="sm" className="w-full gap-2 rounded-xl h-10 border-border/60 hover:bg-muted/50 transition-all font-medium text-xs" asChild>
-                                                                <a href={msg.system_payload.attachment_url} target="_blank" rel="noopener noreferrer">
-                                                                    <Paperclip className="h-3.5 w-3.5" />
-                                                                    View Proposal Document
-                                                                </a>
-                                                            </Button>
-                                                        )}
-
-                                                        {!isMe && otherPartyRole === 'vendor' && quoteStatus === 'responded' && (
-                                                            <div className="flex flex-col gap-2 pt-2">
-                                                                <Button
-                                                                    variant="default"
-                                                                    size="sm"
-                                                                    className="w-full h-10 font-semibold shadow-md shadow-primary/5 rounded-xl"
-                                                                    onClick={() => handleQuoteResponseAction('accept')}
-                                                                    disabled={isSubmittingQuote}
-                                                                >
-                                                                    {isSubmittingQuote ? "Processing..." : "Accept & Unlock"}
-                                                                </Button>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    className="w-full h-10 font-medium text-muted-foreground hover:text-foreground rounded-xl"
-                                                                    onClick={() => setIsRevisionModalOpen(true)}
-                                                                    disabled={isSubmittingQuote}
-                                                                >
-                                                                    Request Revision
-                                                                </Button>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ) : msg.message_type.startsWith('quote_') ? (
-                                                <div className="flex flex-col items-center my-4 w-full">
-                                                    <div className={`px-4 py-1.5 rounded-full text-[10px] font-semibold border flex items-center gap-2 transition-all ${msg.message_type === 'quote_accepted' ? 'bg-green-500/5 border-green-500/10 text-green-600' :
-                                                        msg.message_type === 'quote_rejected' ? 'bg-red-500/5 border-red-500/20 text-red-600' :
-                                                            'bg-amber-500/5 border-amber-500/20 text-amber-600'
-                                                        }`}>
-                                                        <div className={`h-1 w-1 rounded-full ${msg.message_type === 'quote_accepted' ? 'bg-green-500' :
-                                                            msg.message_type === 'quote_rejected' ? 'bg-red-500' :
-                                                                'bg-amber-500'
-                                                            }`} />
-                                                        <span className="tracking-widest uppercase">
-                                                            {msg.message_type === 'quote_response' ? 'Quote Received' :
-                                                                msg.message_type === 'quote_accepted' ? 'Contract Finalized' :
-                                                                    msg.message_type === 'quote_rejected' ? 'Quote Declined' :
-                                                                        `Quote ${msg.message_type.split('_')[1].toUpperCase()}`}
-                                                            {msg.system_payload?.message && (
-                                                                <span className="ml-1 opacity-60 font-medium whitespace-nowrap">— {msg.system_payload.message}</span>
-                                                            )}
-                                                            {!msg.system_payload && msg.body && (
-                                                                <span className="ml-1 opacity-60 font-medium whitespace-nowrap">— {msg.body}</span>
-                                                            )}
-                                                        </span>
+                                        <div className={`flex flex-col w-full ${isMe ? 'items-end' : 'items-start'} mb-6`}>
+                                            {msg.message_type.startsWith('quote_') ? (
+                                                <div className="flex flex-col items-center w-full my-2">
+                                                    <div className="px-3 py-1 rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 border border-slate-200 uppercase tracking-tighter">
+                                                        {msg.message_type === 'quote_card' ? 'Quote Request Received' :
+                                                            msg.message_type === 'quote_accepted' ? 'Contract Finalized' :
+                                                                msg.message_type === 'quote_rejected' ? 'Quote Declined' : 'Quote Update'}
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div
-                                                    className={`flex items-center gap-2 group/msg relative ${isMe ? 'flex-row' : 'flex-row-reverse'}`}
-                                                    onMouseEnter={() => setHoveredMessageId(msg.id)}
-                                                    onMouseLeave={() => {
-                                                        setHoveredMessageId(null);
-                                                        setActiveReactionPickerId(null);
-                                                    }}
-                                                >
-                                                    {/* Smile Trigger Icon */}
-                                                    <div
-                                                        className={`transition-all duration-300 ${hoveredMessageId === msg.id && activeReactionPickerId !== msg.id ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}
-                                                        onMouseEnter={() => setActiveReactionPickerId(msg.id)}
-                                                    >
-                                                        <button
-                                                            className={`p-1.5 rounded-full hover:bg-muted/80 text-muted-foreground/40 hover:text-primary transition-colors bg-background/50 border border-border/20 shadow-sm`}
-                                                        >
-                                                            <Smile className="h-4 w-4" />
-                                                        </button>
-                                                    </div>
+                                                <div className={`flex items-start gap-3 w-full ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                                                    {!isMe && (
+                                                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400 shrink-0 mt-1">
+                                                            {otherPartyName.charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
 
-                                                    <div className="relative">
+                                                    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]`}>
                                                         <div
-                                                            className={`flex flex-col gap-2 p-1.5 shadow-sm transition-all duration-200 ${isMe
-                                                                ? 'bg-primary text-primary-foreground rounded-tl-2xl rounded-tr-md rounded-bl-2xl rounded-br-sm'
-                                                                : 'bg-muted border border-border text-foreground rounded-tr-2xl rounded-tl-md rounded-br-2xl rounded-bl-sm'
-                                                                } ${hoveredMessageId === msg.id ? 'scale-[1.01] shadow-md border-primary/20' : ''}`}
+                                                            className={`px-4 py-2.5 shadow-sm transition-all duration-200 text-[13px] leading-relaxed ${isMe
+                                                                ? 'bg-zinc-900 text-white rounded-2xl rounded-tr-sm'
+                                                                : 'bg-white border border-zinc-200 text-zinc-900 rounded-2xl rounded-tl-sm'
+                                                                }`}
                                                         >
-                                                            {/* Attachment Rendering */}
                                                             {msg.attachment_url && (
-                                                                <div className="overflow-hidden rounded-xl bg-background/10">
+                                                                <div className="mb-2">
                                                                     {msg.attachment_type?.startsWith('image/') || (msg.attachment_url.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)) ? (
-                                                                        <a
-                                                                            href={msg.attachment_url}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="block group/img relative"
-                                                                        >
-                                                                            <img
-                                                                                src={msg.attachment_url}
-                                                                                alt="Attachment"
-                                                                                className="max-w-full h-auto max-h-[300px] object-cover rounded-lg transition-transform hover:scale-[1.02]"
-                                                                            />
-                                                                            <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/5 transition-colors rounded-lg" />
+                                                                        <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg border border-slate-100">
+                                                                            <img src={msg.attachment_url} alt="Attachment" className="max-w-full h-auto max-h-[300px] object-cover" />
                                                                         </a>
                                                                     ) : (
-                                                                        <a
-                                                                            href={msg.attachment_url}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className={`flex items-center gap-3 p-3 rounded-lg border border-border/20 hover:bg-background/20 transition-colors ${isMe ? 'bg-primary-foreground/10' : 'bg-muted-foreground/10'}`}
-                                                                        >
-                                                                            <div className="p-2 bg-background/20 rounded-lg">
-                                                                                <FileIcon className="h-5 w-5" />
-                                                                            </div>
-                                                                            <div className="flex flex-col min-w-0">
-                                                                                <span className="text-xs font-medium truncate max-w-[150px]">
-                                                                                    {msg.attachment_url.split('/').pop() || 'Attachment'}
-                                                                                </span>
-                                                                                <span className="text-[10px] opacity-70 uppercase tracking-tighter">
-                                                                                    {msg.attachment_url.endsWith('.pdf') ? 'PDF Document' : 'File'}
-                                                                                </span>
+                                                                        <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-3 p-3 rounded-xl border ${isMe ? 'bg-white/10 border-white/20' : 'bg-slate-50 border-slate-200'}`}>
+                                                                            <FileIcon className="h-4 w-4" />
+                                                                            <div className="flex flex-col overflow-hidden">
+                                                                                <span className="text-[11px] font-bold truncate">{msg.attachment_url.split('/').pop()}</span>
                                                                             </div>
                                                                         </a>
                                                                     )}
                                                                 </div>
                                                             )}
-
-                                                            {/* Message Body */}
-                                                            {msg.body && (
-                                                                <div className={`px-3.5 py-1.5 ${msg.attachment_url ? 'pt-0' : ''}`}>
-                                                                    {msg.body}
-                                                                </div>
-                                                            )}
+                                                            {msg.body}
                                                         </div>
-
-                                                        {/* Reaction Picker anchored to the Smile icon's vicinity */}
-                                                        <AnimatePresence>
-                                                            {activeReactionPickerId === msg.id && (
-                                                                <motion.div
-                                                                    initial={{ opacity: 0, scale: 0.5, x: isMe ? -20 : 20, y: 10 }}
-                                                                    animate={{ opacity: 1, scale: 1, x: isMe ? -20 : 20, y: -45 }}
-                                                                    exit={{ opacity: 0, scale: 0.5, y: 10 }}
-                                                                    className={`absolute ${isMe ? 'right-full' : 'left-full'} z-50 bg-background/95 backdrop-blur-md border border-border shadow-2xl rounded-full p-1.5 flex items-center gap-1`}
-                                                                >
-                                                                    {REACTION_OPTIONS.map((emoji, idx) => {
-                                                                        const hasReacted = msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId);
-                                                                        return (
-                                                                            <motion.button
-                                                                                key={emoji}
-                                                                                initial={{ scale: 0, opacity: 0 }}
-                                                                                animate={{
-                                                                                    scale: 1,
-                                                                                    opacity: 1,
-                                                                                    transition: { delay: idx * 0.03 }
-                                                                                }}
-                                                                                whileHover={{ scale: 1.3, zIndex: 10 }}
-                                                                                whileTap={{ scale: 0.9 }}
-                                                                                onClick={() => handleToggleReaction(msg.id, emoji)}
-                                                                                className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${hasReacted ? 'bg-primary/20' : 'hover:bg-primary/10'}`}
-                                                                            >
-                                                                                <span className="text-lg">{emoji}</span>
-                                                                            </motion.button>
-                                                                        );
-                                                                    })}
-                                                                </motion.div>
-                                                            )}
-                                                        </AnimatePresence>
-
-                                                        {/* Displayed Reactions (Stuck to bottom of bubble) */}
-                                                        {msg.reactions && msg.reactions.length > 0 && (
-                                                            <div className={`flex flex-wrap gap-1 mt-1.5 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                                                {Array.from(new Set(msg.reactions.map(r => r.reaction))).map(emoji => (
-                                                                    <button
-                                                                        key={emoji}
-                                                                        onClick={() => handleToggleReaction(msg.id, emoji)}
-                                                                        className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] border transition-all active:scale-95 ${msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId)
-                                                                            ? 'bg-primary/10 border-primary/30 text-primary font-bold'
-                                                                            : 'bg-muted/50 border-border text-muted-foreground'
-                                                                            }`}
-                                                                    >
-                                                                        <span>{emoji}</span>
-                                                                        <span className="opacity-80">{msg.reactions?.filter(r => r.reaction === emoji).length}</span>
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        )}
+                                                        <div className="mt-1.5 px-1 text-[10px] font-medium text-slate-400">
+                                                            {hasMounted ? format(new Date(msg.created_at), 'h:mm a') : '--:--'}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
-
-                                            <div className={`flex items-center gap-1 mt-1 px-1 text-[10px] text-muted-foreground bg-background/80 backdrop-blur-sm rounded-full py-0.5`}>
-                                                <span>{hasMounted ? format(new Date(msg.created_at), 'HH:mm') : '--:--'}</span>
-                                                {isMe && (
-                                                    <span className="ml-1 text-primary/80">
-                                                        {msg.is_read ? <CheckCheck className="h-3 w-3 inline-block" /> : <Check className="h-3 w-3 inline-block" />}
-                                                    </span>
-                                                )}
-                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -726,49 +515,42 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                         </div>
                     )
                 ) : (
-                    <>
-                        <form onSubmit={handleSend} className="flex gap-2">
-                            <Button
+                    <div className="relative">
+                        <form onSubmit={handleSend} className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full p-1 pl-4 pr-1 transition-all focus-within:border-primary/30">
+                            <button
                                 type="button"
-                                size="icon"
-                                variant="outline"
-                                className="shrink-0 h-11 w-11 rounded-full text-muted-foreground hover:text-foreground hidden sm:flex"
-                                title="Attach file"
+                                className="text-slate-400 hover:text-slate-600 transition-colors"
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isSending || isUploading}
                             >
                                 {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
-                            </Button>
-                            <Input
-                                placeholder="Type a message..."
+                            </button>
+                            <input
+                                placeholder="Type your message..."
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
-                                className="flex-1 h-11 rounded-full px-5 border-border focus-visible:border-border/80 focus-visible:ring-0 bg-background/50 text-sm placeholder:text-muted-foreground/40 transition-all shadow-none"
+                                className="flex-1 bg-transparent border-none outline-none text-sm py-2 px-2 placeholder:text-slate-400"
                                 disabled={isSending}
                             />
                             <Button
                                 type="submit"
                                 size="icon"
-                                className="shrink-0 h-11 w-11 rounded-full transition-transform active:scale-95"
+                                className="h-9 w-9 rounded-full bg-slate-900 hover:bg-black text-white shrink-0 shadow-lg"
                                 disabled={(!inputValue.trim() && !attachmentUrl) || isSending || isUploading}
                             >
-                                <Send className="h-4 w-4 translate-x-[-1px] translate-y-[1px]" />
+                                <Send className="h-4 w-4" />
                             </Button>
                         </form>
                         {attachmentUrl && (
-                            <div className="mt-2 flex items-center gap-2 text-xs text-primary bg-primary/5 p-2 rounded border border-primary/20 animate-in fade-in slide-in-from-top-1 max-w-fit">
+                            <div className="absolute bottom-full mb-2 left-4 flex items-center gap-2 text-[10px] font-bold text-primary bg-primary/5 p-2 rounded-xl border border-primary/20 animate-in fade-in slide-in-from-bottom-1 max-w-fit">
                                 <FileIcon className="h-3 w-3" />
-                                <span className="truncate max-w-[200px]">File attached</span>
-                                <button
-                                    type="button"
-                                    onClick={() => setAttachmentUrl(null)}
-                                    className="hover:text-destructive transition-colors ml-1"
-                                >
+                                <span className="truncate max-w-[200px]">Attachment ready</span>
+                                <button type="button" onClick={() => setAttachmentUrl(null)} className="hover:text-destructive transition-colors ml-1">
                                     <X className="h-3 w-3" />
                                 </button>
                             </div>
                         )}
-                    </>
+                    </div>
                 )}
             </div>
 
