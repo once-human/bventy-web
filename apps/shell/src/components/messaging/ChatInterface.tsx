@@ -48,11 +48,8 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
     const [hasMounted, setHasMounted] = useState(false);
     const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
     const [revisionText, setRevisionText] = useState('');
-    const [activePickerId, setActivePickerId] = useState<string | null>(null);
-    const hasInitialScrolled = useRef(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const { lastMessage, isConnected } = useWebSocket(conversationId);
 
     const handleRevisionSubmit = async () => {
@@ -62,32 +59,16 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
         setRevisionText('');
     };
 
-    // Robust scroll to bottom logic
-    const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior });
-        }
-    };
-
     // Scroll to bottom on load and new messages
     useEffect(() => {
-        if (!isLoading && messages.length > 0 && hasMounted) {
-            if (!hasInitialScrolled.current) {
-                // First load: Snap to bottom instantly
-                scrollToBottom('auto');
-                hasInitialScrolled.current = true;
-            } else {
-                // New messages: Smooth scroll
-                const timer = setTimeout(() => scrollToBottom('smooth'), 100);
-                return () => clearTimeout(timer);
-            }
+        if (!isLoading && hasMounted && messagesEndRef.current) {
+            // Precise scroll after a microfetch to ensure DOM has rendered
+            const timer = setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+            }, 50);
+            return () => clearTimeout(timer);
         }
-    }, [messages, isLoading, hasMounted]);
-
-    // Reset initial scroll flag when conversation changes
-    useEffect(() => {
-        hasInitialScrolled.current = false;
-    }, [conversationId]);
+    }, [messages, hasMounted, isLoading]);
 
     const fetchMessages = async () => {
         if (!conversationId) return;
@@ -149,9 +130,13 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                 if (onQuoteResponded) onQuoteResponded();
             }
 
+            // If it's from the other person, mark it as read
             if (newMessage.sender_user_id !== currentUserId) {
                 messagingService.markAsRead(conversationId).catch(console.error);
             }
+            setMessages(prev => prev.map(m =>
+                m.id === lastMessage.payload.message_id ? { ...m, is_read: true } : m
+            ));
         } else if (lastMessage.type === 'reaction_updated') {
             const { message_id, reactions } = lastMessage.payload;
             setMessages(prev => prev.map(m =>
@@ -160,6 +145,10 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
         }
     }, [lastMessage, conversationId, currentUserId]);
 
+    // Auto-scroll to bottom
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -372,10 +361,10 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                     ) : (
                                         <div className={`flex flex-col max-w-[85%] sm:max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
                                             {msg.message_type === 'quote_card' && msg.system_payload ? (
-                                                <div className={`p-5 border border-border/40 w-full max-w-[380px] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] ${isMe ? 'bg-primary/5 rounded-2xl rounded-tr-sm' : 'bg-muted/20 rounded-2xl rounded-tl-sm'}`}>
+                                                <div className={`p-5 border border-border/40 w-full max-w-[390px] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] ${isMe ? 'bg-primary/5 rounded-2xl rounded-tr-sm' : 'bg-muted/20 rounded-2xl rounded-tl-sm'}`}>
                                                     <div className="space-y-4">
-                                                        <div className="flex items-center justify-between pb-3 border-b border-border/50 gap-4">
-                                                            <div className="flex items-center gap-3 min-w-0">
+                                                        <div className="flex items-center justify-between pb-3 border-b border-border/50 gap-3">
+                                                            <div className="flex items-center gap-2.5 min-w-0">
                                                                 <FileText className="h-4 w-4 text-primary opacity-60 shrink-0" />
                                                                 <span className="font-semibold text-sm tracking-tight text-foreground/90 truncate">Request Context</span>
                                                             </div>
@@ -397,9 +386,9 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                             </div>
 
                                                             {msg.system_payload.special_requirements && (
-                                                                <div className="flex flex-col gap-2 pt-2 border-t border-border/20 mt-1">
-                                                                    <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.15em]">Special Requirements</span>
-                                                                    <p className="text-xs text-muted-foreground/80 leading-relaxed italic border-l-2 border-primary/20 pl-3">
+                                                                <div className="flex flex-col gap-2 pt-2 border-t border-border/30 mt-1">
+                                                                    <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Special Requirements</span>
+                                                                    <p className="text-xs text-muted-foreground/80 leading-relaxed italic bg-muted/30 p-2.5 rounded-lg border-l-2 border-primary/20">
                                                                         "{msg.system_payload.special_requirements}"
                                                                     </p>
                                                                 </div>
@@ -408,10 +397,10 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                     </div>
                                                 </div>
                                             ) : msg.message_type === 'quote_response' && msg.system_payload ? (
-                                                <div className={`p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 w-full max-w-[360px] relative overflow-hidden bg-card ${isMe ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm'}`}>
+                                                <div className={`p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 w-full max-w-[370px] relative overflow-hidden bg-card ${isMe ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm'}`}>
                                                     <div className="bg-primary/[0.03] px-5 py-4 border-b border-border/40 flex items-center justify-between gap-4">
                                                         <div className="flex items-center gap-3 min-w-0">
-                                                            <div className="p-1.5 bg-primary/10 rounded-lg shrink-0">
+                                                            <div className="p-2 bg-primary/10 rounded-xl shrink-0">
                                                                 <FileIcon className="h-4 w-4 text-primary" />
                                                             </div>
                                                             <span className="font-bold text-sm tracking-tight text-foreground/90 truncate">Official Quote</span>
@@ -496,62 +485,39 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                 </div>
                                             ) : (
                                                 <div
-                                                    className={`relative flex items-center gap-2 group/msg-row ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
+                                                    className="relative group"
                                                     onMouseEnter={() => setHoveredMessageId(msg.id)}
-                                                    onMouseLeave={() => {
-                                                        setHoveredMessageId(null);
-                                                        if (activePickerId === msg.id) setActivePickerId(null);
-                                                    }}
+                                                    onMouseLeave={() => setHoveredMessageId(null)}
                                                 >
                                                     <div
-                                                        className={`px-5 py-3 text-sm shadow-sm transition-all duration-200 z-10 ${isMe
+                                                        className={`px-5 py-3 text-sm shadow-sm transition-all duration-200 ${isMe
                                                             ? 'bg-primary text-primary-foreground rounded-tl-2xl rounded-tr-md rounded-bl-2xl rounded-br-sm'
                                                             : 'bg-muted border border-border text-foreground rounded-tr-2xl rounded-tl-md rounded-br-2xl rounded-bl-sm'
-                                                            } ${hoveredMessageId === msg.id ? 'scale-[1.01] shadow-md' : ''}`}
+                                                            } ${hoveredMessageId === msg.id ? 'scale-[1.01] shadow-md border-primary/20' : ''}`}
                                                     >
                                                         {msg.body}
                                                     </div>
 
-                                                    {/* Emoji Trigger Icon - WhatsApp Style */}
-                                                    <motion.button
-                                                        initial={{ opacity: 0, scale: 0.8 }}
-                                                        animate={{
-                                                            opacity: hoveredMessageId === msg.id ? 1 : 0,
-                                                            scale: hoveredMessageId === msg.id ? 1 : 0.8
-                                                        }}
-                                                        onClick={() => setActivePickerId(activePickerId === msg.id ? null : msg.id)}
-                                                        className={`p-1.5 rounded-full hover:bg-muted text-muted-foreground/40 hover:text-primary transition-all active:scale-90 shrink-0 ${activePickerId === msg.id ? 'bg-muted text-primary opacity-100' : ''}`}
-                                                    >
-                                                        <Smile className="h-4 w-4" />
-                                                    </motion.button>
-
-                                                    {/* Reaction Picker - Floating Animated Bar */}
+                                                    {/* Reaction Picker on Hover */}
                                                     <AnimatePresence>
-                                                        {activePickerId === msg.id && (
+                                                        {hoveredMessageId === msg.id && (
                                                             <motion.div
-                                                                initial={{ opacity: 0, y: 10, scale: 0.8, filter: 'blur(8px)' }}
-                                                                animate={{ opacity: 1, y: -42, scale: 1, filter: 'blur(0px)' }}
-                                                                exit={{ opacity: 0, y: 10, scale: 0.8, filter: 'blur(8px)' }}
-                                                                transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                                                                className={`absolute bottom-full ${isMe ? 'right-0' : 'left-0'} mb-2 z-[100] bg-background/95 backdrop-blur-xl border border-border/50 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] rounded-2xl p-1.5 flex items-center gap-1`}
+                                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                animate={{ opacity: 1, y: -45, scale: 1 }}
+                                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                className={`absolute ${isMe ? 'right-0' : 'left-0'} z-50 bg-background/95 backdrop-blur-md border border-border shadow-2xl rounded-full p-1.5 flex items-center gap-1.5`}
                                                             >
-                                                                {REACTION_OPTIONS.map((emoji, i) => {
+                                                                {REACTION_OPTIONS.map((emoji) => {
                                                                     const hasReacted = msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId);
                                                                     return (
                                                                         <motion.button
                                                                             key={emoji}
-                                                                            initial={{ opacity: 0, scale: 0.5, y: 5 }}
-                                                                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                                            transition={{ delay: i * 0.03 }}
-                                                                            whileHover={{ scale: 1.25, y: -2 }}
+                                                                            whileHover={{ scale: 1.3 }}
                                                                             whileTap={{ scale: 0.9 }}
-                                                                            onClick={() => {
-                                                                                handleToggleReaction(msg.id, emoji);
-                                                                                setActivePickerId(null);
-                                                                            }}
-                                                                            className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all ${hasReacted ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`}
+                                                                            onClick={() => handleToggleReaction(msg.id, emoji)}
+                                                                            className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${hasReacted ? 'bg-primary/20 scale-110' : 'hover:bg-muted'}`}
                                                                         >
-                                                                            <span className="text-lg">{emoji}</span>
+                                                                            {emoji}
                                                                         </motion.button>
                                                                     );
                                                                 })}
@@ -559,32 +525,28 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                         )}
                                                     </AnimatePresence>
 
-                                                    {/* Displayed Reactions Badges - WhatsApp Overlay Style */}
+                                                    {/* Displayed Reactions */}
                                                     {msg.reactions && msg.reactions.length > 0 && (
-                                                        <div className={`absolute -bottom-3 ${isMe ? 'right-2' : 'left-2'} flex flex-wrap gap-1 z-20 select-none`}>
+                                                        <div className={`flex flex-wrap gap-1.5 mt-2 mb-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
                                                             {Array.from(new Set(msg.reactions.map(r => r.reaction))).map(emoji => (
-                                                                <motion.button
+                                                                <button
                                                                     key={emoji}
-                                                                    initial={{ scale: 0, opacity: 0 }}
-                                                                    animate={{ scale: 1, opacity: 1 }}
                                                                     onClick={() => handleToggleReaction(msg.id, emoji)}
-                                                                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] border shadow-sm transition-all hover:scale-110 active:scale-90 bg-background/95 backdrop-blur-sm ${msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId)
-                                                                        ? 'border-primary/30 text-primary font-bold shadow-primary/10'
-                                                                        : 'border-border text-muted-foreground'
+                                                                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] border transition-all active:scale-95 ${msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId)
+                                                                        ? 'bg-primary/10 border-primary/30 text-primary font-bold'
+                                                                        : 'bg-muted/50 border-border text-muted-foreground'
                                                                         }`}
                                                                 >
                                                                     <span>{emoji}</span>
-                                                                    <span className="text-[9px] opacity-70 font-medium">
-                                                                        {msg.reactions?.filter(r => r.reaction === emoji).length}
-                                                                    </span>
-                                                                </motion.button>
+                                                                    <span className="opacity-80">{msg.reactions?.filter(r => r.reaction === emoji).length}</span>
+                                                                </button>
                                                             ))}
                                                         </div>
                                                     )}
                                                 </div>
                                             )}
 
-                                            <div className={`flex items-center gap-1 mt-3.5 px-1 text-[10px] text-muted-foreground bg-background/80 backdrop-blur-sm rounded-full py-0.5`}>
+                                            <div className={`flex items-center gap-1 mt-1 px-1 text-[10px] text-muted-foreground bg-background/80 backdrop-blur-sm rounded-full py-0.5`}>
                                                 <span>{hasMounted ? format(new Date(msg.created_at), 'HH:mm') : '--:--'}</span>
                                                 {isMe && (
                                                     <span className="ml-1 text-primary/80">
@@ -705,7 +667,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                             placeholder="Type a message..."
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
-                            className="flex-1 h-11 rounded-full px-5 border border-border/60 focus-visible:border-border/80 focus-visible:ring-1 focus-visible:ring-primary/10 bg-muted/5 text-sm placeholder:text-muted-foreground/40 transition-all shadow-none"
+                            className="flex-1 h-11 rounded-full px-5 border-border focus-visible:border-border/80 focus-visible:ring-0 bg-background/50 text-sm placeholder:text-muted-foreground/40 transition-all shadow-none"
                             disabled={isSending}
                         />
                         <Button
