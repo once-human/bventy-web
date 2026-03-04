@@ -37,6 +37,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
     const [inputValue, setInputValue] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
+    const [activeReactionPickerId, setActiveReactionPickerId] = useState<string | null>(null);
 
     // Quote Response State
     const [quotePrice, setQuotePrice] = useState('');
@@ -485,64 +486,87 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                 </div>
                                             ) : (
                                                 <div
-                                                    className="relative group"
+                                                    className={`flex items-center gap-2 group/msg relative ${isMe ? 'flex-row' : 'flex-row-reverse'}`}
                                                     onMouseEnter={() => setHoveredMessageId(msg.id)}
-                                                    onMouseLeave={() => setHoveredMessageId(null)}
+                                                    onMouseLeave={() => {
+                                                        setHoveredMessageId(null);
+                                                        setActiveReactionPickerId(null);
+                                                    }}
                                                 >
+                                                    {/* Smile Trigger Icon */}
                                                     <div
-                                                        className={`px-5 py-3 text-sm shadow-sm transition-all duration-200 ${isMe
-                                                            ? 'bg-primary text-primary-foreground rounded-tl-2xl rounded-tr-md rounded-bl-2xl rounded-br-sm'
-                                                            : 'bg-muted border border-border text-foreground rounded-tr-2xl rounded-tl-md rounded-br-2xl rounded-bl-sm'
-                                                            } ${hoveredMessageId === msg.id ? 'scale-[1.01] shadow-md border-primary/20' : ''}`}
+                                                        className={`transition-all duration-300 ${hoveredMessageId === msg.id ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}
+                                                        onMouseEnter={() => setActiveReactionPickerId(msg.id)}
                                                     >
-                                                        {msg.body}
+                                                        <button
+                                                            className={`p-1.5 rounded-full hover:bg-muted/80 text-muted-foreground/40 hover:text-primary transition-colors bg-background/50 border border-border/20 shadow-sm`}
+                                                        >
+                                                            <Smile className="h-4 w-4" />
+                                                        </button>
                                                     </div>
 
-                                                    {/* Reaction Picker on Hover */}
-                                                    <AnimatePresence>
-                                                        {hoveredMessageId === msg.id && (
-                                                            <motion.div
-                                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                                animate={{ opacity: 1, y: -45, scale: 1 }}
-                                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                                className={`absolute ${isMe ? 'right-0' : 'left-0'} z-50 bg-background/95 backdrop-blur-md border border-border shadow-2xl rounded-full p-1.5 flex items-center gap-1.5`}
-                                                            >
-                                                                {REACTION_OPTIONS.map((emoji) => {
-                                                                    const hasReacted = msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId);
-                                                                    return (
-                                                                        <motion.button
-                                                                            key={emoji}
-                                                                            whileHover={{ scale: 1.3 }}
-                                                                            whileTap={{ scale: 0.9 }}
-                                                                            onClick={() => handleToggleReaction(msg.id, emoji)}
-                                                                            className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${hasReacted ? 'bg-primary/20 scale-110' : 'hover:bg-muted'}`}
-                                                                        >
-                                                                            {emoji}
-                                                                        </motion.button>
-                                                                    );
-                                                                })}
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
-
-                                                    {/* Displayed Reactions */}
-                                                    {msg.reactions && msg.reactions.length > 0 && (
-                                                        <div className={`flex flex-wrap gap-1.5 mt-2 mb-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                                            {Array.from(new Set(msg.reactions.map(r => r.reaction))).map(emoji => (
-                                                                <button
-                                                                    key={emoji}
-                                                                    onClick={() => handleToggleReaction(msg.id, emoji)}
-                                                                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] border transition-all active:scale-95 ${msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId)
-                                                                        ? 'bg-primary/10 border-primary/30 text-primary font-bold'
-                                                                        : 'bg-muted/50 border-border text-muted-foreground'
-                                                                        }`}
-                                                                >
-                                                                    <span>{emoji}</span>
-                                                                    <span className="opacity-80">{msg.reactions?.filter(r => r.reaction === emoji).length}</span>
-                                                                </button>
-                                                            ))}
+                                                    <div className="relative">
+                                                        <div
+                                                            className={`px-5 py-3 text-sm shadow-sm transition-all duration-200 ${isMe
+                                                                ? 'bg-primary text-primary-foreground rounded-tl-2xl rounded-tr-md rounded-bl-2xl rounded-br-sm'
+                                                                : 'bg-muted border border-border text-foreground rounded-tr-2xl rounded-tl-md rounded-br-2xl rounded-bl-sm'
+                                                                } ${hoveredMessageId === msg.id ? 'scale-[1.01] shadow-md border-primary/20' : ''}`}
+                                                        >
+                                                            {msg.body}
                                                         </div>
-                                                    )}
+
+                                                        {/* Reaction Picker anchored to the Smile icon's vicinity */}
+                                                        <AnimatePresence>
+                                                            {activeReactionPickerId === msg.id && (
+                                                                <motion.div
+                                                                    initial={{ opacity: 0, scale: 0.5, x: isMe ? -20 : 20, y: 10 }}
+                                                                    animate={{ opacity: 1, scale: 1, x: isMe ? -10 : 10, y: -50 }}
+                                                                    exit={{ opacity: 0, scale: 0.5, y: 10 }}
+                                                                    className={`absolute ${isMe ? 'left-0 origin-bottom-left' : 'right-0 origin-bottom-right'} z-50 bg-background/95 backdrop-blur-md border border-border shadow-2xl rounded-full p-1.5 flex items-center gap-1`}
+                                                                >
+                                                                    {REACTION_OPTIONS.map((emoji, idx) => {
+                                                                        const hasReacted = msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId);
+                                                                        return (
+                                                                            <motion.button
+                                                                                key={emoji}
+                                                                                initial={{ scale: 0, opacity: 0 }}
+                                                                                animate={{
+                                                                                    scale: 1,
+                                                                                    opacity: 1,
+                                                                                    transition: { delay: idx * 0.03 }
+                                                                                }}
+                                                                                whileHover={{ scale: 1.3, zIndex: 10 }}
+                                                                                whileTap={{ scale: 0.9 }}
+                                                                                onClick={() => handleToggleReaction(msg.id, emoji)}
+                                                                                className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${hasReacted ? 'bg-primary/20' : 'hover:bg-primary/10'}`}
+                                                                            >
+                                                                                <span className="text-lg">{emoji}</span>
+                                                                            </motion.button>
+                                                                        );
+                                                                    })}
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+
+                                                        {/* Displayed Reactions (Stuck to bottom of bubble) */}
+                                                        {msg.reactions && msg.reactions.length > 0 && (
+                                                            <div className={`flex flex-wrap gap-1 mt-1.5 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                                                {Array.from(new Set(msg.reactions.map(r => r.reaction))).map(emoji => (
+                                                                    <button
+                                                                        key={emoji}
+                                                                        onClick={() => handleToggleReaction(msg.id, emoji)}
+                                                                        className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] border transition-all active:scale-95 ${msg.reactions?.some(r => r.reaction === emoji && r.user_id === currentUserId)
+                                                                            ? 'bg-primary/10 border-primary/30 text-primary font-bold'
+                                                                            : 'bg-muted/50 border-border text-muted-foreground'
+                                                                            }`}
+                                                                    >
+                                                                        <span>{emoji}</span>
+                                                                        <span className="opacity-80">{msg.reactions?.filter(r => r.reaction === emoji).length}</span>
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             )}
 
