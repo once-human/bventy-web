@@ -380,7 +380,8 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                     </div>
                 ) : (
                     messages.map((msg, idx) => {
-                        const isMe = msg.sender_user_id === currentUserId;
+                        // Use case-insensitive comparison for UUIDs to avoid mismatching due to casing
+                        const isMe = msg.sender_user_id?.toLowerCase() === currentUserId?.toLowerCase();
                         const isSystem = msg.message_type === 'system';
 
                         // Add date separators if needed (simple check against previous message date)
@@ -413,6 +414,12 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                         </div>
                                     ) : (
                                         <div className={`flex flex-col max-w-[85%] sm:max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
+                                            {/* Optional: Add sender name label for received messages if it's a shared account or self-chat context */}
+                                            {!isMe && msg.sender_name && (
+                                                <span className="text-[10px] text-muted-foreground/60 mb-1 ml-1 font-medium">
+                                                    {msg.sender_name}
+                                                </span>
+                                            )}
                                             {msg.message_type === 'quote_card' && msg.system_payload ? (
                                                 <div className={`p-5 border border-border/40 w-full max-w-[390px] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] ${isMe ? 'bg-primary/5 rounded-2xl rounded-tr-sm' : 'bg-muted/20 rounded-2xl rounded-tl-sm'}`}>
                                                     <div className="space-y-4">
