@@ -32,7 +32,7 @@ import {
     DialogFooter,
 } from "@bventy/ui";
 import { Button } from "@bventy/ui";
-import { Trash2, User, Mail, Shield, Calendar, MapPin } from "lucide-react";
+import { Trash2, User, Mail, Shield, Calendar, MapPin, Check } from "lucide-react";
 import { format } from "date-fns";
 
 interface UserDetailsModalProps {
@@ -41,12 +41,15 @@ interface UserDetailsModalProps {
     onClose: () => void;
     onDelete: (userId: string) => Promise<void>;
     onRoleChange: (userId: string, newRole: string) => Promise<void>;
+    onVerify: (userId: string) => Promise<void>;
+    onUnverify: (userId: string) => Promise<void>;
     canManageRoles: boolean;
     canManageUsers: boolean;
 }
 
-function UserDetailsModal({ user, open, onClose, onDelete, onRoleChange, canManageRoles, canManageUsers }: UserDetailsModalProps) {
+function UserDetailsModal({ user, open, onClose, onDelete, onRoleChange, onVerify, onUnverify, canManageRoles, canManageUsers }: UserDetailsModalProps) {
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
     if (!user) return null;
@@ -105,27 +108,46 @@ function UserDetailsModal({ user, open, onClose, onDelete, onRoleChange, canMana
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                             <Shield className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">Role:</span>
-                            {canManageRoles ? (
-                                <Select
-                                    value={user.role}
-                                    onValueChange={(value) => onRoleChange(user.id, value)}
-                                >
-                                    <SelectTrigger className="h-7 w-[130px]">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="user">User</SelectItem>
-                                        <SelectItem value="staff">Staff</SelectItem>
-                                        <SelectItem value="admin">Admin</SelectItem>
-                                        <SelectItem value="super_admin">Super Admin</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                            <span className="font-medium">Verification:</span>
+                            {user.email_verified ? (
+                                <Badge variant="default" className="bg-green-500 hover:bg-green-600">Verified</Badge>
                             ) : (
-                                <span className="capitalize">{user.role}</span>
+                                <Badge variant="destructive">Unverified</Badge>
                             )}
                         </div>
                     </div>
+
+                    {canManageUsers && (
+                        <div className="flex flex-col gap-2 border-t pt-4">
+                            <h3 className="text-sm font-semibold">Verification Controls</h3>
+                            <p className="text-xs text-muted-foreground">Manually override the email verification status for this user.</p>
+                            <div className="flex gap-2 mt-1">
+                                {user.email_verified ? (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => onUnverify(user.id)}
+                                        disabled={isVerifying}
+                                        className="text-amber-600 border-amber-200 hover:bg-amber-50"
+                                    >
+                                        {isVerifying ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Shield className="h-3 w-3 mr-2" />}
+                                        Mark as Unverified
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => onVerify(user.id)}
+                                        disabled={isVerifying}
+                                        className="text-green-600 border-green-200 hover:bg-green-50"
+                                    >
+                                        {isVerifying ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Check className="h-3 w-3 mr-2" />}
+                                        Verify User Now
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {user.bio && (
                         <div className="border-t pt-4">
@@ -210,6 +232,36 @@ export default function AdminUsersPage() {
         }
     };
 
+    const handleVerifyUser = async (userId: string) => {
+        try {
+            await adminService.verifyUser(userId);
+            toast.success("User verified manually");
+            setUsers((prev) =>
+                prev.map((u) => (u.id === userId ? { ...u, email_verified: true } : u))
+            );
+            if (selectedUser?.id === userId) {
+                setSelectedUser(prev => prev ? { ...prev, email_verified: true } : null);
+            }
+        } catch (error) {
+            toast.error("Failed to verify user");
+        }
+    };
+
+    const handleUnverifyUser = async (userId: string) => {
+        try {
+            await adminService.unverifyUser(userId);
+            toast.success("User verification removed");
+            setUsers((prev) =>
+                prev.map((u) => (u.id === userId ? { ...u, email_verified: false } : u))
+            );
+            if (selectedUser?.id === userId) {
+                setSelectedUser(prev => prev ? { ...prev, email_verified: false } : null);
+            }
+        } catch (error) {
+            toast.error("Failed to unverify user");
+        }
+    };
+
     const openUserDetails = (user: UserProfile) => {
         setSelectedUser(user);
         setIsModalOpen(true);
@@ -283,9 +335,16 @@ export default function AdminUsersPage() {
                                 </TableCell>
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>
-                                    <Badge variant="outline" className="capitalize">
-                                        {user.role}
-                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className="capitalize">
+                                            {user.role}
+                                        </Badge>
+                                        {user.email_verified ? (
+                                            <Check className="h-4 w-4 text-green-500" />
+                                        ) : (
+                                            <Shield className="h-4 w-4 text-muted-foreground opacity-50" />
+                                        )}
+                                    </div>
                                 </TableCell>
                                 <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                                     {canManageUsers ? (
@@ -344,6 +403,8 @@ export default function AdminUsersPage() {
                 onClose={() => setIsModalOpen(false)}
                 onDelete={handleDeleteUser}
                 onRoleChange={handleRoleChange}
+                onVerify={handleVerifyUser}
+                onUnverify={handleUnverifyUser}
                 canManageRoles={canManageRoles}
                 canManageUsers={canManageUsers && !!selectedUser && canDeleteUser(selectedUser)}
             />

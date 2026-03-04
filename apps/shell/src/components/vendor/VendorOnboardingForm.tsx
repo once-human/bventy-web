@@ -69,7 +69,8 @@ export function VendorOnboardingForm() {
         try {
             await vendorService.createProfile(values);
             setSuccess(true);
-        } catch (error: unknown) { const err = error as any;
+        } catch (error: unknown) {
+            const err = error as any;
             // Check for 409 Conflict
             if (err.response && err.response.status === 409) {
                 // If 409, it means profile exists (or slug conflict).
@@ -84,6 +85,8 @@ export function VendorOnboardingForm() {
                     setError("This Business Name or City combination is already taken. Please try a different name.");
                     // Or if update failed for other reasons, show generic error
                 }
+            } else if (err.response && err.response.status === 403 && err.response.data?.error === "Email verification required.") {
+                setError("Email verification is required to onboard as a vendor. Please check your inbox and verify your email before submitting.");
             } else if (err.response && err.response.data && err.response.data.message) {
                 setError(err.response.data.message);
             } else {

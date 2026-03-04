@@ -130,8 +130,12 @@ export default function VendorProfilePage() {
             quoteService.getMyQuotes().then(setMyQuotes).catch(console.error);
         } catch (error: any) {
             console.error("Failed to request quote", error);
-            const errMsg = error.response?.data?.error || "Failed to send quote request.";
-            toast.error(errMsg);
+            if (error.response?.status === 403 && error.response?.data?.error === "Email verification required.") {
+                toast.error("Email verification required. Please verify your email to request quotes.");
+            } else {
+                const errMsg = error.response?.data?.error || "Failed to send quote request.";
+                toast.error(errMsg);
+            }
         } finally {
             setQuoteLoading(false);
         }

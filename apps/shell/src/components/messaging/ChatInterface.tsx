@@ -28,6 +28,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
     const [attachmentUrl, setAttachmentUrl] = useState<string | null>(null);
     const [isSubmittingQuote, setIsSubmittingQuote] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [isVerificationRequired, setIsVerificationRequired] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -44,9 +45,13 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                 if (data.some(m => !m.is_read && m.sender_user_id !== currentUserId)) {
                     await messagingService.markAsRead(conversationId);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Failed to fetch messages:', error);
-                toast.error('Failed to load chat history');
+                if (error?.response?.status === 403 && error?.response?.data?.error === "Email verification required.") {
+                    setIsVerificationRequired(true);
+                } else {
+                    toast.error('Failed to load chat history');
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -141,9 +146,14 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
             // Swap temp ID with real ID
             setMessages(prev => prev.map(m => m.id === tempId ? { ...m, id: res.message_id } : m));
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error sending message:', error);
-            toast.error('Failed to send message');
+            if (error?.response?.status === 403 && error?.response?.data?.error === "Email verification required.") {
+                setIsVerificationRequired(true);
+                toast.error('Email verification required to send messages');
+            } else {
+                toast.error('Failed to send message');
+            }
             // Revert optimistic update
             setInputValue(trimmed);
             setMessages(prev => prev.filter(m => !m.id.startsWith('temp-')));
@@ -161,9 +171,14 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
             await quoteService.respondToQuote(quoteId, Number(quotePrice), quoteMessage, attachmentUrl || undefined);
             toast.success("Quote submitted to Organizer");
             if (onQuoteResponded) onQuoteResponded();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to respond to quote:', error);
-            toast.error('Failed to submit quote');
+            if (error?.response?.status === 403 && error?.response?.data?.error === "Email verification required.") {
+                setIsVerificationRequired(true);
+                toast.error('Email verification required to submit quotes');
+            } else {
+                toast.error('Failed to submit quote');
+            }
         } finally {
             setIsSubmittingQuote(false);
         }
@@ -210,9 +225,20 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/5 scroll-smooth">
+                {isVerificationRequired && (
+                    <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 p-4 rounded-xl mb-4">
+                        <div className="flex items-center gap-3 text-amber-800 dark:text-amber-200">
+                            <Lock className="h-5 w-5 shrink-0" />
+                            <div className="text-sm">
+                                <p className="font-semibold">Email Verification Required</p>
+                                <p className="opacity-90">Please verify your email address to unlock messaging and other restricted features.</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {messages.length === 0 ? (
                     <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-                        No messages yet.
+                        {isVerificationRequired ? "Messages are locked until email is verified." : "No messages yet."}
                     </div>
                 ) : (
                     messages.map((msg, idx) => {

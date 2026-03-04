@@ -50,6 +50,12 @@ export const adminService = {
     deleteUser: async (id: string): Promise<void> => {
         await api.delete(`/admin/users/${id}`);
     },
+    verifyUser: async (id: string): Promise<void> => {
+        await api.patch(`/admin/users/${id}/verify`);
+    },
+    unverifyUser: async (id: string): Promise<void> => {
+        await api.patch(`/admin/users/${id}/unverify`);
+    },
     getEmailLogs: async (): Promise<any[]> => {
         const response = await api.get("/admin/email/logs");
         return response.data;
