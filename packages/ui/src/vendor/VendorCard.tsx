@@ -6,12 +6,16 @@ import { Badge } from "@bventy/ui";
 import { CheckCircle2, MapPin, Store, Star } from "lucide-react";
 import { Button } from "@bventy/ui";
 import Image from "next/image";
+import { useAuth } from "@bventy/services";
 
 interface VendorCardProps {
     vendor: VendorProfile;
 }
 
 export function VendorCard({ vendor }: VendorCardProps) {
+    const { user } = useAuth();
+    const isOwner = user?.id === vendor.owner_user_id;
+
     const images = vendor.gallery_images || [];
     const coverImage = images.length > 0 ? images[0] : null;
 
@@ -98,8 +102,10 @@ export function VendorCard({ vendor }: VendorCardProps) {
                 </p>
             </CardContent>
             <CardFooter className="pt-0">
-                <Button asChild className="w-full font-semibold" variant={isUnavailable ? "ghost" : "outline"}>
-                    <Link href={`/vendors/${vendor.slug}`}>View Profile</Link>
+                <Button asChild className="w-full font-semibold" variant={isOwner ? "default" : (isUnavailable ? "ghost" : "outline")}>
+                    <Link href={`/vendors/${vendor.slug}`}>
+                        {isOwner ? "Manage Your Profile" : "View Profile"}
+                    </Link>
                 </Button>
             </CardFooter>
         </Card>
