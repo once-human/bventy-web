@@ -276,7 +276,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                         {otherPartyName.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                        <h3 className="font-semibold">{otherPartyName}</h3>
+                        <h3 className="font-medium">{otherPartyName}</h3>
                         <p className="text-xs text-muted-foreground capitalize">{otherPartyRole}</p>
                     </div>
                 </div>
@@ -346,7 +346,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                         <div className="flex items-center justify-between pb-3 border-b border-border/50">
                                                             <div className="flex items-center gap-2">
                                                                 <FileText className="h-4 w-4 text-primary opacity-70" />
-                                                                <span className="font-semibold text-sm tracking-tight text-foreground/80">Request Context</span>
+                                                                <span className="font-medium text-sm tracking-tight text-foreground/80">Request Context</span>
                                                             </div>
                                                             <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-widest">Details</span>
                                                         </div>
@@ -354,12 +354,13 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                         <div className="grid grid-cols-1 gap-y-4">
                                                             <div className="flex flex-col gap-1">
                                                                 <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Budget Range</span>
-                                                                <span className="text-sm font-semibold text-foreground/90">₹{msg.system_payload.budget_range || 'Not specified'}</span>
+                                                                <span className="text-sm font-medium text-foreground/90">
+                                                                    {msg.system_payload.budget_range || 'Not specified'}
+                                                                </span>
                                                             </div>
-
-                                                            <div className="flex flex-col gap-1">
-                                                                <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Event Deadline</span>
-                                                                <span className="text-sm font-semibold text-foreground/90">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-widest">Deadline</span>
+                                                                <span className="text-sm font-medium text-foreground/90">
                                                                     {hasMounted && msg.system_payload.deadline ? format(new Date(msg.system_payload.deadline), 'PPP') : '...'}
                                                                 </span>
                                                             </div>
@@ -382,17 +383,17 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                             <div className="p-1.5 bg-primary/10 rounded-md">
                                                                 <FileIcon className="h-4 w-4 text-primary" />
                                                             </div>
-                                                            <span className="font-bold text-sm tracking-tight text-foreground/90">Official Quote</span>
+                                                            <span className="font-semibold text-sm tracking-tight text-foreground/90">Official Quote</span>
                                                         </div>
-                                                        <Badge variant="outline" className="bg-background text-[9px] h-5 px-1.5 font-bold tracking-tighter uppercase border-border/60">
+                                                        <Badge variant="outline" className="bg-background text-[9px] h-5 px-1.5 font-medium tracking-tighter uppercase border-border/60">
                                                             #{quoteId.slice(0, 5)}
                                                         </Badge>
                                                     </div>
 
                                                     <div className="p-5 space-y-5">
                                                         <div className="flex flex-col items-center justify-center py-2 text-center">
-                                                            <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.2em] mb-1">Total Amount</span>
-                                                            <div className="text-3xl font-bold tracking-tight text-foreground">
+                                                            <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-[0.2em] mb-1">Total Amount</span>
+                                                            <div className="text-3xl font-semibold tracking-tight text-foreground">
                                                                 ₹{msg.system_payload.quoted_price}
                                                             </div>
                                                         </div>
@@ -419,16 +420,16 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                                 <Button
                                                                     variant="default"
                                                                     size="sm"
-                                                                    className="w-full h-10 font-bold shadow-md shadow-primary/10 rounded-xl"
+                                                                    className="w-full h-10 font-semibold shadow-md shadow-primary/5 rounded-xl"
                                                                     onClick={() => handleQuoteResponseAction('accept')}
                                                                     disabled={isSubmittingQuote}
                                                                 >
-                                                                    {isSubmittingQuote ? <Loader2 className="h-4 w-4 animate-spin" /> : "Accept Quote"}
+                                                                    {isSubmittingQuote ? "Processing..." : "Accept & Unlock"}
                                                                 </Button>
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="sm"
-                                                                    className="w-full h-10 font-semibold text-muted-foreground hover:text-foreground rounded-xl"
+                                                                    className="w-full h-10 font-medium text-muted-foreground hover:text-foreground rounded-xl"
                                                                     onClick={() => setIsRevisionModalOpen(true)}
                                                                     disabled={isSubmittingQuote}
                                                                 >
@@ -440,7 +441,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                 </div>
                                             ) : msg.message_type.startsWith('quote_') ? (
                                                 <div className="flex flex-col items-center my-4 w-full">
-                                                    <div className={`px-4 py-1.5 rounded-full text-[10px] font-bold border flex items-center gap-2 transition-all ${msg.message_type === 'quote_accepted' ? 'bg-green-500/5 border-green-500/20 text-green-600' :
+                                                    <div className={`px-4 py-1.5 rounded-full text-[10px] font-semibold border flex items-center gap-2 transition-all ${msg.message_type === 'quote_accepted' ? 'bg-green-500/5 border-green-500/10 text-green-600' :
                                                         msg.message_type === 'quote_rejected' ? 'bg-red-500/5 border-red-500/20 text-red-600' :
                                                             'bg-amber-500/5 border-amber-500/20 text-amber-600'
                                                         }`}>
@@ -497,7 +498,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                     otherPartyRole === 'organizer' ? (
                         quoteStatus === 'pending' || quoteStatus === 'revision_requested' ? (
                             <form onSubmit={handleQuoteResponse} className="bg-muted/10 p-3 sm:p-4 rounded-lg border border-border/50 flex flex-col gap-3">
-                                <div className="text-sm font-semibold flex items-center justify-between">
+                                <div className="text-sm font-medium flex items-center justify-between">
                                     <span>Respond to Quote Request</span>
                                     <span className="text-xs font-normal text-muted-foreground hidden sm:inline-block">This officially unlocks pricing logic.</span>
                                 </div>
@@ -613,7 +614,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
             <Dialog open={isRevisionModalOpen} onOpenChange={setIsRevisionModalOpen}>
                 <DialogContent className="sm:max-w-[480px] rounded-2xl p-0 overflow-hidden border-none shadow-xl">
                     <DialogHeader className="p-6 pb-0">
-                        <DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground/90">
+                        <DialogTitle className="text-lg font-semibold flex items-center gap-2 text-foreground/90">
                             <FileText className="h-5 w-5 text-primary opacity-80" />
                             Request Revision
                         </DialogTitle>
@@ -624,7 +625,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
 
                     <div className="p-6 space-y-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/50 ml-1">
+                            <label className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground/50 ml-1">
                                 Revision Message
                             </label>
                             <Textarea
@@ -641,7 +642,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                             variant="ghost"
                             type="button"
                             onClick={() => setIsRevisionModalOpen(false)}
-                            className="flex-1 rounded-xl h-10 font-semibold text-muted-foreground hover:text-foreground"
+                            className="flex-1 rounded-xl h-10 font-medium text-muted-foreground hover:text-foreground"
                         >
                             Cancel
                         </Button>
@@ -649,7 +650,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                             type="button"
                             onClick={handleRevisionSubmit}
                             disabled={!revisionText.trim() || isSubmittingQuote}
-                            className="flex-1 rounded-xl h-10 font-bold shadow-md shadow-primary/10"
+                            className="flex-1 rounded-xl h-10 font-semibold shadow-md shadow-primary/5"
                         >
                             {isSubmittingQuote ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit Request"}
                         </Button>
