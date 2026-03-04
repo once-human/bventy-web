@@ -1,7 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatMessage, messagingService, useWebSocket, quoteService, mediaService } from '@bventy/services';
-import { Send, Paperclip, Lock, Check, CheckCheck, Loader2, FileIcon, X } from 'lucide-react';
-import { Button, Input, Skeleton } from '@bventy/ui';
+import { Send, Paperclip, Lock, Check, CheckCheck, Loader2, FileIcon, X, Calendar, Banknote, FileText, Info } from 'lucide-react';
+import {
+    Button,
+    Input,
+    Skeleton,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription,
+    Textarea,
+    Badge
+} from '@bventy/ui';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -30,9 +42,18 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
     const [isUploading, setIsUploading] = useState(false);
     const [isVerificationRequired, setIsVerificationRequired] = useState(false);
     const [hasMounted, setHasMounted] = useState(false);
+    const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
+    const [revisionText, setRevisionText] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { lastMessage, isConnected } = useWebSocket(conversationId);
+
+    const handleRevisionSubmit = async () => {
+        if (!revisionText.trim() || isSubmittingQuote) return;
+        await handleQuoteResponseAction('revision', revisionText);
+        setIsRevisionModalOpen(false);
+        setRevisionText('');
+    };
 
     const fetchMessages = async () => {
         if (!conversationId) return;
@@ -320,67 +341,98 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                     ) : (
                                         <div className={`flex flex-col max-w-[85%] sm:max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
                                             {msg.message_type === 'quote_card' && msg.system_payload ? (
-                                                <div className={`px-3 py-2 shadow-sm text-sm ${isMe ? 'bg-primary/5 border border-primary/20 text-foreground rounded-tl-xl rounded-tr-md rounded-bl-xl rounded-br-sm' : 'bg-muted border border-border text-foreground rounded-tr-xl rounded-tl-md rounded-br-xl rounded-bl-sm'}`}>
-                                                    <div className="space-y-2">
-                                                        <div className="flex items-center gap-2 font-medium pb-1 border-b border-primary/10 dark:border-border/50 text-xs">
-                                                            <Paperclip className="h-3 w-3" />
-                                                            <span>Request Context</span>
+                                                <div className={`p-4 shadow-sm border-2 w-full max-w-[400px] ${isMe ? 'bg-primary/5 border-primary/10 rounded-2xl rounded-tr-sm' : 'bg-muted/30 border-border rounded-2xl rounded-tl-sm'}`}>
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-center gap-2 pb-2 border-b border-border">
+                                                            <div className="p-1.5 bg-primary/10 rounded-md">
+                                                                <FileText className="h-4 w-4 text-primary" />
+                                                            </div>
+                                                            <span className="font-bold text-sm tracking-tight text-foreground">Request Context</span>
                                                         </div>
-                                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-left text-[10px]">
-                                                            {msg.system_payload.budget_range && (
-                                                                <div>
-                                                                    <span className="text-muted-foreground">Budget: </span>
-                                                                    <span className="font-medium">{msg.system_payload.budget_range}</span>
+
+                                                        <div className="space-y-2.5">
+                                                            <div className="flex items-center gap-3 text-sm">
+                                                                <Banknote className="h-4 w-4 text-muted-foreground shrink-0" />
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Budget Range</span>
+                                                                    <span className="font-bold text-foreground">₹{msg.system_payload.budget_range || 'Not specified'}</span>
                                                                 </div>
-                                                            )}
-                                                            {msg.system_payload.deadline && (
-                                                                <div>
-                                                                    <span className="text-muted-foreground">Deadline: </span>
-                                                                    <span className="font-medium">{hasMounted ? format(new Date(msg.system_payload.deadline), 'PP') : '...'}</span>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-3 text-sm">
+                                                                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Event Deadline</span>
+                                                                    <span className="font-bold text-foreground">
+                                                                        {hasMounted && msg.system_payload.deadline ? format(new Date(msg.system_payload.deadline), 'PPP') : '...'}
+                                                                    </span>
                                                                 </div>
-                                                            )}
+                                                            </div>
+
                                                             {msg.system_payload.special_requirements && (
-                                                                <div className="col-span-2 text-muted-foreground line-clamp-2">
-                                                                    <span className="italic">"{msg.system_payload.special_requirements}"</span>
+                                                                <div className="flex gap-3 text-sm pt-1">
+                                                                    <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Special Requirements</span>
+                                                                        <p className="text-muted-foreground leading-relaxed italic border-l-2 border-primary/20 pl-2 mt-1">
+                                                                            "{msg.system_payload.special_requirements}"
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
                                                             )}
                                                         </div>
                                                     </div>
                                                 </div>
                                             ) : msg.message_type === 'quote_response' && msg.system_payload ? (
-                                                <div className={`px-4 py-4 shadow-md text-sm w-full max-w-[400px] border-2 ${isMe ? 'bg-primary/5 border-primary/20 rounded-tl-xl rounded-tr-md rounded-bl-xl rounded-br-sm' : 'bg-card border-border rounded-tr-xl rounded-tl-md rounded-br-xl rounded-bl-sm'}`}>
-                                                    <div className="space-y-4">
-                                                        <div className="flex items-center justify-between border-b pb-2">
-                                                            <div className="flex items-center gap-2 font-bold text-lg">
-                                                                <FileIcon className="h-5 w-5 text-primary" />
-                                                                <span>Quote Response</span>
+                                                <div className={`p-5 shadow-lg border-2 w-full max-w-[420px] relative overflow-hidden ${isMe ? 'bg-primary/5 border-primary/20 rounded-2xl rounded-tr-sm' : 'bg-card border-border rounded-2xl rounded-tl-sm'}`}>
+                                                    {/* Decorative corner accent */}
+                                                    <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-full -mr-8 -mt-8" />
+
+                                                    <div className="space-y-5 relative">
+                                                        <div className="flex items-center justify-between border-b border-border pb-3">
+                                                            <div className="flex items-center gap-2.5">
+                                                                <div className="p-2 bg-primary/10 rounded-lg">
+                                                                    <FileIcon className="h-5 w-5 text-primary" />
+                                                                </div>
+                                                                <div className="flex flex-col">
+                                                                    <span className="font-black text-base tracking-tight italic uppercase">Official Quote</span>
+                                                                    <span className="text-[10px] text-muted-foreground font-medium">Click to view details</span>
+                                                                </div>
                                                             </div>
-                                                            <div className="text-xl font-black text-primary">
-                                                                ₹{msg.system_payload.quoted_price}
+                                                            <div className="text-right">
+                                                                <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">Total Amount</span>
+                                                                <div className="text-2xl font-black text-primary leading-none">
+                                                                    ₹{msg.system_payload.quoted_price}
+                                                                </div>
                                                             </div>
                                                         </div>
 
                                                         {msg.system_payload.vendor_response && (
-                                                            <div className="text-muted-foreground italic bg-muted/30 p-3 rounded-lg border border-border/50">
-                                                                "{msg.system_payload.vendor_response}"
+                                                            <div className="bg-muted/40 p-3.5 rounded-xl border border-border/50 relative">
+                                                                <div className="absolute -top-2 left-3 bg-background px-2 text-[9px] font-bold text-primary uppercase tracking-widest border border-border rounded-full">
+                                                                    Vendor Message
+                                                                </div>
+                                                                <p className="text-xs text-foreground leading-relaxed italic">
+                                                                    "{msg.system_payload.vendor_response}"
+                                                                </p>
                                                             </div>
                                                         )}
 
                                                         {msg.system_payload.attachment_url && (
-                                                            <Button variant="outline" size="sm" className="w-full gap-2" asChild>
+                                                            <Button variant="outline" size="sm" className="w-full gap-2 rounded-xl h-10 border-dashed border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-all" asChild>
                                                                 <a href={msg.system_payload.attachment_url} target="_blank" rel="noopener noreferrer">
-                                                                    <Paperclip className="h-4 w-4" />
-                                                                    View Proposal Document
+                                                                    <Paperclip className="h-4 w-4 text-primary" />
+                                                                    <span className="font-semibold">View Proposal Document</span>
                                                                 </a>
                                                             </Button>
                                                         )}
 
                                                         {!isMe && otherPartyRole === 'vendor' && quoteStatus === 'responded' && (
-                                                            <div className="grid grid-cols-2 gap-2 pt-2">
+                                                            <div className="grid grid-cols-2 gap-3 pt-2">
                                                                 <Button
                                                                     variant="default"
                                                                     size="sm"
-                                                                    className="bg-green-600 hover:bg-green-700"
+                                                                    className="bg-green-600 hover:bg-green-700 rounded-xl h-10 font-bold shadow-sm shadow-green-200"
                                                                     onClick={() => handleQuoteResponseAction('accept')}
                                                                     disabled={isSubmittingQuote}
                                                                 >
@@ -390,10 +442,8 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                                 <Button
                                                                     variant="outline"
                                                                     size="sm"
-                                                                    onClick={() => {
-                                                                        const msg = prompt("What revisions would you like to request?");
-                                                                        if (msg) handleQuoteResponseAction('revision', msg);
-                                                                    }}
+                                                                    className="rounded-xl h-10 font-bold border-border"
+                                                                    onClick={() => setIsRevisionModalOpen(true)}
                                                                     disabled={isSubmittingQuote}
                                                                 >
                                                                     Request Revision
@@ -403,16 +453,28 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                     </div>
                                                 </div>
                                             ) : msg.message_type.startsWith('quote_') ? (
-                                                <div className="flex flex-col items-center my-2 w-full">
-                                                    <div className={`px-4 py-2 rounded-full text-xs font-semibold border flex items-center gap-2 ${msg.message_type === 'quote_accepted' ? 'bg-green-50 border-green-200 text-green-700' :
+                                                <div className="flex flex-col items-center my-4 w-full">
+                                                    <div className={`px-5 py-2.5 rounded-full text-xs font-bold border-2 shadow-sm flex items-center gap-2.5 transition-all hover:scale-[1.02] ${msg.message_type === 'quote_accepted' ? 'bg-green-50 border-green-200 text-green-700' :
                                                         msg.message_type === 'quote_rejected' ? 'bg-red-50 border-red-200 text-red-700' :
                                                             'bg-amber-50 border-amber-200 text-amber-700'
                                                         }`}>
-                                                        {msg.message_type === 'quote_accepted' ? <Check className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-                                                        <span>
-                                                            {msg.message_type === 'quote_response' ? 'Quote Received' : `Quote ${msg.message_type.split('_')[1].replace('requested', 'Requested')}`}
-                                                            {msg.system_payload?.message && `: ${msg.system_payload.message}`}
-                                                            {!msg.system_payload && msg.body && `: ${msg.body}`}
+                                                        <div className={`p-1 rounded-full ${msg.message_type === 'quote_accepted' ? 'bg-green-200' :
+                                                            msg.message_type === 'quote_rejected' ? 'bg-red-200' :
+                                                                'bg-amber-200'
+                                                            }`}>
+                                                            {msg.message_type === 'quote_accepted' ? <Check className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                                                        </div>
+                                                        <span className="tracking-tight">
+                                                            {msg.message_type === 'quote_response' ? 'Quote Received' :
+                                                                msg.message_type === 'quote_accepted' ? 'Quote Accepted & Finalized' :
+                                                                    msg.message_type === 'quote_rejected' ? 'Quote Declined' :
+                                                                        `Quote ${msg.message_type.split('_')[1].replace('requested', 'Requested')}`}
+                                                            {msg.system_payload?.message && (
+                                                                <span className="ml-1 opacity-80 font-medium">— {msg.system_payload.message}</span>
+                                                            )}
+                                                            {!msg.system_payload && msg.body && (
+                                                                <span className="ml-1 opacity-80 font-medium">— {msg.body}</span>
+                                                            )}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -562,6 +624,55 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                     </form>
                 )}
             </div>
+
+            {/* Revision Request Modal */}
+            <Dialog open={isRevisionModalOpen} onOpenChange={setIsRevisionModalOpen}>
+                <DialogContent className="sm:max-w-[500px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
+                    <DialogHeader className="p-6 pb-0">
+                        <DialogTitle className="text-2xl font-black italic uppercase tracking-tight flex items-center gap-2">
+                            <FileText className="h-6 w-6 text-primary" />
+                            Request Revision
+                        </DialogTitle>
+                        <DialogDescription className="text-muted-foreground font-medium">
+                            Tell the vendor what you'd like to change or negotiate in this quote.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="p-6 space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
+                                Revision Message
+                            </label>
+                            <Textarea
+                                placeholder="E.g. Could we reduce the price if we remove the lighting package?"
+                                value={revisionText}
+                                onChange={(e) => setRevisionText(e.target.value)}
+                                className="min-h-[120px] rounded-2xl border-muted-foreground/20 focus-visible:ring-primary bg-muted/20 resize-none p-4 text-sm"
+                            />
+                        </div>
+                    </div>
+
+                    <DialogFooter className="p-6 pt-0 flex gap-3 pb-6 px-6">
+                        <Button
+                            variant="outline"
+                            type="button"
+                            onClick={() => setIsRevisionModalOpen(false)}
+                            className="flex-1 rounded-xl h-11 font-bold border-border"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleRevisionSubmit}
+                            disabled={!revisionText.trim() || isSubmittingQuote}
+                            className="flex-1 rounded-xl h-11 font-bold shadow-lg shadow-primary/20"
+                        >
+                            {isSubmittingQuote ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                            Submit Request
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
