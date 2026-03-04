@@ -495,7 +495,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
             <div className="p-3 border-t border-border bg-card">
                 {chatLocked ? (
                     otherPartyRole === 'organizer' ? (
-                        quoteStatus === 'pending' ? (
+                        quoteStatus === 'pending' || quoteStatus === 'revision_requested' ? (
                             <form onSubmit={handleQuoteResponse} className="bg-muted/10 p-3 sm:p-4 rounded-lg border border-border/50 flex flex-col gap-3">
                                 <div className="text-sm font-semibold flex items-center justify-between">
                                     <span>Respond to Quote Request</span>
