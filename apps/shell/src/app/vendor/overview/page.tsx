@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from "@bventy/ui";
 import Link from "next/link";
 import {
@@ -13,17 +13,41 @@ import {
     CheckCircle2,
     Loader2
 } from "lucide-react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { vendorService } from "@bventy/services";
+import { toast } from "sonner";
 
 export default function OverviewPage() {
+    const { mutate } = useSWRConfig();
     const { data: stats, isLoading } = useSWR("vendor-overview-stats", vendorService.getOverviewStats);
+    const [actionId, setActionId] = useState<string | null>(null);
 
     // Fallbacks if data isn't loaded yet
     const requestCount = stats?.urgent_requests || 0;
     const responseTime = stats?.avg_response_time ? stats.avg_response_time.toFixed(1) : 0;
     const viewCount = stats?.profile_views || 0;
     const bookings = stats?.upcoming_bookings || 0;
+    const holds = stats?.tentative_holds || [];
+
+    const handleAction = async (id: string, action: 'confirm' | 'reject') => {
+        setActionId(id);
+        try {
+            if (action === 'confirm') {
+                await vendorService.confirmHold(id);
+                toast.success("Hold confirmed successfully");
+            } else {
+                await vendorService.rejectHold(id);
+                toast.success("Hold rejected");
+            }
+            mutate("vendor-overview-stats");
+        } catch (error) {
+            console.error(`Failed to ${action} hold:`, error);
+            toast.error(`Failed to ${action} hold`);
+        } finally {
+            setActionId(null);
+        }
+    };
+
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
@@ -141,16 +165,37 @@ export default function OverviewPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between rounded-lg border p-4">
-                                    <div className="space-y-1">
-                                        <p className="font-medium">Wedding Reception - Kapur</p>
-                                        <p className="text-xs text-muted-foreground">Expires in 2 days</p>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <Button size="sm" variant="ghost">Reject</Button>
-                                        <Button size="sm">Confirm</Button>
-                                    </div>
-                                </div>
+                                {isLoading ? (
+                                    <div className="flex justify-center p-4"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+                                ) : holds.length === 0 ? (
+                                    <div className="text-center p-4 text-sm text-muted-foreground">No tentative holds.</div>
+                                ) : (
+                                    holds.map((hold) => (
+                                        <div key={hold.id} className="flex items-center justify-between rounded-lg border p-4">
+                                            <div className="space-y-1">
+                                                <p className="font-medium">{hold.title}</p>
+                                                <p className="text-xs text-muted-foreground">{hold.expires_in}</p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => handleAction(hold.id, 'reject')}
+                                                    disabled={actionId === hold.id}
+                                                >
+                                                    {actionId === hold.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Reject"}
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => handleAction(hold.id, 'confirm')}
+                                                    disabled={actionId === hold.id}
+                                                >
+                                                    {actionId === hold.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Confirm"}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </CardContent>
                     </Card>

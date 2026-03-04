@@ -39,11 +39,19 @@ export interface Review {
     profile_image?: string;
 }
 
+export interface TentativeHold {
+    id: string;
+    title: string;
+    expires_in: string;
+    created_at: string;
+}
+
 export interface VendorOverviewStats {
     urgent_requests: number;
     avg_response_time: number;
     upcoming_bookings: number;
     profile_views: number;
+    tentative_holds: TentativeHold[];
 }
 
 export interface CalendarEvent {
@@ -107,5 +115,11 @@ export const vendorService = {
     },
     deleteManualBlock: async (id: string): Promise<void> => {
         await api.delete(`/vendor/calendar/blocks/${id}`);
+    },
+    confirmHold: async (id: string): Promise<void> => {
+        await api.patch(`/quotes/vendor/confirm/${id}`);
+    },
+    rejectHold: async (id: string): Promise<void> => {
+        await api.patch(`/quotes/vendor/reject/${id}`);
     }
 };
