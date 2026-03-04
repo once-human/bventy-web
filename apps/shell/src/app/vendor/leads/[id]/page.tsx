@@ -147,7 +147,7 @@ export default function LeadDetailPage() {
                             <div className="space-y-4">
                                 <h4 className="font-semibold text-sm">Description</h4>
                                 <p className="text-sm text-muted-foreground leading-relaxed">
-                                    {lead.message || lead.event.description || "No description provided."}
+                                    {lead.message || (lead.event.event_type ? `Request for ${lead.event.event_type}` : "No description provided.")}
                                 </p>
                             </div>
                         </CardContent>
