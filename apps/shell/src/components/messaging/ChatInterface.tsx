@@ -61,10 +61,14 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
 
     // Scroll to bottom on load and new messages
     useEffect(() => {
-        if (hasMounted && messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
+        if (!isLoading && hasMounted && messagesEndRef.current) {
+            // Small delay to ensure the DOM has fully rendered the new messages
+            const timer = setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+            }, 50);
+            return () => clearTimeout(timer);
         }
-    }, [messages, hasMounted]);
+    }, [messages, hasMounted, isLoading]);
 
     const fetchMessages = async () => {
         if (!conversationId) return;
@@ -141,10 +145,12 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
         }
     }, [lastMessage, conversationId, currentUserId]);
 
-    // Auto-scroll to bottom
+    // Auto-scroll to bottom on new messages (redundant but safe)
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        if (!isLoading && messages.length > 0) {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages.length, isLoading]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -357,17 +363,17 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                     ) : (
                                         <div className={`flex flex-col max-w-[85%] sm:max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
                                             {msg.message_type === 'quote_card' && msg.system_payload ? (
-                                                <div className={`p-6 border border-border/40 w-full max-w-[400px] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] ${isMe ? 'bg-primary/5 rounded-2xl rounded-tr-sm' : 'bg-muted/20 rounded-2xl rounded-tl-sm'}`}>
-                                                    <div className="space-y-6">
-                                                        <div className="flex items-center justify-between pb-3 border-b border-border/50 gap-6">
+                                                <div className={`p-5 border border-border/40 w-full max-w-[380px] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] ${isMe ? 'bg-primary/5 rounded-2xl rounded-tr-sm' : 'bg-muted/20 rounded-2xl rounded-tl-sm'}`}>
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center justify-between pb-3 border-b border-border/50 gap-4">
                                                             <div className="flex items-center gap-3 min-w-0">
                                                                 <FileText className="h-4 w-4 text-primary opacity-60 shrink-0" />
                                                                 <span className="font-semibold text-sm tracking-tight text-foreground/90 truncate">Request Context</span>
                                                             </div>
-                                                            <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] shrink-0 whitespace-nowrap">Details</span>
+                                                            <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.15em] shrink-0 whitespace-nowrap">Details</span>
                                                         </div>
 
-                                                        <div className="grid grid-cols-1 gap-y-6 pt-1">
+                                                        <div className="grid grid-cols-1 gap-y-4 pt-1">
                                                             <div className="flex flex-col gap-1">
                                                                 <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Budget Range</span>
                                                                 <span className="text-sm font-medium text-foreground/90">
@@ -382,9 +388,9 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                             </div>
 
                                                             {msg.system_payload.special_requirements && (
-                                                                <div className="flex flex-col gap-2 pt-2 border-t border-border/30 mt-1">
-                                                                    <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Special Requirements</span>
-                                                                    <p className="text-xs text-muted-foreground/80 leading-relaxed italic bg-muted/30 p-2.5 rounded-lg border-l-2 border-primary/20">
+                                                                <div className="flex flex-col gap-2 pt-2 border-t border-border/20 mt-1">
+                                                                    <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.15em]">Special Requirements</span>
+                                                                    <p className="text-xs text-muted-foreground/80 leading-relaxed italic border-l-2 border-primary/20 pl-3">
                                                                         "{msg.system_payload.special_requirements}"
                                                                     </p>
                                                                 </div>
@@ -393,20 +399,20 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                                                     </div>
                                                 </div>
                                             ) : msg.message_type === 'quote_response' && msg.system_payload ? (
-                                                <div className={`p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 w-full max-w-[380px] relative overflow-hidden bg-card ${isMe ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm'}`}>
-                                                    <div className="bg-primary/[0.03] px-6 py-5 border-b border-border/40 flex items-center justify-between gap-6">
-                                                        <div className="flex items-center gap-3.5 min-w-0">
-                                                            <div className="p-2 bg-primary/10 rounded-xl shrink-0">
+                                                <div className={`p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 w-full max-w-[360px] relative overflow-hidden bg-card ${isMe ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm'}`}>
+                                                    <div className="bg-primary/[0.03] px-5 py-4 border-b border-border/40 flex items-center justify-between gap-4">
+                                                        <div className="flex items-center gap-3 min-w-0">
+                                                            <div className="p-1.5 bg-primary/10 rounded-lg shrink-0">
                                                                 <FileIcon className="h-4 w-4 text-primary" />
                                                             </div>
                                                             <span className="font-bold text-sm tracking-tight text-foreground/90 truncate">Official Quote</span>
                                                         </div>
-                                                        <Badge variant="outline" className="bg-background text-[9px] h-5 px-2.5 font-bold tracking-tighter uppercase border-border/60 shrink-0 whitespace-nowrap">
+                                                        <Badge variant="outline" className="bg-background text-[9px] h-5 px-2 font-bold tracking-tighter uppercase border-border/60 shrink-0 whitespace-nowrap">
                                                             #{quoteId.slice(0, 5)}
                                                         </Badge>
                                                     </div>
 
-                                                    <div className="p-6 space-y-6">
+                                                    <div className="p-5 space-y-5">
                                                         <div className="flex flex-col items-center justify-center py-2 text-center">
                                                             <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-[0.2em] mb-1">Total Amount</span>
                                                             <div className="text-3xl font-semibold tracking-tight text-foreground">
@@ -663,7 +669,7 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                             placeholder="Type a message..."
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
-                            className="flex-1 h-11 rounded-full px-5 border-border/40 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 bg-muted/5 text-sm placeholder:text-muted-foreground/40 transition-all shadow-none"
+                            className="flex-1 h-11 rounded-full px-5 border border-border/60 focus-visible:border-border/80 focus-visible:ring-1 focus-visible:ring-primary/10 bg-muted/5 text-sm placeholder:text-muted-foreground/40 transition-all shadow-none"
                             disabled={isSending}
                         />
                         <Button
