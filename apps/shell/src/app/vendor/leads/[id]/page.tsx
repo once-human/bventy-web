@@ -20,20 +20,34 @@ import {
     CheckCircle2,
     XCircle,
     Info,
-    Loader2
+    Loader2,
+    Mail,
+    Phone,
+    ExternalLink
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import useSWR, { mutate } from "swr";
-import { vendorService } from "@bventy/services";
+import { vendorService, quoteService, QuoteContact } from "@bventy/services";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@bventy/ui";
 
 export default function LeadDetailPage() {
     const params = useParams();
     const router = useRouter();
     const id = params.id as string;
     const [isActioning, setIsActioning] = useState<string | null>(null);
+    const [isContactOpen, setIsContactOpen] = useState(false);
+    const [contactInfo, setContactInfo] = useState<QuoteContact | null>(null);
+    const [contactLoading, setContactLoading] = useState(false);
 
     const { data: lead, error, isLoading } = useSWR(
         id ? [`quote-detail`, id] : null,
@@ -58,6 +72,21 @@ export default function LeadDetailPage() {
             toast.error(`Failed to ${action} lead`);
         } finally {
             setIsActioning(null);
+        }
+    };
+
+    const handleViewContact = async () => {
+        setIsContactOpen(true);
+        setContactLoading(true);
+        try {
+            const data = await quoteService.getQuoteContact(id);
+            setContactInfo(data);
+        } catch (err: any) {
+            console.error("Failed to fetch contact details:", err);
+            toast.error(err.response?.data?.error || "Failed to fetch contact information");
+            setIsContactOpen(false);
+        } finally {
+            setContactLoading(false);
         }
     };
 
@@ -203,11 +232,11 @@ export default function LeadDetailPage() {
                         <CardContent className="grid gap-3">
                             <Button
                                 className="w-full"
-                                disabled={!!isActioning || (safeLead.status !== 'pending' && safeLead.status !== 'revision_requested')}
-                                onClick={() => handleAction('confirm')}
+                                disabled={!!isActioning || (safeLead.status !== 'pending' && safeLead.status !== 'revision_requested' && safeLead.status !== 'accepted')}
+                                onClick={() => safeLead.status === 'accepted' ? handleViewContact() : handleAction('confirm')}
                             >
-                                {isActioning === 'confirm' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-                                {safeLead.status === 'pending' ? 'Confirm Availability' : 'Resubmit Quote'}
+                                {isActioning === 'confirm' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : (safeLead.status === 'accepted' ? <ExternalLink className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4" />)}
+                                {safeLead.status === 'pending' ? 'Confirm Availability' : (safeLead.status === 'accepted' ? 'View Organizer Contact' : 'Resubmit Quote')}
                             </Button>
                             <Button variant="outline" className="w-full" asChild disabled={!!isActioning}>
                                 <Link href={safeLead.conversation_id ? `/messages?id=${safeLead.conversation_id}` : "/messages"}>
@@ -226,6 +255,62 @@ export default function LeadDetailPage() {
                             </Button>
                         </CardContent>
                     </Card>
+
+                    {/* Contact Dialog */}
+                    <Dialog open={isContactOpen} onOpenChange={setIsContactOpen}>
+                        <DialogContent className="sm:max-w-[400px]">
+                            <DialogHeader>
+                                <DialogTitle>Organizer Contact Information</DialogTitle>
+                                <DialogDescription>
+                                    Direct communication unlocked with {contactInfo?.organizer.name} for {safeLead.event.title}
+                                </DialogDescription>
+                                {safeLead.contact_expires_at && (
+                                    <div className="mt-2 text-[10px] font-semibold text-orange-600 uppercase tracking-tight">
+                                        Access ends on {format(new Date(safeLead.contact_expires_at), "MMM d, yyyy h:mm a")}
+                                    </div>
+                                )}
+                            </DialogHeader>
+
+                            {contactLoading ? (
+                                <div className="py-12 flex justify-center">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                </div>
+                            ) : contactInfo ? (
+                                <div className="space-y-6 py-4">
+                                    <div className="space-y-4">
+                                        <div className="flex items-center p-3 border rounded-lg">
+                                            <Phone className="h-5 w-5 text-primary mr-3" />
+                                            <div className="flex-1">
+                                                <p className="text-xs text-muted-foreground uppercase font-semibold">Phone Number</p>
+                                                <a href={`tel:${contactInfo.organizer.phone}`} className="text-sm font-medium hover:underline">
+                                                    {contactInfo.organizer.phone || "Not provided"}
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center p-3 border rounded-lg">
+                                            <Mail className="h-5 w-5 text-primary mr-3" />
+                                            <div className="flex-1">
+                                                <p className="text-xs text-muted-foreground uppercase font-semibold">Email Address</p>
+                                                <a href={`mailto:${contactInfo.organizer.email}`} className="text-sm font-medium hover:underline">
+                                                    {contactInfo.organizer.email || "Not provided"}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="py-8 text-center text-sm text-muted-foreground">
+                                    Failed to load contact information.
+                                </div>
+                            )}
+                            <DialogFooter>
+                                <Button variant="ghost" onClick={() => setIsContactOpen(false)} className="w-full">
+                                    Close
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
 
                     {/* Internal Notes */}
                     <InternalNotesCard quoteId={id} initialNotes={safeLead.internal_notes || ""} />

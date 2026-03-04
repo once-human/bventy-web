@@ -151,9 +151,14 @@ export default function VendorDashboardPage() {
     };
 
     const handleContactVendor = async (quote: any) => {
+        setSelectedQuote(quote);
         setIsContactOpen(true);
+        setContactLoading(true);
         try {
+            const data = await quoteService.getQuoteContact(quote.id);
+            setContactInfo(data);
         } catch (error: any) {
+            console.error("Failed to fetch contact details:", error);
             const msg = error.response?.data?.error || "Failed to fetch contact information.";
             toast.error(msg);
             setIsContactOpen(false);
