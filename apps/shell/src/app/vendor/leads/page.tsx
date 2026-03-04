@@ -19,7 +19,13 @@ import {
     DialogFooter,
     Input,
     Label,
-    Textarea
+    Textarea,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+    DropdownMenuCheckboxItem
 } from "@bventy/ui";
 import {
     Filter,
@@ -33,6 +39,7 @@ import {
 import { toast } from "sonner";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSWRConfig } from "swr";
 import useSWR from "swr";
 import { quoteService, Quote, vendorService } from "@bventy/services";
@@ -47,11 +54,16 @@ const TABS = [
 ];
 
 export default function LeadsPage() {
+    const router = useRouter();
     const { mutate } = useSWRConfig();
     const { data: quotes, isLoading } = useSWR("vendor-quotes", quoteService.getQuoteRequests);
     const [activeTab, setActiveTab] = React.useState("all");
     const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+    // Filter states
+    const [statusFilters, setStatusFilters] = React.useState<string[]>([]);
+    const [dateFilter, setDateFilter] = React.useState<"all" | "upcoming" | "past">("all");
 
     const [form, setForm] = React.useState({
         event_title: "",
@@ -111,16 +123,38 @@ export default function LeadsPage() {
 
     const filteredQuotes = React.useMemo(() => {
         if (!quotes) return [];
-        if (activeTab === "all") return quotes;
+        let filtered = quotes;
 
-        return quotes.filter((q: Quote) => {
-            if (activeTab === "pending") return q.status === "pending";
-            if (activeTab === "responded") return ["responded", "revision_requested"].includes(q.status);
-            if (activeTab === "accepted") return q.status === "accepted";
-            if (activeTab === "archived") return ["rejected", "archived"].includes(q.status);
-            return true;
-        });
-    }, [quotes, activeTab]);
+        // 1. Tab filtering
+        if (activeTab !== "all") {
+            filtered = filtered.filter((q: Quote) => {
+                if (activeTab === "pending") return q.status === "pending";
+                if (activeTab === "responded") return ["responded", "revision_requested"].includes(q.status);
+                if (activeTab === "accepted") return q.status === "accepted";
+                if (activeTab === "archived") return ["rejected", "archived"].includes(q.status);
+                return true;
+            });
+        }
+
+        // 2. Status multi-select filters (from dropdown)
+        if (statusFilters.length > 0) {
+            filtered = filtered.filter((q: Quote) => statusFilters.includes(q.status));
+        }
+
+        // 3. Date filtering
+        if (dateFilter !== "all") {
+            const now = new Date();
+            filtered = filtered.filter((q: Quote) => {
+                if (!q.event_date) return false;
+                const eventDate = new Date(q.event_date);
+                if (dateFilter === "upcoming") return eventDate >= now;
+                if (dateFilter === "past") return eventDate < now;
+                return true;
+            });
+        }
+
+        return filtered;
+    }, [quotes, activeTab, statusFilters, dateFilter]);
 
     const getTabCount = (tabId: string) => {
         if (!quotes) return 0;
@@ -139,9 +173,72 @@ export default function LeadsPage() {
                     <p className="text-muted-foreground">Track and manage your incoming business opportunities.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
-                        <Filter className="mr-2 h-4 w-4" /> Filter
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className={statusFilters.length > 0 || dateFilter !== "all" ? "border-primary text-primary" : ""}>
+                                <Filter className="mr-2 h-4 w-4" />
+                                {statusFilters.length > 0 || dateFilter !== "all" ? "Filtered" : "Filter"}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel>Status</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuCheckboxItem
+                                checked={statusFilters.includes("pending")}
+                                onCheckedChange={(checked) =>
+                                    setStatusFilters(prev => checked ? [...prev, "pending"] : prev.filter(s => s !== "pending"))
+                                }
+                            >
+                                New Requests
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuCheckboxItem
+                                checked={statusFilters.includes("accepted")}
+                                onCheckedChange={(checked) =>
+                                    setStatusFilters(prev => checked ? [...prev, "accepted"] : prev.filter(s => s !== "accepted"))
+                                }
+                            >
+                                Confirmed
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuCheckboxItem
+                                checked={statusFilters.includes("rejected")}
+                                onCheckedChange={(checked) =>
+                                    setStatusFilters(prev => checked ? [...prev, "rejected"] : prev.filter(s => s !== "rejected"))
+                                }
+                            >
+                                Declined
+                            </DropdownMenuCheckboxItem>
+
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel>Date</DropdownMenuLabel>
+                            <DropdownMenuCheckboxItem
+                                checked={dateFilter === "upcoming"}
+                                onCheckedChange={(checked) => setDateFilter(checked ? "upcoming" : "all")}
+                            >
+                                Upcoming Events
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuCheckboxItem
+                                checked={dateFilter === "past"}
+                                onCheckedChange={(checked) => setDateFilter(checked ? "past" : "all")}
+                            >
+                                Past Events
+                            </DropdownMenuCheckboxItem>
+
+                            {(statusFilters.length > 0 || dateFilter !== "all") && (
+                                <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuCheckboxItem
+                                        className="text-destructive focus:text-destructive"
+                                        onSelect={() => {
+                                            setStatusFilters([]);
+                                            setDateFilter("all");
+                                        }}
+                                    >
+                                        Clear Filters
+                                    </DropdownMenuCheckboxItem>
+                                </>
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                     <Button size="sm" onClick={() => setIsCreateModalOpen(true)}>
                         <Plus className="mr-2 h-4 w-4" /> Create Manual Lead
                     </Button>
@@ -196,7 +293,11 @@ export default function LeadsPage() {
                                 </TableCell>
                             </TableRow>
                         ) : filteredQuotes.map((lead: Quote) => (
-                            <TableRow key={lead.id} className="cursor-pointer group transition-colors hover:bg-muted/50">
+                            <TableRow
+                                key={lead.id}
+                                className="cursor-pointer group transition-colors hover:bg-muted/50"
+                                onClick={() => router.push(`/leads/${lead.id}`)}
+                            >
                                 <TableCell>
                                     <div className="space-y-1">
                                         <p className="font-semibold group-hover:text-primary transition-colors">{lead.event_title}</p>
