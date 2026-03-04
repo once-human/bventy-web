@@ -180,9 +180,12 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
             // We rely on the WebSocket broadcast to add the message to the UI.
             // This prevents duplication once and for all.
             await messagingService.sendMessage(conversationId, {
-                message_type: 'text',
-                body: trimmed
+                message_type: attachmentUrl ? 'attachment' : 'text',
+                body: trimmed || undefined,
+                attachment_url: attachmentUrl || undefined,
+                attachment_type: attachmentUrl ? (attachmentUrl.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg') : undefined
             });
+            setAttachmentUrl(null); // Clear after send
         } catch (error: any) {
             console.error('Error sending message:', error);
             if (error?.response?.status === 403 && error?.response?.data?.error === "Email verification required.") {
@@ -676,33 +679,49 @@ export function ChatInterface({ conversationId, currentUserId, chatLocked, other
                         </div>
                     )
                 ) : (
-                    <form onSubmit={handleSend} className="flex gap-2">
-                        <Button
-                            type="button"
-                            size="icon"
-                            variant="outline"
-                            className="shrink-0 h-11 w-11 rounded-full text-muted-foreground hover:text-foreground hidden sm:flex"
-                            title="Attach file (coming soon)"
-                            disabled
-                        >
-                            <Paperclip className="h-4 w-4" />
-                        </Button>
-                        <Input
-                            placeholder="Type a message..."
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            className="flex-1 h-11 rounded-full px-5 border-border focus-visible:border-border/80 focus-visible:ring-0 bg-background/50 text-sm placeholder:text-muted-foreground/40 transition-all shadow-none"
-                            disabled={isSending}
-                        />
-                        <Button
-                            type="submit"
-                            size="icon"
-                            className="shrink-0 h-11 w-11 rounded-full transition-transform active:scale-95"
-                            disabled={!inputValue.trim() || isSending}
-                        >
-                            <Send className="h-4 w-4 translate-x-[-1px] translate-y-[1px]" />
-                        </Button>
-                    </form>
+                    <>
+                        <form onSubmit={handleSend} className="flex gap-2">
+                            <Button
+                                type="button"
+                                size="icon"
+                                variant="outline"
+                                className="shrink-0 h-11 w-11 rounded-full text-muted-foreground hover:text-foreground hidden sm:flex"
+                                title="Attach file"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isSending || isUploading}
+                            >
+                                {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
+                            </Button>
+                            <Input
+                                placeholder="Type a message..."
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                className="flex-1 h-11 rounded-full px-5 border-border focus-visible:border-border/80 focus-visible:ring-0 bg-background/50 text-sm placeholder:text-muted-foreground/40 transition-all shadow-none"
+                                disabled={isSending}
+                            />
+                            <Button
+                                type="submit"
+                                size="icon"
+                                className="shrink-0 h-11 w-11 rounded-full transition-transform active:scale-95"
+                                disabled={(!inputValue.trim() && !attachmentUrl) || isSending || isUploading}
+                            >
+                                <Send className="h-4 w-4 translate-x-[-1px] translate-y-[1px]" />
+                            </Button>
+                        </form>
+                        {attachmentUrl && (
+                            <div className="mt-2 flex items-center gap-2 text-xs text-primary bg-primary/5 p-2 rounded border border-primary/20 animate-in fade-in slide-in-from-top-1 max-w-fit">
+                                <FileIcon className="h-3 w-3" />
+                                <span className="truncate max-w-[200px]">File attached</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setAttachmentUrl(null)}
+                                    className="hover:text-destructive transition-colors ml-1"
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
