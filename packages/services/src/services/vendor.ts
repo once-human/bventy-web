@@ -107,6 +107,9 @@ export interface VendorPricingRules {
 
 export interface VendorCancellationPolicy {
     policy_type: string;
+    strictness_level: 'flexible' | 'moderate' | 'strict' | 'custom';
+    time_frame_days: number;
+    refund_percentage: number;
     custom_text: string;
 }
 
@@ -125,6 +128,9 @@ export interface PublicVendorDetails {
     pricing_rules: VendorPricingRules;
     cancellation_policy: {
         type: string;
+        strictness_level: string;
+        time_frame_days: number;
+        refund_percentage: number;
         text: string;
     };
     service_areas: string[];

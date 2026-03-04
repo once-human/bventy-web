@@ -11,6 +11,7 @@ export interface UserProfile {
     bio?: string;
     profile_image_url?: string;
     vendor_profile_exists: boolean;
+    vendor_slug?: string;
     email_verified: boolean;
     created_at?: string | Date;
     // organizer_profile_exists is deprecated in V8

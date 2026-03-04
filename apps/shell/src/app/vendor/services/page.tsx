@@ -58,10 +58,12 @@ export default function ServicesPricingPage() {
     const [serviceForm, setServiceForm] = useState({
         name: "",
         base_price: 0,
-        price_unit: "/ Plate",
+        price_unit: "/ Participant",
         status: "active",
         description: ""
     });
+    const [isCustomUnit, setIsCustomUnit] = useState(false);
+    const [customUnit, setCustomUnit] = useState("");
     const [areaName, setAreaName] = useState("");
     const [isSaving, setIsSaving] = useState(false);
 
@@ -93,16 +95,21 @@ export default function ServicesPricingPage() {
     const handleSaveService = async () => {
         try {
             setIsSaving(true);
+            const finalUnit = isCustomUnit ? `/ ${customUnit}` : serviceForm.price_unit;
+            const payload = { ...serviceForm, price_unit: finalUnit };
+
             if (editingService) {
-                await vendorService.updateService(editingService.id, serviceForm);
+                await vendorService.updateService(editingService.id, payload);
                 toast.success("Service updated successfully");
             } else {
-                await vendorService.addService(serviceForm);
+                await vendorService.addService(payload);
                 toast.success("Service added successfully");
             }
             setIsServiceModalOpen(false);
             setEditingService(null);
-            setServiceForm({ name: "", base_price: 0, price_unit: "/ Plate", status: "active", description: "" });
+            setServiceForm({ name: "", base_price: 0, price_unit: "/ Participant", status: "active", description: "" });
+            setIsCustomUnit(false);
+            setCustomUnit("");
             loadData();
         } catch (err) {
             toast.error("Failed to save service");
@@ -191,7 +198,9 @@ export default function ServicesPricingPage() {
                 </div>
                 <Button size="sm" onClick={() => {
                     setEditingService(null);
-                    setServiceForm({ name: "", base_price: 0, price_unit: "/ Plate", status: "active", description: "" });
+                    setServiceForm({ name: "", base_price: 0, price_unit: "/ Participant", status: "active", description: "" });
+                    setIsCustomUnit(false);
+                    setCustomUnit("");
                     setIsServiceModalOpen(true);
                 }}>
                     <Plus className="mr-2 h-4 w-4" /> Add New Service
@@ -310,16 +319,16 @@ export default function ServicesPricingPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-1">
-                                <p className="text-sm font-bold capitalize">{policy?.policy_type} Policy</p>
+                                <p className="text-sm font-bold capitalize">
+                                    {policy?.strictness_level} ({policy?.time_frame_days}d)
+                                </p>
                                 <p className="text-xs text-muted-foreground italic">
-                                    {policy?.policy_type === 'flexible' && "Full refund up to 24 hours before event."}
-                                    {policy?.policy_type === 'moderate' && "Full refund up to 14 days before event. 50% refund after that. No refund within 48 hours."}
-                                    {policy?.policy_type === 'strict' && "No refund for cancellations within 30 days of the event."}
-                                    {policy?.policy_type === 'custom' && (policy.custom_text || "Custom terms defined by vendor.")}
+                                    {policy?.refund_percentage}% refund if cancelled before {policy?.time_frame_days} days of the event.
+                                    {policy?.strictness_level === 'custom' && policy.custom_text && ` Additional terms: ${policy.custom_text}`}
                                 </p>
                             </div>
                             <Button variant="outline" size="sm" className="w-full border-orange-200 hover:bg-orange-100/50 hover:text-orange-700" onClick={() => setIsPolicyModalOpen(true)}>
-                                Edit Policy
+                                Configure Policy
                             </Button>
                         </CardContent>
                     </Card>
@@ -367,7 +376,7 @@ export default function ServicesPricingPage() {
                         <div className="space-y-2">
                             <Label>Service Name</Label>
                             <Input
-                                placeholder="e.g. Wedding Catering"
+                                placeholder="e.g. Corporate Technical Workshop"
                                 value={serviceForm.name}
                                 onChange={e => setServiceForm({ ...serviceForm, name: e.target.value })}
                             />
@@ -383,19 +392,42 @@ export default function ServicesPricingPage() {
                             </div>
                             <div className="space-y-2">
                                 <Label>Unit</Label>
-                                <Select value={serviceForm.price_unit} onValueChange={v => setServiceForm({ ...serviceForm, price_unit: v })}>
+                                <Select
+                                    value={isCustomUnit ? "Custom" : serviceForm.price_unit}
+                                    onValueChange={v => {
+                                        if (v === "Custom") {
+                                            setIsCustomUnit(true);
+                                        } else {
+                                            setIsCustomUnit(false);
+                                            setServiceForm({ ...serviceForm, price_unit: v });
+                                        }
+                                    }}
+                                >
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="/ Plate">/ Plate</SelectItem>
+                                        <SelectItem value="/ Participant">/ Participant</SelectItem>
                                         <SelectItem value="/ Hour">/ Hour</SelectItem>
                                         <SelectItem value="/ Day">/ Day</SelectItem>
+                                        <SelectItem value="/ Event">/ Event</SelectItem>
                                         <SelectItem value="Fixed">Fixed Price</SelectItem>
+                                        <SelectItem value="Custom">Custom Unit...</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
+                        {isCustomUnit && (
+                            <div className="space-y-2 animate-in slide-in-from-top-1 duration-200">
+                                <Label>Custom Unit Name</Label>
+                                <Input
+                                    placeholder="e.g. License, Module, Seat"
+                                    value={customUnit}
+                                    onChange={e => setCustomUnit(e.target.value)}
+                                />
+                                <p className="text-[10px] text-muted-foreground uppercase">Will be displayed as "/ {customUnit || '...'}"</p>
+                            </div>
+                        )}
                         <div className="space-y-2">
                             <Label>Description</Label>
                             <Textarea
@@ -434,31 +466,70 @@ export default function ServicesPricingPage() {
                     <DialogHeader>
                         <DialogTitle>Edit Cancellation Policy</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label>Policy Type</Label>
-                            <Select
-                                value={policy?.policy_type}
-                                onValueChange={v => setPolicy(prev => prev ? { ...prev, policy_type: v } : null)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="flexible">Flexible (24h)</SelectItem>
-                                    <SelectItem value="moderate">Moderate (Default)</SelectItem>
-                                    <SelectItem value="strict">Strict (30 days)</SelectItem>
-                                    <SelectItem value="custom">Custom Policy</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        {policy?.policy_type === 'custom' && (
+                    <div className="space-y-6 py-4">
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Custom Text</Label>
+                                <Label>Strictness Level</Label>
+                                <Select
+                                    value={policy?.strictness_level}
+                                    onValueChange={v => setPolicy(prev => prev ? { ...prev, strictness_level: v as any } : null)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="flexible">Flexible</SelectItem>
+                                        <SelectItem value="moderate">Moderate</SelectItem>
+                                        <SelectItem value="strict">Strict</SelectItem>
+                                        <SelectItem value="custom">Custom</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Time Frame (Days before)</Label>
+                                <Input
+                                    type="number"
+                                    value={policy?.time_frame_days}
+                                    onChange={e => setPolicy(prev => prev ? { ...prev, time_frame_days: Number(e.target.value) } : null)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Refund Percentage ({policy?.refund_percentage}%)</Label>
+                            <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                step="5"
+                                value={policy?.refund_percentage}
+                                onChange={e => setPolicy(prev => prev ? { ...prev, refund_percentage: Number(e.target.value) } : null)}
+                                className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                            />
+                            <div className="flex justify-between text-[10px] text-muted-foreground uppercase tracking-widest">
+                                <span>No Refund</span>
+                                <span>Partial</span>
+                                <span>Full Refund</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Internal Policy Label</Label>
+                            <Input
+                                placeholder="e.g. Standard Corporate Policy"
+                                value={policy?.policy_type}
+                                onChange={e => setPolicy(prev => prev ? { ...prev, policy_type: e.target.value } : null)}
+                            />
+                        </div>
+
+                        {policy?.strictness_level === 'custom' && (
+                            <div className="space-y-2 animate-in fade-in duration-300">
+                                <Label>Custom Policy Terms</Label>
                                 <Textarea
-                                    placeholder="Enter your custom terms..."
+                                    placeholder="Enter your detailed custom terms..."
                                     value={policy.custom_text}
                                     onChange={e => setPolicy(prev => prev ? { ...prev, custom_text: e.target.value } : null)}
+                                    rows={4}
                                 />
                             </div>
                         )}
