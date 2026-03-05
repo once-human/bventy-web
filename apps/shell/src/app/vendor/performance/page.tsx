@@ -1,34 +1,148 @@
 "use client";
 
 import React from "react";
+import useSWR from "swr";
+import { vendorService } from "@bventy/services";
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
-    Button
+    Button,
+    Skeleton
 } from "@bventy/ui";
 import {
     TrendingUp,
     BarChart3,
-    LineChart,
+    LineChart as LineChartIcon,
     Clock,
     ChevronDown,
     Filter,
     ArrowUpRight,
     ArrowDownRight,
-    Target
+    Target,
+    Users,
+    Loader2
 } from "lucide-react";
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    LineChart,
+    Line,
+    AreaChart,
+    Area
+} from "recharts";
+
 export default function PerformancePage() {
+    const { data, error, isLoading } = useSWR("vendor-performance", vendorService.getVendorPerformance, {
+        revalidateOnFocus: false
+    });
+
+    if (isLoading) {
+        return (
+            <div className="space-y-8 animate-in fade-in duration-500">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="space-y-2">
+                        <Skeleton className="h-8 w-48" />
+                        <Skeleton className="h-4 w-64" />
+                    </div>
+                </div>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    {[1, 2, 3, 4].map((i) => (
+                        <Card key={i} className="shadow-sm">
+                            <CardHeader className="pb-2">
+                                <Skeleton className="h-4 w-24" />
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                                <Skeleton className="h-8 w-16" />
+                                <Skeleton className="h-3 w-32" />
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+                <div className="grid gap-6 lg:grid-cols-2">
+                    <Card className="h-[400px]"><Skeleton className="h-full w-full" /></Card>
+                    <Card className="h-[400px]"><Skeleton className="h-full w-full" /></Card>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+                <div className="p-4 rounded-full bg-destructive/10 text-destructive">
+                    <BarChart3 className="h-8 w-8" />
+                </div>
+                <h2 className="text-xl font-semibold">Failed to load performance data</h2>
+                <p className="text-muted-foreground text-center max-w-sm">
+                    There was an error retrieving your analytics. Please try again later.
+                </p>
+                <Button onClick={() => window.location.reload()} variant="outline">
+                    Retry
+                </Button>
+            </div>
+        );
+    }
+
+    const { summary, funnel, trends } = data || {};
+
+    const stats = [
+        {
+            label: "Quote Count",
+            value: summary?.quote_count || 0,
+            trend: "+0%",
+            up: true,
+            icon: BarChart3,
+            sublabel: "Last 30 days"
+        },
+        {
+            label: "Acceptance Rate",
+            value: `${(summary?.acceptance_rate || 0).toFixed(1)}%`,
+            trend: "+0%",
+            up: true,
+            icon: Target,
+            sublabel: "Last 30 days"
+        },
+        {
+            label: "Avg Response",
+            value: summary?.avg_response_time > 0 ? `${summary.avg_response_time.toFixed(1)}h` : "N/A",
+            trend: "-0%",
+            up: true,
+            icon: Clock,
+            sublabel: "Awaiting response"
+        },
+        {
+            label: "Profile Views",
+            value: summary?.total_views || 0,
+            trend: "+0%",
+            up: true,
+            icon: Users,
+            sublabel: "Total impressions"
+        },
+    ];
+
+    const funnelData = [
+        { label: "Requested Quotes", value: funnel?.requested || 0, width: "100%", color: "bg-primary/20", fill: "hsl(var(--primary) / 0.2)" },
+        { label: "Responded", value: funnel?.responded || 0, width: `${(funnel?.responded / (funnel?.requested || 1) * 100).toFixed(0)}%`, color: "bg-primary/40", fill: "hsl(var(--primary) / 0.4)" },
+        { label: "In Negotiation", value: funnel?.negotiating || 0, width: `${(funnel?.negotiating / (funnel?.requested || 1) * 100).toFixed(0)}%`, color: "bg-primary/60", fill: "hsl(var(--primary) / 0.6)" },
+        { label: "Confirmed Bookings", value: funnel?.confirmed || 0, width: `${(funnel?.confirmed / (funnel?.requested || 1) * 100).toFixed(0)}%`, color: "bg-primary", fill: "hsl(var(--primary))" },
+    ];
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Performance</h1>
                     <p className="text-muted-foreground">Analyze your business growth and conversion metrics.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="hidden sm:flex">
                         Last 30 Days <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                     <Button variant="outline" size="sm">
@@ -38,13 +152,8 @@ export default function PerformancePage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                {[
-                    { label: "Quote Count", value: "84", trend: "+12%", up: true, icon: BarChart3 },
-                    { label: "Acceptance Rate", value: "68%", trend: "+5%", up: true, icon: Target },
-                    { label: "Response Time", value: "3.2h", trend: "-15%", up: true, icon: Clock },
-                    { label: "Conversion Rate", value: "24%", trend: "-2%", up: false, icon: TrendingUp },
-                ].map((stat, i) => (
-                    <Card key={i} className="shadow-sm">
+                {stats.map((stat, i) => (
+                    <Card key={i} className="shadow-sm hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                 {stat.label}
@@ -53,9 +162,8 @@ export default function PerformancePage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stat.value}</div>
-                            <p className={`flex items-center text-xs mt-1 font-medium ${stat.up ? "text-emerald-500" : "text-rose-500"}`}>
-                                {stat.up ? <ArrowUpRight className="mr-1 h-3 w-3" /> : <ArrowDownRight className="mr-1 h-3 w-3" />}
-                                {stat.trend} <span className="text-muted-foreground ml-1 font-normal text-[10px]">from last month</span>
+                            <p className="text-[10px] text-muted-foreground mt-1 font-medium">
+                                {stat.sublabel}
                             </p>
                         </CardContent>
                     </Card>
@@ -63,20 +171,67 @@ export default function PerformancePage() {
             </div>
 
             <div className="grid gap-6 lg:grid-cols-2">
-                {/* Quote Activity Chart */}
+                {/* Quote Volume vs. Conversions Chart */}
                 <Card className="shadow-sm">
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-md font-semibold">Quote Volume vs. Conversions</CardTitle>
-                    </CardHeader>
-                    <CardContent className="h-[300px] flex items-center justify-center bg-muted/20 rounded-lg m-6 border border-dashed">
-                        {/* 
-                          Using the shared GrowthCharts component or similar.
-                          Placeholder for actual chart implementation.
-                        */}
-                        <div className="text-center space-y-2 opacity-40">
-                            <BarChart3 className="h-10 w-10 mx-auto" />
-                            <p className="text-xs font-medium">Chart Data Visualization Placeholder</p>
+                        <div className="flex items-center gap-4 text-[10px] uppercase font-bold tracking-wider">
+                            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-primary" /> Quotes</div>
+                            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500" /> Confirmed</div>
                         </div>
+                    </CardHeader>
+                    <CardContent className="h-[350px] pt-4">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={trends}>
+                                <defs>
+                                    <linearGradient id="colorQuotes" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+                                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                                    </linearGradient>
+                                    <linearGradient id="colorConfirmed" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
+                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
+                                <XAxis
+                                    dataKey="month"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                                    dy={10}
+                                />
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: 'hsl(var(--background))',
+                                        borderColor: 'hsl(var(--border))',
+                                        borderRadius: '8px',
+                                        fontSize: '12px'
+                                    }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="quotes"
+                                    stroke="hsl(var(--primary))"
+                                    strokeWidth={2}
+                                    fillOpacity={1}
+                                    fill="url(#colorQuotes)"
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="confirmed"
+                                    stroke="#10b981"
+                                    strokeWidth={2}
+                                    fillOpacity={1}
+                                    fill="url(#colorConfirmed)"
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
                     </CardContent>
                 </Card>
 
@@ -86,41 +241,70 @@ export default function PerformancePage() {
                         <CardTitle className="text-md font-semibold">Conversion Funnel</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6 pt-6">
-                        <div className="space-y-4">
-                            {[
-                                { label: "Requested Quotes", value: "124", width: "100%", color: "bg-primary/20" },
-                                { label: "Responded", value: "112", width: "90%", color: "bg-primary/40" },
-                                { label: "In Negotiation", value: "68", width: "55%", color: "bg-primary/60" },
-                                { label: "Confirmed Bookings", value: "24", width: "20%", color: "bg-primary" },
-                            ].map((step, i) => (
-                                <div key={i} className="space-y-1.5">
-                                    <div className="flex justify-between items-center text-xs font-medium">
+                        <div className="space-y-5">
+                            {funnelData.map((step, i) => (
+                                <div key={i} className="space-y-1.5 group">
+                                    <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
                                         <span>{step.label}</span>
-                                        <span className="font-bold">{step.value}</span>
+                                        <span className="font-bold text-foreground">{step.value}</span>
                                     </div>
-                                    <div className="w-full h-8 bg-muted/30 rounded overflow-hidden">
+                                    <div className="w-full h-10 bg-muted/20 rounded-lg overflow-hidden border border-muted/30">
                                         <div
-                                            className={`h-full ${step.color} transition-all duration-1000`}
+                                            className={`h-full ${step.color} transition-all duration-1000 ease-in-out relative`}
                                             style={{ width: step.width }}
-                                        />
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent h-full w-full" />
+                                        </div>
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                        <div className="pt-4 border-t border-dashed">
+                            <div className="flex items-center justify-between text-sm px-2">
+                                <span className="text-muted-foreground">Overall Conversion Rate</span>
+                                <span className="font-bold text-emerald-500">
+                                    {((funnel?.confirmed / (funnel?.requested || 1)) * 100).toFixed(1)}%
+                                </span>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Monthly Breakdown */}
+            {/* Monthly Trend Analytics */}
             <Card className="shadow-sm">
                 <CardHeader>
                     <CardTitle className="text-md font-semibold">Monthly Breakdown</CardTitle>
                 </CardHeader>
-                <CardContent className="h-[250px] flex items-center justify-center bg-muted/20 rounded-lg m-2 border border-dashed">
-                    <div className="text-center space-y-2 opacity-40">
-                        <LineChart className="h-10 w-10 mx-auto" />
-                        <p className="text-xs font-medium">Monthly Trend Analysis Placeholder</p>
-                    </div>
+                <CardContent className="h-[300px] pt-4">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={trends}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
+                            <XAxis
+                                dataKey="month"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                                dy={10}
+                            />
+                            <YAxis
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                            />
+                            <Tooltip
+                                cursor={{ fill: 'hsl(var(--muted)/0.2)' }}
+                                contentStyle={{
+                                    backgroundColor: 'hsl(var(--background))',
+                                    borderColor: 'hsl(var(--border))',
+                                    borderRadius: '8px',
+                                    fontSize: '12px'
+                                }}
+                            />
+                            <Bar dataKey="quotes" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={40} />
+                            <Bar dataKey="confirmed" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
+                        </BarChart>
+                    </ResponsiveContainer>
                 </CardContent>
             </Card>
         </div>

@@ -179,8 +179,11 @@ export const vendorService = {
     likeReview: async (reviewId: string): Promise<void> => {
         await api.post(`/reviews/${reviewId}/like`);
     },
-    replyToReview: async (reviewId: string, replyText: string): Promise<void> => {
-        await api.post(`/reviews/${reviewId}/reply`, { reply_text: replyText });
+    replyToReview: (reviewId: string, replyText: string) => {
+        return api.post(`/reviews/${reviewId}/reply`, { reply_text: replyText });
+    },
+    getVendorPerformance: () => {
+        return api.get("/vendor/performance").then((res) => res.data);
     },
     submitReview: async (vendorId: string, rating: number, comment: string, quoteId?: string): Promise<void> => {
         await api.post(`/vendors/${vendorId}/reviews`, { rating, comment, quote_id: quoteId });
