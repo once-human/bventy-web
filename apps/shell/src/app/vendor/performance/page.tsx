@@ -18,11 +18,11 @@ import {
     Clock,
     ChevronDown,
     Filter,
-    ArrowUpRight,
-    ArrowDownRight,
     Target,
     Users,
-    Loader2
+    Loader2,
+    ArrowUpRight,
+    ArrowDownRight,
 } from "lucide-react";
 import {
     BarChart,
@@ -112,7 +112,7 @@ export default function PerformancePage() {
             trend: `${summary?.acceptance_rate_delta > 0 ? "+" : ""}${summary?.acceptance_rate_delta?.toFixed(1) || 0}%`,
             up: summary?.acceptance_rate_delta >= 0,
             icon: Target,
-            sublabel: "Change vs prev period"
+            sublabel: "Engagement rate"
         },
         {
             label: "Avg Response",
@@ -120,15 +120,15 @@ export default function PerformancePage() {
             trend: `${summary?.avg_response_time_delta > 0 ? "+" : ""}${summary?.avg_response_time_delta?.toFixed(1) || 0}%`,
             up: summary?.avg_response_time_delta >= 0,
             icon: Clock,
-            sublabel: "Speed improvement"
+            sublabel: "Response speed"
         },
         {
-            label: "Profile Views",
-            value: summary?.total_views || 0,
-            trend: `${summary?.views_delta > 0 ? "+" : ""}${summary?.views_delta?.toFixed(1) || 0}%`,
-            up: summary?.views_delta >= 0,
-            icon: Users,
-            sublabel: "Click-through trend"
+            label: "Conversion Rate",
+            value: `${(summary?.conversion_rate || 0).toFixed(1)}%`,
+            trend: `${summary?.conversion_rate_delta > 0 ? "+" : ""}${summary?.conversion_rate_delta?.toFixed(1) || 0}%`,
+            up: summary?.conversion_rate_delta >= 0,
+            icon: TrendingUp,
+            sublabel: "Booking success"
         },
     ];
 
