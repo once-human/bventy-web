@@ -39,9 +39,14 @@ import {
 } from "recharts";
 
 export default function PerformancePage() {
+    const [isMounted, setIsMounted] = React.useState(false);
     const { data, error, isLoading } = useSWR("vendor-performance", vendorService.getVendorPerformance, {
         revalidateOnFocus: false
     });
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     if (isLoading) {
         return (
@@ -96,34 +101,34 @@ export default function PerformancePage() {
         {
             label: "Quote Count",
             value: summary?.quote_count || 0,
-            trend: "+0%",
-            up: true,
+            trend: `${summary?.quote_count_delta > 0 ? "+" : ""}${summary?.quote_count_delta?.toFixed(1) || 0}%`,
+            up: summary?.quote_count_delta >= 0,
             icon: BarChart3,
             sublabel: "Last 30 days"
         },
         {
             label: "Acceptance Rate",
             value: `${(summary?.acceptance_rate || 0).toFixed(1)}%`,
-            trend: "+0%",
-            up: true,
+            trend: `${summary?.acceptance_rate_delta > 0 ? "+" : ""}${summary?.acceptance_rate_delta?.toFixed(1) || 0}%`,
+            up: summary?.acceptance_rate_delta >= 0,
             icon: Target,
-            sublabel: "Last 30 days"
+            sublabel: "Change vs prev period"
         },
         {
             label: "Avg Response",
             value: summary?.avg_response_time > 0 ? `${summary.avg_response_time.toFixed(1)}h` : "N/A",
-            trend: "-0%",
-            up: true,
+            trend: `${summary?.avg_response_time_delta > 0 ? "+" : ""}${summary?.avg_response_time_delta?.toFixed(1) || 0}%`,
+            up: summary?.avg_response_time_delta >= 0,
             icon: Clock,
-            sublabel: "Awaiting response"
+            sublabel: "Speed improvement"
         },
         {
             label: "Profile Views",
             value: summary?.total_views || 0,
-            trend: "+0%",
-            up: true,
+            trend: `${summary?.views_delta > 0 ? "+" : ""}${summary?.views_delta?.toFixed(1) || 0}%`,
+            up: summary?.views_delta >= 0,
             icon: Users,
-            sublabel: "Total impressions"
+            sublabel: "Click-through trend"
         },
     ];
 
@@ -153,16 +158,23 @@ export default function PerformancePage() {
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {stats.map((stat, i) => (
-                    <Card key={i} className="shadow-sm hover:shadow-md transition-shadow">
+                    <Card key={i} className="shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                        <div className={`absolute top-0 left-0 w-1 h-full ${stat.up ? 'bg-emerald-500' : 'bg-red-500'} opacity-50`} />
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                                 {stat.label}
                             </CardTitle>
-                            <stat.icon className="h-4 w-4 text-muted-foreground opacity-50" />
+                            <stat.icon className="h-4 w-4 text-muted-foreground opacity-30 group-hover:opacity-100 transition-opacity" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stat.value}</div>
-                            <p className="text-[10px] text-muted-foreground mt-1 font-medium">
+                            <div className="flex items-baseline gap-2">
+                                <div className="text-2xl font-bold tracking-tight">{stat.value}</div>
+                                <div className={`flex items-center text-[10px] font-bold ${stat.up ? 'text-emerald-500' : 'text-red-500'}`}>
+                                    {stat.up ? <ArrowUpRight className="h-3 w-3 mr-0.5" /> : <ArrowDownRight className="h-3 w-3 mr-0.5" />}
+                                    {stat.trend}
+                                </div>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground mt-1 font-medium opacity-70">
                                 {stat.sublabel}
                             </p>
                         </CardContent>
@@ -181,57 +193,63 @@ export default function PerformancePage() {
                         </div>
                     </CardHeader>
                     <CardContent className="h-[350px] pt-4">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={trends}>
-                                <defs>
-                                    <linearGradient id="colorQuotes" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
-                                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                                    </linearGradient>
-                                    <linearGradient id="colorConfirmed" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
-                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
-                                <XAxis
-                                    dataKey="month"
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                                    dy={10}
-                                />
-                                <YAxis
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                                />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: 'hsl(var(--background))',
-                                        borderColor: 'hsl(var(--border))',
-                                        borderRadius: '8px',
-                                        fontSize: '12px'
-                                    }}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="quotes"
-                                    stroke="hsl(var(--primary))"
-                                    strokeWidth={2}
-                                    fillOpacity={1}
-                                    fill="url(#colorQuotes)"
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="confirmed"
-                                    stroke="#10b981"
-                                    strokeWidth={2}
-                                    fillOpacity={1}
-                                    fill="url(#colorConfirmed)"
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                        {!isMounted ? (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                            </div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={trends}>
+                                    <defs>
+                                        <linearGradient id="colorQuotes" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                                        </linearGradient>
+                                        <linearGradient id="colorConfirmed" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
+                                    <XAxis
+                                        dataKey="month"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                                        dy={10}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'hsl(var(--background))',
+                                            borderColor: 'hsl(var(--border))',
+                                            borderRadius: '8px',
+                                            fontSize: '12px'
+                                        }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="quotes"
+                                        stroke="hsl(var(--primary))"
+                                        strokeWidth={2}
+                                        fillOpacity={1}
+                                        fill="url(#colorQuotes)"
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="confirmed"
+                                        stroke="#10b981"
+                                        strokeWidth={2}
+                                        fillOpacity={1}
+                                        fill="url(#colorConfirmed)"
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -277,34 +295,40 @@ export default function PerformancePage() {
                     <CardTitle className="text-md font-semibold">Monthly Breakdown</CardTitle>
                 </CardHeader>
                 <CardContent className="h-[300px] pt-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={trends}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
-                            <XAxis
-                                dataKey="month"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                                dy={10}
-                            />
-                            <YAxis
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                            />
-                            <Tooltip
-                                cursor={{ fill: 'hsl(var(--muted)/0.2)' }}
-                                contentStyle={{
-                                    backgroundColor: 'hsl(var(--background))',
-                                    borderColor: 'hsl(var(--border))',
-                                    borderRadius: '8px',
-                                    fontSize: '12px'
-                                }}
-                            />
-                            <Bar dataKey="quotes" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={40} />
-                            <Bar dataKey="confirmed" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
-                        </BarChart>
-                    </ResponsiveContainer>
+                    {!isMounted ? (
+                        <div className="w-full h-full flex items-center justify-center">
+                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                        </div>
+                    ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={trends}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
+                                <XAxis
+                                    dataKey="month"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                                    dy={10}
+                                />
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                                />
+                                <Tooltip
+                                    cursor={{ fill: 'hsl(var(--muted)/0.2)' }}
+                                    contentStyle={{
+                                        backgroundColor: 'hsl(var(--background))',
+                                        borderColor: 'hsl(var(--border))',
+                                        borderRadius: '8px',
+                                        fontSize: '12px'
+                                    }}
+                                />
+                                <Bar dataKey="quotes" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={40} />
+                                <Bar dataKey="confirmed" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    )}
                 </CardContent>
             </Card>
         </div>
