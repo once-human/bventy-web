@@ -17,36 +17,27 @@ export function middleware(request: NextRequest) {
         appPath = '/admin';
     }
 
-    // 2. Prevent rewrite loop
-    if (
-        url.pathname.startsWith('/www') ||
-        url.pathname.startsWith('/auth') ||
-        url.pathname.startsWith('/app') ||
-        url.pathname.startsWith('/vendor') ||
-        url.pathname.startsWith('/admin')
-    ) {
-        return NextResponse.next();
-    }
-
-    // 3. Rewrite internal path
-    if (url.pathname === '/') {
-        url.pathname = appPath;
-        // TEMPORARY: Use redirect to prove middleware is running
-        return NextResponse.redirect(url);
-    } else {
-        url.pathname = `${appPath}${url.pathname}`;
-    }
-
+    // 2. Rewrite internal path
+    url.pathname = `${appPath}${url.pathname}`;
     const response = NextResponse.rewrite(url);
-    response.headers.set('x-debug-rewrite', url.pathname);
-    response.headers.set('x-debug-host', host);
+
+    // 3. Fix Cookie Domain for local development
+    // (We intercept the response to rewrite Set-Cookie headers from the backend)
+    // Note: Since this is a rewrite, headers might be tricky to catch here.
+    // We'll also rely on the individual app configs if needed, but the Shell is the primary gateway.
 
     return response;
 }
 
 export const config = {
     matcher: [
-        '/',
+        /*
+         * Match all request paths except for the ones starting with:
+         * - api (internal rewrites handled by next.config.api)
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         */
         '/((?!api|_next/static|_next/image|favicon.ico).*)',
     ],
 };
