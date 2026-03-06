@@ -7,41 +7,18 @@ export function middleware(request: NextRequest) {
 
     // 1. Determine which app to serve based on subdomain
     let appPath = '/www';
-
-    // Redirect vendor subdomain to partner
-    if (host.startsWith('vendor.')) {
-        const redirectUrl = request.nextUrl.clone();
-        redirectUrl.host = host.replace('vendor.', 'partner.');
-        return NextResponse.redirect(redirectUrl);
-    }
-
     if (host.startsWith('auth.')) {
         appPath = '/auth';
     } else if (host.startsWith('app.')) {
         appPath = '/app';
-    } else if (host.startsWith('partner.')) {
+    } else if (host.startsWith('vendor.')) {
         appPath = '/vendor';
     } else if (host.startsWith('admin.')) {
         appPath = '/admin';
     }
 
-    // 2. Prevent rewrite loop
-    if (
-        url.pathname.startsWith('/www') ||
-        url.pathname.startsWith('/auth') ||
-        url.pathname.startsWith('/app') ||
-        url.pathname.startsWith('/vendor') ||
-        url.pathname.startsWith('/admin')
-    ) {
-        return NextResponse.next();
-    }
-
-    // 3. Rewrite internal path
-    if (url.pathname === '/') {
-        url.pathname = appPath;
-    } else {
-        url.pathname = `${appPath}${url.pathname}`;
-    }
+    // 2. Rewrite internal path
+    url.pathname = `${appPath}${url.pathname}`;
     const response = NextResponse.rewrite(url);
 
     // 3. Fix Cookie Domain for local development
