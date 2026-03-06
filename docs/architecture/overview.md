@@ -12,7 +12,7 @@ graph TD
         WWW[www.bventy.in]
         AUTH[auth.bventy.in]
         APP[app.bventy.in]
-        VENDOR[vendor.bventy.in]
+        PARTNER[partner.bventy.in]
         ADMIN[admin.bventy.in]
     end
 

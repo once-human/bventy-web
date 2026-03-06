@@ -9,7 +9,15 @@ const nextConfig = {
             },
             {
                 protocol: "https",
+                hostname: "images.unsplash.com",
+            },
+            {
+                protocol: "https",
                 hostname: "va.vercel-scripts.com",
+            },
+            {
+                protocol: "https",
+                hostname: "*.bventy.in",
             },
         ],
     },
