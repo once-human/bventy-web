@@ -7,11 +7,19 @@ export function middleware(request: NextRequest) {
 
     // 1. Determine which app to serve based on subdomain
     let appPath = '/www';
+
+    // Redirect vendor subdomain to partner
+    if (host.startsWith('vendor.')) {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.host = host.replace('vendor.', 'partner.');
+        return NextResponse.redirect(redirectUrl);
+    }
+
     if (host.startsWith('auth.')) {
         appPath = '/auth';
     } else if (host.startsWith('app.')) {
         appPath = '/app';
-    } else if (host.startsWith('partner.') || host.startsWith('vendor.')) {
+    } else if (host.startsWith('partner.')) {
         appPath = '/vendor';
     } else if (host.startsWith('admin.')) {
         appPath = '/admin';
