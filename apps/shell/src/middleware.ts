@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
         appPath = '/auth';
     } else if (host.startsWith('app.')) {
         appPath = '/app';
-    } else if (host.startsWith('vendor.')) {
+    } else if (host.startsWith('partner.') || host.startsWith('vendor.')) {
         appPath = '/vendor';
     } else if (host.startsWith('admin.')) {
         appPath = '/admin';
