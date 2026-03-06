@@ -29,7 +29,11 @@ export function middleware(request: NextRequest) {
     }
 
     // 3. Rewrite internal path
-    url.pathname = `${appPath}${url.pathname}`;
+    if (url.pathname === '/') {
+        url.pathname = appPath;
+    } else {
+        url.pathname = `${appPath}${url.pathname}`;
+    }
     const response = NextResponse.rewrite(url);
 
     // 3. Fix Cookie Domain for local development
