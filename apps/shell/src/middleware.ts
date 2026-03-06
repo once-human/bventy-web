@@ -17,8 +17,23 @@ export function middleware(request: NextRequest) {
         appPath = '/admin';
     }
 
-    // 2. Rewrite internal path
-    url.pathname = `${appPath}${url.pathname}`;
+    // 2. Prevent rewrite loop
+    if (
+        url.pathname.startsWith('/www') ||
+        url.pathname.startsWith('/auth') ||
+        url.pathname.startsWith('/app') ||
+        url.pathname.startsWith('/vendor') ||
+        url.pathname.startsWith('/admin')
+    ) {
+        return NextResponse.next();
+    }
+
+    // 3. Rewrite internal path
+    if (url.pathname === '/') {
+        url.pathname = appPath;
+    } else {
+        url.pathname = `${appPath}${url.pathname}`;
+    }
     const response = NextResponse.rewrite(url);
 
     // 3. Fix Cookie Domain for local development
