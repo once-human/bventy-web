@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { adminService  } from "@bventy/services";
+import { adminService } from "@bventy/services";
 import { OverviewCards, OverviewData } from "@/components/admin/OverviewCards";
-import { GrowthCharts, GrowthData  } from "@bventy/ui";
+import { GrowthCharts, GrowthData } from "@bventy/ui";
 import { MarketplaceAnalytics, MarketplaceData } from "@/components/admin/MarketplaceAnalytics";
 import { RiskSection } from "@/components/admin/RiskSection";
 
@@ -47,6 +47,14 @@ export default function AdminOverviewPage() {
             </div>
 
             <div className="mt-2">
+                <OverviewCards data={overviewData} loading={loadingOverview} />
+            </div>
+
+            <div className="mt-2 text-foreground font-bold text-center">
+                Growth over time
+            </div>
+
+            <div className="mt-0">
                 <GrowthCharts data={growthData} loading={loadingGrowth} />
             </div>
 

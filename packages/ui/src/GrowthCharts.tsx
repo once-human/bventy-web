@@ -67,7 +67,7 @@ export function GrowthCharts({ data, loading }: { data?: GrowthData; loading: bo
             return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
         };
 
-        const dataMax = Math.max(...chartData.map(d => d.count), 0);
+        const dataMax = (chartData && chartData.length > 0) ? Math.max(...chartData.map(d => d.count), 0) : 0;
 
         // Ensure we have at least 2 points and they are valid
         let displayData = chartData;

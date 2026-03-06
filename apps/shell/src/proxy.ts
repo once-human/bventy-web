@@ -5,13 +5,21 @@ export function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     const host = request.headers.get('host') || '';
 
-    // 1. Determine which app to serve based on subdomain
+    // 1. Handle Subdomain Mappings & Redirects
     let appPath = '/www';
+
+    // Explicit Redirect: vendor.bventy.in -> partner.bventy.in
+    if (host.startsWith('vendor.')) {
+        const newUrl = request.nextUrl.clone();
+        newUrl.host = host.replace('vendor.', 'partner.');
+        return NextResponse.redirect(newUrl, 301);
+    }
+
     if (host.startsWith('auth.')) {
         appPath = '/auth';
     } else if (host.startsWith('app.')) {
         appPath = '/app';
-    } else if (host.startsWith('vendor.')) {
+    } else if (host.startsWith('partner.')) {
         appPath = '/vendor';
     } else if (host.startsWith('admin.')) {
         appPath = '/admin';
