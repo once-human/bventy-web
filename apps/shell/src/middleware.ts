@@ -17,7 +17,18 @@ export function middleware(request: NextRequest) {
         appPath = '/admin';
     }
 
-    // 2. Rewrite internal path
+    // 2. Prevent rewrite loop
+    if (
+        url.pathname.startsWith('/www') ||
+        url.pathname.startsWith('/auth') ||
+        url.pathname.startsWith('/app') ||
+        url.pathname.startsWith('/vendor') ||
+        url.pathname.startsWith('/admin')
+    ) {
+        return NextResponse.next();
+    }
+
+    // 3. Rewrite internal path
     url.pathname = `${appPath}${url.pathname}`;
     const response = NextResponse.rewrite(url);
 
