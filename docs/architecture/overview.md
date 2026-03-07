@@ -12,7 +12,7 @@ graph TD
         WWW[www.bventy.in]
         AUTH[auth.bventy.in]
         APP[app.bventy.in]
-        VENDOR[vendor.bventy.in]
+        PARTNER[partner.bventy.in]
         ADMIN[admin.bventy.in]
     end
 
@@ -29,7 +29,7 @@ graph TD
 - **www (Marketing)**: Public-facing landing pages and SEO-optimized vendor listings.
 - **auth (Identity)**: Centralized authentication server managing JWT issuance and parent-domain session cookies.
 - **app (Organizer Hub)**: The primary workspace for event organizers to manage events and quotes.
-- **vendor (Provider Portal)**: Dedicated interface for vendors to manage their business profiles and proposal responses.
+- **partner (Provider Portal)**: Dedicated interface for vendors to manage their business profiles and proposal responses.
 - **admin (Platform Control)**: Internal tools for moderation, analytics, and system oversight.
 
 ## Technical Foundation
