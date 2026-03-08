@@ -206,6 +206,9 @@ export const vendorService = {
     deleteManualBlock: async (id: string): Promise<void> => {
         await api.delete(`/vendor/calendar/blocks/${id}`);
     },
+    syncGoogleCalendar: async (): Promise<void> => {
+        await api.post("/vendor/calendar/sync");
+    },
     confirmHold: async (id: string): Promise<void> => {
         await api.patch(`/quotes/vendor/confirm/${id}`);
     },

@@ -30,7 +30,8 @@ import {
     Clock,
     MapPin,
     X,
-    Trash2
+    Trash2,
+    RefreshCw
 } from "lucide-react";
 import { vendorService, CalendarEvent } from "@bventy/services";
 import useSWR from "swr";
@@ -90,10 +91,23 @@ export default function CalendarPage() {
         }
     };
 
-    // Calendar grid logic
+    const [isSyncing, setIsSyncing] = useState(false);
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+    const handleManualSync = async () => {
+        setIsSyncing(true);
+        try {
+            await vendorService.syncGoogleCalendar();
+            toast.success("Calendar synced with Google");
+            mutate();
+        } catch (error) {
+            toast.error("Failed to sync with Google");
+        } finally {
+            setIsSyncing(false);
+        }
+    };
 
     const eventsForSelectedDate = dbEvents?.filter(e => isSameDay(new Date(e.start_time), selectedDate)) || [];
 
@@ -113,8 +127,24 @@ export default function CalendarPage() {
                     <p className="text-muted-foreground">Manage your availability and upcoming bookings.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
-                        Sync Google Calendar
+                    <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.bventy.in';
+                            window.location.href = `${apiUrl}/auth/google`;
+                        }}
+                    >
+                        Connect Google
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleManualSync}
+                        disabled={isSyncing}
+                    >
+                        <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                        {isSyncing ? "Syncing..." : "Sync Now"}
                     </Button>
                     <Button size="sm" onClick={() => setIsBlockModalOpen(true)}>
                         <Plus className="mr-2 h-4 w-4" /> Block Date
