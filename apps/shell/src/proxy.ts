@@ -44,10 +44,11 @@ export function proxy(request: NextRequest) {
         const targetUrl = new URL(request.url);
         if (isAdminOrStaff) {
             targetUrl.host = host.replace('auth.', 'admin.');
+            targetUrl.pathname = '/'; // Admins/Staff go to root
         } else {
             targetUrl.host = host.replace('auth.', 'app.');
+            targetUrl.pathname = '/dashboard'; // Standard users go to /dashboard
         }
-        targetUrl.pathname = '/dashboard';
         return NextResponse.redirect(targetUrl);
     }
 
