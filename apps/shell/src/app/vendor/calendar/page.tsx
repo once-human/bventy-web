@@ -21,7 +21,14 @@ import {
     Badge,
     Separator,
     Input,
-    Label
+    Label,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogClose,
 } from "@bventy/ui";
 import {
     ChevronLeft,
@@ -47,6 +54,10 @@ export default function CalendarPage() {
     const [blockTitle, setBlockTitle] = useState("");
     const [blockStart, setBlockStart] = useState("");
     const [blockEnd, setBlockEnd] = useState("");
+
+    // Disconnect state
+    const [isDisconnectModalOpen, setIsDisconnectModalOpen] = useState(false);
+    const [isDisconnecting, setIsDisconnecting] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -125,15 +136,17 @@ export default function CalendarPage() {
     };
 
     const handleDisconnect = async () => {
-        if (confirm("Disconnect Google Calendar? This will also remove all events synced FROM Google to your Bventy calendar. Your Bventy bookings will remain on Google Calendar.")) {
-            try {
-                await vendorService.disconnectGoogleCalendar();
-                toast.success("Google Calendar disconnected and synced data removed");
-                mutateSyncStatus();
-                mutate();
-            } catch (error) {
-                toast.error("Failed to disconnect calendar");
-            }
+        setIsDisconnecting(true);
+        try {
+            await vendorService.disconnectGoogleCalendar();
+            toast.success("Google Calendar disconnected and synced data removed");
+            mutateSyncStatus();
+            mutate();
+            setIsDisconnectModalOpen(false);
+        } catch (error) {
+            toast.error("Failed to disconnect calendar");
+        } finally {
+            setIsDisconnecting(false);
         }
     };
 
@@ -174,7 +187,7 @@ export default function CalendarPage() {
                                 variant="ghost" 
                                 size="sm" 
                                 className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                                onClick={handleDisconnect}
+                                onClick={() => setIsDisconnectModalOpen(true)}
                             >
                                 Disconnect
                             </Button>
@@ -196,6 +209,42 @@ export default function CalendarPage() {
                     </Button>
                 </div>
             </div>
+
+            <Dialog open={isDisconnectModalOpen} onOpenChange={setIsDisconnectModalOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl">Disconnect Google Calendar?</DialogTitle>
+                        <DialogDescription className="pt-2 text-base leading-relaxed">
+                            This will perform a **Deep Cleanup**:
+                            <ul className="list-disc pl-5 mt-2 space-y-1 text-sm">
+                                <li>All events synced **FROM Google** to Bventy will be removed.</li>
+                                <li>All events Bventy **pushed to Google** will be deleted from your Google Calendar.</li>
+                                <li>Your native Bventy bookings will remain safe but will no longer stay in sync.</li>
+                            </ul>
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="mt-4 gap-2">
+                        <DialogClose asChild>
+                            <Button variant="ghost" disabled={isDisconnecting}>Cancel</Button>
+                        </DialogClose>
+                        <Button 
+                            variant="destructive" 
+                            onClick={handleDisconnect} 
+                            disabled={isDisconnecting}
+                            className="min-w-[120px]"
+                        >
+                            {isDisconnecting ? (
+                                <>
+                                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                    Cleaning up...
+                                </>
+                            ) : (
+                                "Disconnect Now"
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {isBlockModalOpen && (
                 <Card className="shadow-lg border-red-200">
