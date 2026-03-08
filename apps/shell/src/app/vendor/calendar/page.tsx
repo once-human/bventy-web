@@ -107,8 +107,9 @@ export default function CalendarPage() {
             await vendorService.syncGoogleCalendar();
             toast.success("Calendar synced with Google");
             mutate();
-        } catch (error) {
-            toast.error("Failed to sync with Google");
+        } catch (error: any) {
+            const message = error.response?.data?.error || error.message || "Failed to sync with Google";
+            toast.error(message);
         } finally {
             setIsSyncing(false);
         }
