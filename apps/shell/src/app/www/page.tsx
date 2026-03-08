@@ -16,6 +16,11 @@ export default function Home() {
         <TrustSection />
       </main>
       <Footer />
+      {/* Explicit hidden link for Google verification botanical crawler */}
+      <div className="sr-only">
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+      </div>
     </div>
   );
 }

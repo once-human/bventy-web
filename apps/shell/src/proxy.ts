@@ -21,6 +21,16 @@ export function proxy(request: NextRequest) {
     const host = request.headers.get('host') || '';
     const session = request.cookies.get('bventy_session');
 
+    // 0. Handle Global Legal Pages (Privacy/Terms) - Always use /www versions
+    if (url.pathname === '/privacy') {
+        url.pathname = '/www/privacy';
+        return NextResponse.rewrite(url);
+    }
+    if (url.pathname === '/terms') {
+        url.pathname = '/www/terms';
+        return NextResponse.rewrite(url);
+    }
+
     // 1. Handle Subdomain Mappings & Redirects
     let appPath = '/www';
 
