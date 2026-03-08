@@ -46,7 +46,24 @@ export default function PrivacyPolicyPage() {
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            2. How We Track Usage (Analytics)
+                            2. Google Calendar Data Usage
+                        </h2>
+                        <div className="space-y-4 text-white/70 leading-relaxed">
+                            <p>
+                                When you choose to sync your Google Calendar with Bventy, we request access to your calendar events. This section explains how we handle that sensitive data.
+                            </p>
+                            <ul className="list-disc pl-5 space-y-2">
+                                <li><strong>What we access:</strong> We only access your calendar events and "Busy" time slots via the Google Calendar API.</li>
+                                <li><strong>Why we access it:</strong> To automatically block off dates on your Bventy availability when you are busy on Google, and to push your confirmed Bventy bookings to your Google Calendar for easier management.</li>
+                                <li><strong>Storage & Sharing:</strong> Your Google OAuth tokens are stored securely in our database. We do not share your calendar data with any third parties or use it for any purpose other than providing the synchronization service.</li>
+                                <li><strong>Your Control:</strong> You can disconnect your Google Calendar at any time via your dashboard. Disconnecting will revoke our access and allow you to delete all previously synced Google data from our servers.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
+                            3. How We Track Usage (Analytics)
                         </h2>
                         <div className="space-y-4 text-white/70 leading-relaxed">
                             <p>
@@ -76,7 +93,7 @@ export default function PrivacyPolicyPage() {
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            3. Why We Collect This Data
+                            4. Why We Collect This Data
                         </h2>
                         <div className="space-y-4 text-white/70 leading-relaxed">
                             <p>
@@ -87,7 +104,7 @@ export default function PrivacyPolicyPage() {
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            4. Data Sharing & Third Parties
+                            5. Data Sharing & Third Parties
                         </h2>
                         <div className="space-y-4 text-white/70 leading-relaxed">
                             <p>
@@ -98,7 +115,7 @@ export default function PrivacyPolicyPage() {
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            5. Your Rights & Contact
+                            6. Your Rights & Contact
                         </h2>
                         <div className="space-y-4 text-white/70 leading-relaxed">
                             <p>
