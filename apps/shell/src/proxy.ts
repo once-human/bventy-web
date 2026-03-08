@@ -39,10 +39,10 @@ export function proxy(request: NextRequest) {
         // Logged in user trying to access auth.bventy.in -> Redirect to app.bventy.in or admin.bventy.in
         const claims = decodeJWT(session.value);
         const role = claims?.role;
-        const isAdmin = ['admin', 'super_admin'].includes(role);
+        const isAdminOrStaff = ['admin', 'super_admin', 'staff'].includes(role);
 
         const targetUrl = new URL(request.url);
-        if (isAdmin) {
+        if (isAdminOrStaff) {
             targetUrl.host = host.replace('auth.', 'admin.');
         } else {
             targetUrl.host = host.replace('auth.', 'app.');
