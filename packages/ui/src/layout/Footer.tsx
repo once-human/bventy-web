@@ -41,11 +41,11 @@ export function Footer() {
                     <Link href={`${WWW_URL}/vendors`} className="text-sm font-medium hover:underline">
                         Explore
                     </Link>
-                    <Link href={`${WWW_URL}/privacy`} className="text-sm font-medium hover:underline">
-                        Privacy
+                    <Link href={`${WWW_URL}/privacy`} className="text-sm font-medium hover:underline whitespace-nowrap">
+                        Privacy Policy
                     </Link>
-                    <Link href={`${WWW_URL}/terms`} className="text-sm font-medium hover:underline">
-                        Terms
+                    <Link href={`${WWW_URL}/terms`} className="text-sm font-medium hover:underline whitespace-nowrap">
+                        Terms of Service
                     </Link>
                 </div>
             </div>
