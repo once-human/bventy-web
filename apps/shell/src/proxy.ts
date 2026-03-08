@@ -1,6 +1,21 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+function decodeJWT(token: string) {
+    try {
+        const base64Url = token.split('.')[1];
+        if (!base64Url) return null;
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        return null;
+    }
+}
+
 export function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     const host = request.headers.get('host') || '';
@@ -21,9 +36,17 @@ export function proxy(request: NextRequest) {
     const isProtectedSubdomain = ['app.', 'admin.', 'partner.', 'vendor.'].some(sub => host.startsWith(sub));
 
     if (isAuthSubdomain && session) {
-        // Logged in user trying to access auth.bventy.in -> Redirect to app.bventy.in
+        // Logged in user trying to access auth.bventy.in -> Redirect to app.bventy.in or admin.bventy.in
+        const claims = decodeJWT(session.value);
+        const role = claims?.role;
+        const isAdmin = ['admin', 'super_admin'].includes(role);
+
         const targetUrl = new URL(request.url);
-        targetUrl.host = host.replace('auth.', 'app.');
+        if (isAdmin) {
+            targetUrl.host = host.replace('auth.', 'admin.');
+        } else {
+            targetUrl.host = host.replace('auth.', 'app.');
+        }
         targetUrl.pathname = '/dashboard';
         return NextResponse.redirect(targetUrl);
     }
