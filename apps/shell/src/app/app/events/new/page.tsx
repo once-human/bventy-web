@@ -98,8 +98,9 @@ function CreateEventForm() {
                 router.push("/events");
             }
         } catch (err: any) {
-            if (err.response && err.response.data && err.response.data.message) {
-                setError(err.response.data.message);
+            const backendError = err.response?.data?.message || err.response?.data?.error;
+            if (backendError) {
+                setError(backendError);
             } else {
                 setError("Failed to create event. Please try again.");
             }
