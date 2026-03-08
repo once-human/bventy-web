@@ -215,6 +215,13 @@ export const vendorService = {
     rejectHold: async (id: string): Promise<void> => {
         await api.patch(`/quotes/vendor/reject/${id}`);
     },
+    getGoogleSyncStatus: async (): Promise<{ connected: boolean }> => {
+        const response = await api.get<{ connected: boolean }>("/vendor/calendar/sync/status");
+        return response.data;
+    },
+    disconnectGoogleCalendar: async (): Promise<void> => {
+        await api.delete("/vendor/calendar/sync");
+    },
 
     getQuoteDetail: async (id: string): Promise<any> => {
         const { data } = await api.get(`/quotes/${id}`);

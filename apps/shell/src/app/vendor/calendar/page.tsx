@@ -91,6 +91,11 @@ export default function CalendarPage() {
         }
     };
 
+    const { data: syncStatus, mutate: mutateSyncStatus } = useSWR(
+        mounted ? "google-sync-status" : null,
+        () => vendorService.getGoogleSyncStatus()
+    );
+
     const [isSyncing, setIsSyncing] = useState(false);
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
@@ -106,6 +111,19 @@ export default function CalendarPage() {
             toast.error("Failed to sync with Google");
         } finally {
             setIsSyncing(false);
+        }
+    };
+
+    const handleDisconnect = async () => {
+        if (confirm("Disconnect Google Calendar? This will also remove all events synced FROM Google to your Bventy calendar. Your Bventy bookings will remain on Google Calendar.")) {
+            try {
+                await vendorService.disconnectGoogleCalendar();
+                toast.success("Google Calendar disconnected and synced data removed");
+                mutateSyncStatus();
+                mutate();
+            } catch (error) {
+                toast.error("Failed to disconnect calendar");
+            }
         }
     };
 
@@ -127,25 +145,42 @@ export default function CalendarPage() {
                     <p className="text-muted-foreground">Manage your availability and upcoming bookings.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.bventy.in';
-                            window.location.href = `${apiUrl}/auth/google`;
-                        }}
-                    >
-                        Connect Google
-                    </Button>
-                    <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={handleManualSync}
-                        disabled={isSyncing}
-                    >
-                        <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                        {isSyncing ? "Syncing..." : "Sync Now"}
-                    </Button>
+                    {syncStatus?.connected ? (
+                        <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 flex items-center gap-1 py-1">
+                                <div className="h-2 w-2 rounded-full bg-blue-500" />
+                                Google Connected
+                            </Badge>
+                            <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={handleManualSync}
+                                disabled={isSyncing}
+                            >
+                                <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                                {isSyncing ? "Syncing..." : "Sync Now"}
+                            </Button>
+                            <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                onClick={handleDisconnect}
+                            >
+                                Disconnect
+                            </Button>
+                        </div>
+                    ) : (
+                        <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.bventy.in';
+                                window.location.href = `${apiUrl}/auth/google`;
+                            }}
+                        >
+                            Connect Google
+                        </Button>
+                    )}
                     <Button size="sm" onClick={() => setIsBlockModalOpen(true)}>
                         <Plus className="mr-2 h-4 w-4" /> Block Date
                     </Button>
