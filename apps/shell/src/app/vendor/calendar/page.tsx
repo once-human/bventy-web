@@ -96,6 +96,15 @@ export default function CalendarPage() {
         () => vendorService.getGoogleSyncStatus()
     );
 
+    useEffect(() => {
+        if (!mounted) return;
+        const interval = setInterval(() => {
+            mutate();
+            mutateSyncStatus();
+        }, 30000);
+        return () => clearInterval(interval);
+    }, [mounted, mutate, mutateSyncStatus]);
+
     const [isSyncing, setIsSyncing] = useState(false);
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
