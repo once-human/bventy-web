@@ -15,6 +15,7 @@ import { Input } from "@bventy/ui";
 import { Textarea } from "@bventy/ui";
 import { Label } from "@bventy/ui";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@bventy/services";
 import {
     Dialog,
@@ -37,6 +38,7 @@ import { toast } from "sonner"; // Assuming sonner is installed, or use standard
 import { InlineCreateEventForm } from "@/components/www/events/InlineCreateEventForm";
 import { ReviewSection } from "@bventy/ui";
 import { Star } from "lucide-react";
+import { VendorProfileSkeleton } from "@/components/www/vendors/VendorProfileSkeleton";
 
 export default function VendorProfilePage() {
     const params = useParams();
@@ -184,9 +186,7 @@ export default function VendorProfilePage() {
         return (
             <div className="flex min-h-screen flex-col">
                 <Navbar />
-                <div className="flex-1 flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
+                <VendorProfileSkeleton />
                 <Footer />
             </div>
         );
@@ -333,11 +333,13 @@ export default function VendorProfilePage() {
                                     <h3 className="text-xl font-semibold mb-4">Gallery</h3>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                         {vendor.gallery_images.map((img, idx) => (
-                                            <div key={idx} className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
-                                                <img
+                                            <div key={idx} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+                                                <Image
                                                     src={img}
                                                     alt={`${vendor.business_name} gallery ${idx + 1}`}
-                                                    className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
+                                                    fill
+                                                    className="object-cover hover:scale-105 transition-transform duration-300"
+                                                    sizes="(max-width: 768px) 50vw, 33vw"
                                                 />
                                             </div>
                                         ))}
