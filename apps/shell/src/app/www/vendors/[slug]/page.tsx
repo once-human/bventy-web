@@ -212,6 +212,30 @@ export default function VendorProfilePage() {
         <div className="flex min-h-screen flex-col">
             <Navbar />
             <main className="flex-1">
+                {/* SEO: Structured Data (JSON-LD) */}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            "@context": "https://schema.org",
+                            "@type": "LocalBusiness",
+                            "name": vendor.business_name,
+                            "description": vendor.bio,
+                            "image": vendor.gallery_images?.[0] || "",
+                            "address": {
+                                "@type": "PostalAddress",
+                                "addressLocality": vendor.city,
+                                "addressCountry": "IN"
+                            },
+                            "aggregateRating": vendor.average_rating > 0 ? {
+                                "@type": "AggregateRating",
+                                "ratingValue": vendor.average_rating.toFixed(1),
+                                "reviewCount": vendor.review_count
+                            } : undefined,
+                            "category": vendor.category,
+                        })
+                    }}
+                />
                 {/* Helper Banner for Context */}
                 <div className="bg-muted/30 border-b">
                     <div className="container mx-auto px-4 py-2 text-sm text-muted-foreground">
