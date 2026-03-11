@@ -19,72 +19,81 @@ export default function TermsOfServicePage() {
 
                 <div className="space-y-4 mb-16">
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-                        Terms. <span className="text-white/40 italic font-normal">The foundation of trust.</span>
+                        Terms. <span className="text-white/40 font-bold">The foundation of trust.</span>
                     </h1>
                     <p className="text-white/50 font-medium">Last updated: March 11, 2026</p>
                 </div>
 
                 <p className="text-white/70 text-xl leading-relaxed mb-24">
-                    These Terms of Service govern your use of Bventy. By accessing our platform, you agree to these terms. We have designed them to be easy to understand, reflecting our commitment to transparency and mutual respect.
+                    These Terms of Service govern your use of Bventy. By accessing our platform, you agree to these legal obligations. We have designed them to be easy to understand, reflecting our commitment to transparency and mutual respect in the marketplace.
                 </p>
 
                 <div className="space-y-24">
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            1. The Bventy Marketplace & Eligibility
+                            1. Acceptance of Terms
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                Bventy provides a sophisticated platform to connect Event Organizers with professional Vendors. By accessing Bventy, you agree to these Terms. They form a binding contract between you and us.
-                            </p>
-                            <p>
-                                Bventy is for adults. You must be at least 18 years old to create an account or use our marketplace. By joining, you represent that you have the legal capacity to enter into this agreement.
+                                By accessing or using Bventy, you agree to be bound by these Terms of Service. They form a binding legal contract between you and Bventy. If you do not agree with any part of these terms, you should not access our services or interact with the marketplace.
                             </p>
                         </div>
                     </section>
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            2. Account Responsibilities & Conduct
+                            2. Eligibility & Access
                         </h2>
-                        <div className="space-y-8 text-white/70 leading-relaxed">
+                        <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                To use certain features, you must create an account. You are responsible for all activities that occur under your credentials. 
+                                Bventy is for adults. You must be at least 18 years old to create an account or use our marketplace. By joining, you represent and warrant that you have the legal capacity to enter into this agreement and that your use of the service complies with all applicable laws.
                             </p>
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
-                                    <h4 className="text-white font-medium mb-2">Professional Conduct</h4>
-                                    <p className="text-sm text-white/50">We expect all users to interact with professional courtesy. Harassment, spam, or any illegal activity will result in immediate termination.</p>
-                                </div>
-                                <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
-                                    <h4 className="text-white font-medium mb-2">Platform Integrity</h4>
-                                    <p className="text-sm text-white/50">Any attempt to scrape our data or reverse engineer our services is a direct breach and will result in permanent suspension.</p>
-                                </div>
-                            </div>
                         </div>
                     </section>
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            3. Calendar & Sync Limitations
+                            3. User Conduct
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                We provide the platform, you provide the professional conduct. We expect all users to interact with honesty and integrity. Any attempt to scrape our data, reverse engineer our software, or use Bventy for malicious coordination is a direct breach and will result in permanent account suspension.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            4. The Marketplace Facilitation
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                Bventy acts as a facilitator for professional event connections. While we provide the technical infrastructure and coordination tools, the actual delivery of services is governed by the agreement between the Vendor and the Client. Bventy is not a party to the independent service contracts formed on the platform.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            5. Calendar & Sync Limitations
                         </h2>
                         <div className="p-8 rounded-3xl bg-white/[0.03] border border-white/10 space-y-6">
                             <p className="text-white/70 leading-relaxed text-sm italic">
-                                For Vendors using our Google Calendar integration:
+                                For Vendors utilizing our Google Calendar integration features:
                             </p>
                             <ul className="space-y-6">
                                 <li className="flex gap-4">
                                     <div className="h-2 w-2 rounded-full bg-white/20 mt-2 shrink-0"></div>
-                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Authorization.</span> You authorize Bventy to access your connected Google account to synchronize availability and bookings.</p>
+                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Authorization.</span> You authorize Bventy to access your connected Google account to synchronize your availability, manage bookings, and prevent scheduling conflicts across the marketplace.</p>
                                 </li>
                                 <li className="flex gap-4">
                                     <div className="h-2 w-2 rounded-full bg-white/20 mt-2 shrink-0"></div>
-                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Accuracy.</span> While we aim for 99.9% accuracy, you are responsible for the ultimate accuracy of your calendar and availability.</p>
+                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Accuracy.</span> While we strive for 99.9% synchronization accuracy, you remain solely responsible for the ultimate veracity of your calendar, your availability, and your professional responses.</p>
                                 </li>
                                 <li className="flex gap-4">
                                     <div className="h-2 w-2 rounded-full bg-white/20 mt-2 shrink-0"></div>
-                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Service Continuity.</span> We are not liable for scheduling conflicts arising from sync delays, technical interruptions, or external API failures.</p>
+                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Technical Continuity.</span> We are not liable for scheduling conflicts resulting from upstream API failures, third-party service outages, or network latency affecting real-time updates.</p>
                                 </li>
                             </ul>
                         </div>
@@ -92,30 +101,46 @@ export default function TermsOfServicePage() {
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            4. Intellectual Property & Marketplace Facilitation
+                            6. Intellectual Property & Licenses
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                Our code, design, and branding are ours. Your data and content are yours. We grant you a limited license to use Bventy; you grant us a license to host your content so we can provide our services.
-                            </p>
-                            <p>
-                                Bventy acts as a facilitator. While we handle the technical infrastructure, the actual service delivery is governed by the agreement between the Vendor and the Client. We are not responsible for the services rendered.
+                                Our code, interface design, branding, and platform logic are the property of Bventy. Your data, portfolios, and uploaded content remain yours. We grant you a limited, revocable license to use Bventy as intended; you grant us a license to host and process your content to provide these services to you.
                             </p>
                         </div>
                     </section>
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            5. Disclaimers & Limitation of Liability
+                            7. Account Termination
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                You may end this agreement at any time by deleting your account. Bventy reserves the right to suspend or terminate your access if we believe you have violated these Terms or if your actions pose a security risk to our ecosystem.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            8. Disclaimers & Warranties
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p className="italic text-sm">
+                                Bventy is provided on an "as is" and "as available" basis without warranties of any kind, whether express or implied. We do not guarantee that the platform will be error-free, uninterrupted, or perfectly compatible with all external systems at all times.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            9. Limitation of Liability
                         </h2>
                         <div className="space-y-8 text-white/70 leading-relaxed italic text-sm">
-                            <p>
-                                Bventy is provided "as is" and "as available". We don't guarantee that the platform will be error-free or uninterrupted. Use it at your own risk.
-                            </p>
                             <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/5 not-italic">
                                 <h3 className="text-white font-medium mb-4">Liability Cap</h3>
                                 <p className="leading-relaxed">
-                                    To the maximum extent permitted by law, Bventy's total liability for any claim arising from these Terms is limited to the amount you've paid us in the last 6 months.
+                                    To the maximum extent permitted by law, Bventy shall not be liable for any indirect, incidental, or consequential damages. Our total liability for any specific claim arising from these Terms is capped at the amount you have paid Bventy in the six months preceding the incident.
                                 </p>
                             </div>
                         </div>
@@ -123,14 +148,22 @@ export default function TermsOfServicePage() {
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            6. Termination & Governing Law
+                            10. Governing Law & Disputes
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                You can leave at any time. Any disputes arising from these Terms will be governed by the laws of India. Legal proceedings will take place in the competent courts of India.
+                                Any disputes arising from these Terms or your use of Bventy shall be governed by the laws of India. We prefer resolving issues through direct professional communication, but legal proceedings will take place within the competent courts of India.
                             </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            11. Modifications to Service
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                As Bventy evolves, so will these Terms. major updates will be communicated and continued use constitutes acceptance of the new Terms.
+                                As Bventy evolves, so will these Terms. We will notify you of major updates via email or dashboard alerts. Your continued use of the platform after such changes constitutes your acceptance of the updated Terms.
                             </p>
                         </div>
                     </section>
@@ -140,7 +173,7 @@ export default function TermsOfServicePage() {
                             <div className="space-y-4">
                                 <h2 className="text-2xl font-semibold tracking-tight text-white">Contact Us</h2>
                                 <p className="text-white/50 text-sm leading-relaxed max-w-xs">
-                                    For formal legal notices or questions regarding our terms, please contact our administrative team.
+                                    For formal legal notices or questions regarding these terms, please contact our administrative team.
                                 </p>
                                 <p className="text-white font-medium text-lg selection:bg-white selection:text-black">legal@bventy.in</p>
                                 <div className="pt-2">
@@ -155,6 +188,7 @@ export default function TermsOfServicePage() {
                             </div>
                         </div>
                     </section>
+
 
                 </div>
 

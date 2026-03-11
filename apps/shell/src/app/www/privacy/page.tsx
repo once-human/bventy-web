@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
 
                 <div className="space-y-4 mb-16">
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-                        Privacy. <span className="text-white/40 italic font-normal">Open and transparent.</span>
+                        Privacy. <span className="text-white/40 font-bold">Open and transparent.</span>
                     </h1>
                     <p className="text-white/50 font-medium">Last updated: March 11, 2026</p>
                 </div>
@@ -32,21 +32,51 @@ export default function PrivacyPolicyPage() {
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            1. Data Controller & Philosophy
+                            1. Our Philosophy
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                Bventy acts as the primary data controller. We manage your information with internal protocols designed to minimize exposure and maximize security. No marketing teams, no data brokers—just code and care.
-                            </p>
-                            <p>
-                                We collect your name, email address, and profile details to establish a trusted connection between you and the vendors or organizers you interact with. This data is never sold or rented.
+                                At Bventy, privacy isn't a feature; it's the foundation of everything we build. We believe that professional coordination shouldn't come at the cost of personal anonymity. We operate on a data-minimization principle, ensuring that our systems only ever handle the information they absolutely need to function.
                             </p>
                         </div>
                     </section>
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            2. Google API Services & Data Protection
+                            2. Data Controller
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                Bventy acts as the primary data controller for all information collected through the platform. We manage your data with strict internal protocols designed to isolate sensitive identifiers from general application logic. We do not employ third-party data brokers or marketing teams.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            3. Identity Data
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                We collect your name, email address, and profile details to establish a trusted connection between you and the vendors or organizers you interact with. This information is used strictly for authentication, account management, and facilitating marketplace interactions.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            4. Technical Logging
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                For security and stability, basic technical identifiers like IP addresses, browser types, and device fingerprints are logged temporarily. This data is used to detect fraudulent activity, optimize our global infrastructure, and maintain the health of our real-time services.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            5. Google API Services & Data Protection
                         </h2>
                         <div className="p-8 rounded-3xl bg-white/[0.03] border border-white/10 space-y-6">
                             <p className="text-white/70 leading-relaxed">
@@ -63,7 +93,7 @@ export default function PrivacyPolicyPage() {
                                 </li>
                                 <li className="flex gap-4">
                                     <div className="h-6 w-6 rounded-full bg-white/10 flex items-center justify-center text-xs shrink-0 font-bold">3</div>
-                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Data Integrity.</span> We do not use your Google data for advertising products or services, nor do we sell it to third party providers.</p>
+                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Data Integrity.</span> We do not use your Google data for advertising products or services, nor do we sell it to third party providers. Your data remains in your control.</p>
                                 </li>
                             </ul>
                             
@@ -78,7 +108,7 @@ export default function PrivacyPolicyPage() {
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            3. Analytics and Operational Metrics
+                            6. Analytics Stack
                         </h2>
                         <div className="p-8 rounded-3xl bg-white/[0.03] border border-white/10 space-y-8">
                             <div className="space-y-4 text-white/70 leading-relaxed text-sm">
@@ -86,17 +116,17 @@ export default function PrivacyPolicyPage() {
                                     To maintain the health and performance of our platform, we use internal tools and privacy-first analytics (PostHog Cloud and Umami Cloud) to understand how Bventy is functioning.
                                 </p>
                                 <p>
-                                    We route technical telemetry through our own secure proxies to strip identifiable markers before they reach third-party servers. Your IP is always anonymized.
+                                    We route technical telemetry through our own secure proxies to strip identifiable markers before they reach third-party servers. Your IP is always anonymized at the edge.
                                 </p>
                             </div>
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
                                     <h4 className="text-white font-medium mb-2">Service Integrity</h4>
-                                    <p className="text-sm text-white/50">Basic technical identifiers like IP addresses and browser fingerprints are logged temporarily to maintain system stability and prevent fraud.</p>
+                                    <p className="text-sm text-white/50">Basic technical identifiers are logged temporarily to maintain system stability and prevent coordinated attacks.</p>
                                 </div>
                                 <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
                                     <h4 className="text-white font-medium mb-2">Performance Metrics</h4>
-                                    <p className="text-sm text-white/50">We collect anonymous usage patterns to see which features are most helpful. We do not track your activity across other websites.</p>
+                                    <p className="text-sm text-white/50">We collect anonymous usage patterns to optimize feature delivery. We do not track your activity across other domains.</p>
                                 </div>
                             </div>
                         </div>
@@ -104,23 +134,23 @@ export default function PrivacyPolicyPage() {
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            4. Infrastructure & Safeguarding
+                            7. Infrastructure & Safeguarding
                         </h2>
                         <div className="space-y-8 text-white/70 leading-relaxed">
                             <p>
-                                Our core data resides in Neon (PostgreSQL) and Cloudflare R2 (Media). These providers are selected for their rigorous security compliance (SOC2 Type II) and global availability.
+                                Our core data resides in Neon (PostgreSQL) and Cloudflare R2 (Media Storage). These providers are selected for their rigorous security compliance (SOC2 Type II) and global availability.
                             </p>
                             <div className="grid md:grid-cols-2 gap-12">
                                 <div className="space-y-4">
-                                    <h3 className="text-white font-medium">Data Retention</h3>
+                                    <h3 className="text-white font-medium">Network Security</h3>
                                     <p className="text-sm text-white/50 leading-relaxed">
-                                        Personal data is retained only as long as your account is active. Upon deletion, we purge all identifiable records within 30 days.
+                                        We employ TLS 1.3 for all data in transit. Production environments are air-gapped from internal development networks to prevent accidental leaks.
                                     </p>
                                 </div>
                                 <div className="space-y-4">
-                                    <h3 className="text-white font-medium">Encryption</h3>
+                                    <h3 className="text-white font-medium">Data Encryption</h3>
                                     <p className="text-sm text-white/50 leading-relaxed">
-                                        We employ TLS 1.3 for data in transit and AES-256 hardware encryption at rest. Production environments are air-gapped.
+                                        All sensitive data is encrypted at rest using AES-256 hardware-level encryption, ensuring that physical access to servers does not compromise your identity.
                                     </p>
                                 </div>
                             </div>
@@ -129,32 +159,88 @@ export default function PrivacyPolicyPage() {
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            5. Your Rights & Erasure
+                            8. Retention Policy
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                You have the right to access, rectify, or export your data at any time. Our dashboard provides 1-click tools for data portability and account closure.
+                                Personal data is retained only as long as your account is active and for a short period thereafter for legal compliance. Upon deletion, we initiate an automated process to purge all identifiable records from our active systems within 30 days.
                             </p>
-                            <div className="flex flex-col gap-4">
-                                <div className="flex gap-4 items-start">
-                                    <div className="h-2 w-2 rounded-full bg-white/20 mt-2 shrink-0"></div>
-                                    <p className="text-sm italic">The "Right to be Forgotten" is a core feature. Deleting your account triggers an automated workflow that wipes your history from our stack.</p>
-                                </div>
-                                <div className="flex gap-4 items-start">
-                                    <div className="h-2 w-2 rounded-full bg-white/20 mt-2 shrink-0"></div>
-                                    <p className="text-sm italic">We use essential cookies to maintain your session. We do not use third-party tracking cookies or advertising pixels.</p>
-                                </div>
-                            </div>
                         </div>
                     </section>
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            6. Children & Revisions
+                            9. Cookie Usage
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                Bventy is designed for adults (18+). We do not knowingly collect data from minors. Major policy updates are announced via email to ensure ongoing transparency.
+                                We use essential cookies to maintain your session, security context, and preferences. We do not use third-party tracking cookies, advertising pixels, or cross-site behavioral indicators. Your digital footprint remains yours alone.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            10. User Rights
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                You have the right to access, rectify, or export your data at any time. Our platform provides self-service tools for data portability, allowing you to take your information wherever you choose.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            11. Data Erasure & "Right to be Forgotten"
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                Deleting your Bventy account triggers an automated workflow that wipes your profile history, media uploads, and analytics telemetry from our stack. We believe deletion should be absolute, not a request waiting for approval.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            12. Children's Privacy
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                Bventy is designed for professional use by adults (18+). We do not knowingly collect data from minors. If such data is discovered, it is purged immediately and without exception from our production archives.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            13. International Data Transfers
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                As a global platform, your data may be processed in various secure regions. We ensure all cross-border transfers comply with standard contractual clauses (SCCs) and the highest possible encryption standards throughout the lifecycle.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            14. Policy Revisions
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                We update this policy as we ship new features and iterate on our infrastructure. Major changes are announced via email and through your dashboard to ensure ongoing transparency and informed consent.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            15. Transparency Commitment
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                Our commitment to privacy is absolute. We invite you to review our security headers and technical disclosures any time. We build in the open, with your trust as our primary metric of success.
                             </p>
                         </div>
                     </section>
