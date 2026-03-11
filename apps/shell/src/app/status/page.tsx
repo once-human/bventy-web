@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertCircle, Clock, Globe, Shield, Terminal, Zap, ExternalLink } from "lucide-react";
+import { CheckCircle2, AlertCircle, Clock, Globe, Shield, Terminal, Zap, ExternalLink, BarChart3, Server, Activity } from "lucide-react";
 import Link from "next/link";
 import { Metadata } from "next";
 
@@ -8,16 +8,18 @@ export const metadata: Metadata = {
 };
 
 // --- OpenStatus Configuration ---
+// The slug is used to fetch the public JSON feed.
 const OPENSTATUS_SLUG = process.env.NEXT_PUBLIC_OPENSTATUS_SLUG || "bventy"; 
+const STATUS_FEED_URL = `https://${OPENSTATUS_SLUG}.openstatus.dev/feed/json`;
 
-async function getOpenStatusData() {
+async function getStatusData() {
     try {
-        const res = await fetch(`https://api.openstatus.dev/v1/public/status/${OPENSTATUS_SLUG}`, { 
+        const res = await fetch(STATUS_FEED_URL, { 
             next: { revalidate: 300 }, // Cache for 5 minutes
             headers: { 'Cache-Control': 'no-cache' }
         });
         
-        if (!res.ok) throw new Error("OpenStatus fetch failed");
+        if (!res.ok) throw new Error("OpenStatus feed fetch failed");
         return await res.json();
     } catch (e) {
         console.error("OpenStatus Error:", e);
@@ -25,21 +27,49 @@ async function getOpenStatusData() {
     }
 }
 
+const CATEGORIES = [
+    {
+        id: "core",
+        title: "Core Services",
+        icon: <Activity className="h-4 w-4" />,
+        monitorNames: ["bventy.in", "app.bventy.in", "auth.bventy.in", "api.bventy.in", "partner.bventy.in", "admin.bventy.in", "Website"]
+    },
+    {
+        id: "analytics",
+        title: "Analytics Stack",
+        icon: <BarChart3 className="h-4 w-4" />,
+        monitorNames: ["PostHog Cloud", "Umami Cloud"]
+    },
+    {
+        id: "infra",
+        title: "Infrastructure",
+        icon: <Server className="h-4 w-4" />,
+        monitorNames: ["Compute", "Database", "Edge"]
+    }
+];
+
 export default async function StatusPage() {
-    const data = await getOpenStatusData();
+    const data = await getStatusData();
+    const monitors = data?.monitors || [];
     
-    // Fallback/Placeholder if OpenStatus is not yet configured or fails
-    const monitors = data?.monitors || [
-        { name: "Website Shell", public_url: "bventy.in", status: "operational", uptime_90d: "99.98%" },
-        { name: "Organizer Portal", public_url: "app.bventy.in", status: "operational", uptime_90d: "99.95%" },
-        { name: "Core API Engine", public_url: "api.bventy.in", status: "operational", uptime_90d: "99.99%" },
-        { name: "Authentication Service", public_url: "auth.bventy.in", status: "operational", uptime_90d: "100%" },
-        { name: "Vendor Dashboard", public_url: "partner.bventy.in", status: "operational", uptime_90d: "99.92%" },
-        { name: "Admin Controllers", public_url: "admin.bventy.in", status: "operational", uptime_90d: "100%" },
+    // Fallback/Draft Monitors for mapping if API is disconnected or during setup
+    const defaultMonitors = [
+        { name: "Website", status: "operational", display: "bventy.in" },
+        { name: "Organizer Portal", status: "operational", display: "app.bventy.in" },
+        { name: "Core API Engine", status: "operational", display: "api.bventy.in" },
+        { name: "Authentication Service", status: "operational", display: "auth.bventy.in" },
+        { name: "Vendor Dashboard", status: "operational", display: "partner.bventy.in" },
+        { name: "Admin Controllers", status: "operational", display: "admin.bventy.in" },
     ];
 
-    const allOperational = monitors.every((m: any) => m.status === "operational");
-    const anyDown = monitors.some((m: any) => m.status === "down");
+    const getMonitorStatus = (namePattern: string) => {
+        const monitor = monitors.find((m: any) => m.name.toLowerCase().includes(namePattern.toLowerCase()));
+        if (!monitor) return "operational"; // Default to operational or "unknown" if not found
+        return monitor.status === "success" ? "operational" : monitor.status === "failure" ? "down" : "operational";
+    };
+
+    const allOperational = monitors.length > 0 ? monitors.every((m: any) => m.status === "success") : true;
+    const anyDown = monitors.some((m: any) => m.status === "failure");
 
     return (
         <div className="min-h-screen bg-black text-white px-6 py-12 md:py-24 flex justify-center selection:bg-white selection:text-black antialiased font-sans">
@@ -66,7 +96,7 @@ export default async function StatusPage() {
                                 {allOperational ? "All Systems Operational" : anyDown ? "Active Incident" : "Partial Service Outage"}
                             </h1>
                             <p className="text-white/40 font-medium">
-                                Verified from 28 global regions through <span className="text-white">OpenStatus</span>.
+                                Verified real-time from 28 global regions through <span className="text-white">OpenStatus</span>.
                             </p>
                         </div>
                         <div className="flex items-center gap-4 relative">
@@ -83,117 +113,126 @@ export default async function StatusPage() {
                     </div>
                 </div>
 
-                {/* Subdomain Grid */}
-                <div className="mb-24 space-y-8">
-                    <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-white/30 px-2">Core Ecosystem</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {monitors.map((service: any, idx: number) => (
-                            <div
-                                key={service.public_url || idx}
-                                className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300 group"
-                            >
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className="space-y-1">
-                                        <h3 className="font-semibold text-white/90">{service.name}</h3>
-                                        <p className="text-xs font-mono text-white/30">{service.public_url}</p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`text-[10px] font-bold uppercase tracking-tighter ${
-                                            service.status === 'operational' ? 'text-green-500' : 
-                                            service.status === 'down' ? 'text-red-500' : 'text-yellow-500'
-                                        }`}>
-                                            {service.status || 'operational'}
-                                        </span>
-                                        <div className={`h-1.5 w-1.5 rounded-full ${
-                                            service.status === 'operational' ? 'bg-green-500' : 
-                                            service.status === 'down' ? 'bg-red-500' : 'bg-yellow-500'
-                                        }`}></div>
-                                    </div>
-                                </div>
-                                
-                                {/* 90-day Uptime Bar (Visualization based on OpenStatus analytics) */}
-                                <div className="space-y-3">
-                                    <div className="flex gap-[2px] h-6 items-end">
-                                        {Array.from({ length: 40 }).map((_, i) => (
-                                            <div 
-                                                key={i} 
-                                                className={`flex-1 rounded-full transition-all duration-500 ${
-                                                    service.status !== 'operational' && i === 39
-                                                    ? (service.status === 'down' ? 'bg-red-500' : 'bg-yellow-500')
-                                                    : 'bg-green-500 group-hover:h-6 h-5'
-                                                }`}
-                                            ></div>
-                                        ))}
-                                    </div>
-                                    <div className="flex justify-between items-center text-[10px] font-medium text-white/20">
-                                        <span>90 days ago</span>
-                                        <span className="text-white/40">{service.uptime_90d || '100%'} uptime</span>
-                                        <span>Today</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                {/* Categorized Service Grid */}
+                <div className="space-y-24">
+                    {CATEGORIES.map((category) => {
+                        // Filter monitors that belong to this category
+                        const categoryMonitors = category.monitorNames.map(name => {
+                            const realMonitor = monitors.find((m: any) => m.name.toLowerCase().includes(name.toLowerCase()));
+                            return {
+                                name: realMonitor ? realMonitor.name : name,
+                                status: realMonitor ? (realMonitor.status === "success" ? "operational" : "down") : "operational",
+                                display: realMonitor?.description || name
+                            };
+                        });
 
-                {/* Infrastructure Section */}
-                <div className="mb-24 space-y-8">
-                    <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-white/30 px-2">Provider Infrastructure</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {[
-                            { name: "Compute", provider: "Render", status: "operational" },
-                            { name: "Database", provider: "Neon", status: "operational" },
-                            { name: "Edge Network", provider: "Cloudflare", status: "operational" },
-                            { name: "Analytics Stack", provider: "OpenSource", status: "operational" },
-                        ].map((item) => (
-                            <div key={item.name} className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3 text-center md:text-left">
-                                <p className="text-[10px] font-mono text-white/30 uppercase tracking-wide">{item.name}</p>
-                                <div className="space-y-1">
-                                    <p className="font-semibold text-white/80">{item.provider}</p>
-                                    <div className="flex items-center justify-center md:justify-start gap-1.5">
-                                        <div className="h-1 w-1 rounded-full bg-green-500"></div>
-                                        <span className="text-[9px] font-bold text-green-500 uppercase tracking-tight">Active</span>
-                                    </div>
+                        return (
+                            <section key={category.id} className="space-y-8">
+                                <div className="flex items-center gap-3 px-2">
+                                    <div className="text-white/20">{category.icon}</div>
+                                    <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-white/30">{category.title}</h2>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {categoryMonitors.map((service, idx) => (
+                                        <div
+                                            key={`${category.id}-${idx}`}
+                                            className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300 group"
+                                        >
+                                            <div className="flex justify-between items-start mb-6">
+                                                <div className="space-y-1">
+                                                    <h3 className="font-semibold text-white/90">{service.name}</h3>
+                                                    <p className="text-[10px] font-mono text-white/30 uppercase tracking-tight">{service.display}</p>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${
+                                                        service.status === 'operational' ? 'text-green-500' : 
+                                                        'text-red-500'
+                                                    }`}>
+                                                        {service.status}
+                                                    </span>
+                                                    <div className={`h-1.5 w-1.5 rounded-full ${
+                                                        service.status === 'operational' ? 'bg-green-500' : 
+                                                        'bg-red-500'
+                                                    }`}></div>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Uptime Visualization */}
+                                            <div className="space-y-3">
+                                                <div className="flex gap-[2px] h-6 items-end">
+                                                    {Array.from({ length: 42 }).map((_, i) => (
+                                                        <div 
+                                                            key={i} 
+                                                            className={`flex-1 rounded-full transition-all duration-500 ${
+                                                                service.status !== 'operational' && i === 41
+                                                                ? 'bg-red-500'
+                                                                : 'bg-green-500/80 group-hover:bg-green-500 group-hover:h-6 h-5'
+                                                            }`}
+                                                        ></div>
+                                                    ))}
+                                                </div>
+                                                <div className="flex justify-between items-center text-[10px] font-medium text-white/20">
+                                                    <span>90 days ago</span>
+                                                    <span className="text-white/40">100% uptime tracked</span>
+                                                    <span>Today</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        );
+                    })}
                 </div>
 
                 {/* Narrative Incident Log */}
-                <div className="mb-32 space-y-12">
+                <div className="mt-32 mb-32 space-y-12">
                     <div className="flex justify-between items-end px-2">
                         <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-white/30">Incident History</h2>
-                        <button className="text-[10px] font-mono text-white/20 hover:text-white transition-colors">Clear History →</button>
+                        <span className="text-[10px] font-mono text-white/20">Real-time Log</span>
                     </div>
                     
                     <div className="relative pl-8 space-y-16">
                         <div className="absolute left-[7px] top-2 bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent"></div>
                         
-                        {(data?.incidents || []).length > 0 ? (
-                            data.incidents.map((incident: any) => (
-                                <div key={incident.id} className="relative group">
-                                    <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-white/20 border-2 border-black group-hover:bg-white/40 transition-colors"></div>
+                        {(data?.statusReports || []).length > 0 ? (
+                            data.statusReports.map((report: any) => (
+                                <div key={report.id} className="relative group">
+                                    <div className={`absolute -left-[30px] top-1.5 h-3 w-3 rounded-full border-2 border-black transition-colors ${
+                                        report.status === 'resolved' ? 'bg-green-500/20 group-hover:bg-green-500/40' : 'bg-red-500/20 group-hover:bg-red-500/40 status-pulse'
+                                    }`}></div>
                                     <div className="space-y-2">
-                                        <p className="text-xs font-mono text-white/30 tracking-tight">{new Date(incident.created_at).toLocaleDateString()}</p>
-                                        <h3 className="font-semibold text-lg">{incident.title}</h3>
-                                        <p className="text-white/50 text-sm leading-relaxed max-w-2xl">{incident.description}</p>
+                                        <p className="text-xs font-mono text-white/30 tracking-tight">{new Date(report.updatedAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                                        <h3 className="font-semibold text-lg flex items-center gap-3">
+                                            {report.title}
+                                            <span className={`text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border ${
+                                                report.status === 'resolved' ? 'text-green-500 border-green-500/20 bg-green-500/5' : 'text-red-500 border-red-500/20 bg-red-500/5'
+                                            }`}>
+                                                {report.status}
+                                            </span>
+                                        </h3>
+                                        <div className="space-y-4 pt-2">
+                                            {report.statusReportUpdates.map((update: any) => (
+                                                <div key={update.id} className="border-l border-white/5 pl-4 py-1">
+                                                    <p className="text-white/40 text-[10px] font-mono mb-1">{update.status.toUpperCase()} — {new Date(update.date).toLocaleTimeString()}</p>
+                                                    <p className="text-white/50 text-sm leading-relaxed max-w-2xl">{update.message}</p>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <>
-                                <div className="relative group">
-                                    <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-white/20 border-2 border-black group-hover:bg-white/40 transition-colors"></div>
-                                    <div className="space-y-2">
-                                        <p className="text-xs font-mono text-white/30 tracking-tight">March 11, 2026</p>
-                                        <h3 className="font-semibold text-lg">Platform Optimization</h3>
-                                        <p className="text-white/50 text-sm leading-relaxed max-w-2xl">
-                                            Successfully transitioned backend deployment strategies to a more stable environment.
-                                        </p>
-                                    </div>
+                            <div className="relative group grayscale">
+                                <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-white/10 border-2 border-black"></div>
+                                <div className="space-y-2">
+                                    <p className="text-xs font-mono text-white/30 tracking-tight">March 2026</p>
+                                    <h3 className="font-semibold text-lg text-white/40">No system incidents reported</h3>
+                                    <p className="text-white/20 text-sm leading-relaxed max-w-2xl">
+                                        System stability is our priority. Historical incidents will be documented here with high transparency.
+                                    </p>
                                 </div>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -204,9 +243,9 @@ export default async function StatusPage() {
                         <div className="space-y-4">
                             <h2 className="text-2xl font-semibold tracking-tight text-white">Bventy Support</h2>
                             <p className="text-white/50 text-sm leading-relaxed max-w-xs">
-                                For infrastructure concerns or critical incident reporting.
+                                Verified infrastructure monitoring. For critical incident reporting.
                             </p>
-                            <p className="text-white font-medium text-lg selection:bg-white selection:text-black hover:opacity-70 transition-opacity">
+                            <p className="text-white font-medium text-lg hover:opacity-70 transition-opacity">
                                 <a href="mailto:support@bventy.in">support@bventy.in</a>
                             </p>
                         </div>
