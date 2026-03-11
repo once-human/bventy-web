@@ -177,7 +177,7 @@ export default function TermsOfServicePage() {
                                 <p className="text-white/50 text-sm leading-relaxed max-w-xs">
                                     For formal legal notices or questions regarding our terms, please contact our administrative team.
                                 </p>
-                                <p className="text-white font-medium text-lg selection:bg-white selection:text-black">legal@bventy.in</p>
+                                <p className="text-white font-medium text-lg selection:bg-white selection:text-black">support@bventy.in</p>
                                 <div className="pt-2">
                                     <Link href="/privacy" className="text-white/40 text-sm hover:text-white transition-all underline underline-offset-8 decoration-white/10 hover:decoration-white">
                                         View Privacy Policy

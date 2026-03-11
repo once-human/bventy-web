@@ -254,7 +254,7 @@ export default function PrivacyPolicyPage() {
                                 <p className="text-white/50 text-sm leading-relaxed max-w-xs">
                                     If you have questions about our privacy standards or wish to exercise your data rights, our team is ready to assist.
                                 </p>
-                                <p className="text-white font-medium text-lg selection:bg-white selection:text-black">legal@bventy.in</p>
+                                <p className="text-white font-medium text-lg selection:bg-white selection:text-black">support@bventy.in</p>
                                 <div className="pt-2">
                                     <Link href="/terms" className="text-white/40 text-sm hover:text-white transition-all underline underline-offset-8 decoration-white/10 hover:decoration-white">
                                         View Terms of Service
