@@ -155,3 +155,18 @@
         scrollbar-color: oklch(0.556 0 0 / 20%) transparent;
     }
 }
+
+.status-pulse {
+    animation: statusPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: .7;
+        transform: scale(1.1);
+    }
+}

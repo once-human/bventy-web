@@ -80,6 +80,8 @@ export function proxy(request: NextRequest) {
         appPath = '/vendor';
     } else if (host.startsWith('admin.')) {
         appPath = '/admin';
+    } else if (host.startsWith('status.')) {
+        appPath = '/status';
     }
 
     // 4. Rewrite internal path
