@@ -12,13 +12,17 @@ const STATUS_ENDPOINT = `${API_URL}/system/status`;
 
 async function getStatusData() {
     try {
+        console.log("Fetching status from:", STATUS_ENDPOINT);
         const res = await fetch(STATUS_ENDPOINT, { 
             next: { revalidate: 300 }, // Cache for 5 minutes
             headers: { 'Cache-Control': 'no-cache' }
         });
         
-        if (!res.ok) throw new Error("System status fetch failed");
-        return await res.json();
+        console.log("Status response status:", res.status);
+        if (!res.ok) throw new Error(`System status fetch failed with status ${res.status}`);
+        const data = await res.json();
+        console.log("Status monitors count:", data?.monitors?.length || 0);
+        return data;
     } catch (e) {
         console.error("Status Error:", e);
         return null;
