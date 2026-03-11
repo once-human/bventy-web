@@ -19,190 +19,169 @@ export default function TermsOfServicePage() {
                     </Link>
                 </div>
 
-                <header className="mb-24 space-y-6">
-                    <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-tight">
+                <header className="mb-32 space-y-8">
+                    <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-tight">
                         Terms. <br />
-                        <span className="text-white/40">The rules of the road.</span>
+                        <span className="text-white/40">The foundation of trust.</span>
                     </h1>
-                    <div className="flex flex-col md:flex-row md:items-center gap-4 text-white/50 text-sm font-medium pt-4">
-                        <p>Effective Date: March 11, 2026</p>
-                        <span className="hidden md:block text-white/20">|</span>
-                        <p>Version 2.1.0</p>
+                    <div className="flex flex-col md:flex-row md:items-center gap-6 text-white/50 text-xs font-mono uppercase tracking-widest pt-4">
+                        <p>Updated: March 11, 2026</p>
+                        <span className="hidden md:block text-white/10">•</span>
+                        <p>Version 2.2.0</p>
                     </div>
                 </header>
 
-                <div className="space-y-32">
+                <div className="space-y-48">
                     
-                    {/* Section 1: Acceptance */}
-                    <section className="max-w-2xl">
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">01 / Agreement</h2>
-                        <p className="text-white/70 text-2xl leading-relaxed font-medium tracking-tight">
-                            By using Bventy, you are agreeing to these terms. It is a simple agreement between you and us to make sure everyone plays fair in our marketplace.
+                    {/* Section 1: Agreement */}
+                    <section className="max-w-3xl">
+                        <h2 className="text-xs uppercase tracking-[0.2em] text-white/30 font-bold mb-10">01 / THE AGREEMENT</h2>
+                        <p className="text-white/90 text-3xl md:text-4xl leading-[1.2] font-semibold tracking-tight">
+                            By accessing or using Bventy, you are engaging in a shared commitment. These terms define the foundation of our relationship and ensure a safe, fair environment for everyone in our marketplace.
                         </p>
                     </section>
 
                     {/* Section 2: Eligibility */}
                     <section>
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">02 / Who Can Use Bventy</h2>
-                        <div className="grid md:grid-cols-2 gap-12">
-                            <div className="space-y-4 text-white/60 leading-relaxed">
-                                <p>
-                                    You must be at least 18 years old to use this platform. This is because our services involve legal agreements between users.
-                                </p>
+                        <h2 className="text-xs uppercase tracking-[0.2em] text-white/30 font-bold mb-10">02 / ACCESS & ELIGIBILITY</h2>
+                        <div className="grid md:grid-cols-2 gap-20 text-white/60 leading-relaxed">
+                            <div className="space-y-4">
+                                <h3 className="text-white font-semibold text-lg">Maturity</h3>
+                                <p className="text-sm">You must be at least 18 years of age. Our platform facilitates legal agreements, requiring the capacity for digital binding.</p>
                             </div>
-                            <div className="p-8 rounded-3xl bg-white/5 border border-white/10">
-                                <h4 className="text-white font-medium mb-2">Business Use</h4>
-                                <p className="text-white/50 text-sm leading-relaxed">
-                                    If you are signing up for a company, you represent that you have the authority to do so.
-                                </p>
+                            <div className="space-y-4">
+                                <h3 className="text-white font-semibold text-lg">Representation</h3>
+                                <p className="text-sm">If you act on behalf of a company or entity, you confirm that you hold the legal authority to bind that entity to these terms.</p>
                             </div>
                         </div>
                     </section>
 
-                    {/* Section 3: Accounts */}
+                    {/* Section 3: Identity */}
                     <section>
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">03 / Your Account</h2>
+                        <h2 className="text-xs uppercase tracking-[0.2em] text-white/30 font-bold mb-10">03 / DIGITAL IDENTITY</h2>
                         <div className="space-y-12">
-                            <p className="text-white/70 text-xl leading-relaxed">
-                                You are responsible for keeping your account secure. If you share your password, you are responsible for what happens next.
+                            <p className="text-white/70 text-xl leading-relaxed max-w-2xl">
+                                Your account is the gateway to your profile. You are responsible for all activity that occurs under your credentials.
                             </p>
-                            <div className="grid md:grid-cols-2 gap-8">
-                                <div className="p-8 rounded-3xl bg-white/5 border border-white/10 space-y-4">
-                                    <h4 className="text-white font-medium italic">Honesty</h4>
-                                    <p className="text-white/50 text-sm leading-relaxed">Don't create fake profiles. Everything you tell us should be true.</p>
+                            <div className="grid md:grid-cols-2 gap-px bg-white/10 rounded-3xl overflow-hidden border border-white/10">
+                                <div className="p-10 bg-black space-y-4">
+                                    <h4 className="text-white font-semibold">Integrity</h4>
+                                    <p className="text-white/40 text-sm leading-relaxed">We expect absolute truthfulness in your profile details, portfolios, and communications.</p>
                                 </div>
-                                <div className="p-8 rounded-3xl bg-white/5 border border-white/10 space-y-4">
-                                    <h4 className="text-white font-medium italic">Security</h4>
-                                    <p className="text-white/50 text-sm leading-relaxed">Let us know immediately if you think someone else has accessed your account.</p>
+                                <div className="p-10 bg-black space-y-4">
+                                    <h4 className="text-white font-semibold">Vigilance</h4>
+                                    <p className="text-white/40 text-sm leading-relaxed">Notify us immediately if you suspect any unauthorized access to your digital workspace.</p>
                                 </div>
                             </div>
                         </div>
                     </section>
 
-                    {/* Section 4: What We Do */}
-                    <section>
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">04 / Our Role</h2>
-                        <div className="p-12 rounded-[2.5rem] bg-white/[0.03] border border-white/10">
-                            <h3 className="text-3xl font-bold tracking-tight mb-8 text-white/90">We are a marketplace.</h3>
-                            <p className="text-white/60 leading-relaxed max-w-2xl mb-8">
-                                Bventy helps Organizers find Vendors. We provide the tools for you to connect, but we aren't part of the actual event services.
+                    {/* Section 4: Ecosystem Role */}
+                    <section className="bg-white/5 p-12 md:p-20 rounded-[3rem] border border-white/10">
+                        <h2 className="text-xs uppercase tracking-[0.2em] text-white/30 font-bold mb-10">04 / THE MARKETPLACE</h2>
+                        <div className="space-y-10 max-w-3xl">
+                            <h3 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">We Architect Connections.</h3>
+                            <p className="text-white/70 text-lg leading-relaxed">
+                                Bventy is a platform that bridges the gap between Organizers and Vendors. While we provide the infrastructure for discovery and coordination, we do not participate in the underlying service contracts.
                             </p>
-                            <div className="flex gap-4 p-6 rounded-2xl bg-white/5 border border-white/5">
-                                <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] shrink-0 font-bold">!</div>
-                                <p className="text-white/60 text-sm leading-relaxed">
-                                    Contracts for services are between the Organizer and the Vendor. Bventy is not responsible for the quality or delivery of those services.
+                            <div className="flex gap-6 p-8 rounded-3xl bg-white/5 border border-white/5 items-center">
+                                <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center text-xs shrink-0 font-bold text-white tracking-widest">INFO</div>
+                                <p className="text-white/50 text-sm leading-relaxed italic">
+                                    Contracts for events are strictly between the Organizer and the Vendor. We are not responsible for the performance or quality of external services.
                                 </p>
                             </div>
                         </div>
                     </section>
 
-                    {/* Section 5: Marketplace Rules */}
+                    {/* Section 5: Conduct */}
                     <section>
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">05 / How it Works</h2>
-                        <div className="grid md:grid-cols-2 gap-12">
-                            <div className="space-y-6">
-                                <h3 className="text-2xl font-semibold italic underline decoration-white/10 underline-offset-8">Quotes</h3>
-                                <p className="text-white/60 leading-relaxed">
-                                    Once a vendor sends a quote, they should honor those terms for the duration they specified.
+                        <h2 className="text-xs uppercase tracking-[0.2em] text-white/30 font-bold mb-10">05 / PROFESSIONAL CONDUCT</h2>
+                        <div className="grid md:grid-cols-2 gap-20">
+                            <div className="space-y-8">
+                                <h3 className="text-2xl font-bold text-white">Ethical Transactions</h3>
+                                <p className="text-white/50 leading-relaxed text-sm">
+                                    Quotes sent through Bventy represent a commitment. Vendors are expected to honor the terms of their quotes for the specified duration.
                                 </p>
                             </div>
-                            <div className="p-8 rounded-3xl bg-white/5 border border-white/10">
-                                <h4 className="text-white font-medium mb-4 italic">Fees</h4>
+                            <div className="p-10 rounded-3xl bg-white/5 border border-white/10">
+                                <h4 className="text-white font-semibold mb-4">Platform Integrity</h4>
                                 <p className="text-white/50 text-sm leading-relaxed">
-                                    We will be clear about any platform fees before you commit to anything. No surprises.
+                                    We maintain a high standard of communication. Circumventing our platform to avoid policies may result in account restriction.
                                 </p>
                             </div>
                         </div>
                     </section>
 
-                    {/* Section 6: Communication */}
+                    {/* Section 6: Google Integration */}
                     <section>
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">06 / Chat & Contact</h2>
-                        <div className="space-y-8 max-w-2xl">
-                            <p className="text-white/70 text-xl leading-relaxed">
-                                We keep contact details hidden until a quote is accepted. This helps prevent spam and ensures a professional environment.
-                            </p>
-                            <p className="text-white/50 text-sm leading-relaxed">
-                                Taking transactions off-platform to avoid policies may result in your account being closed.
+                        <h2 className="text-xs uppercase tracking-[0.2em] text-white/30 font-bold mb-10">06 / GOOGLE SYNC</h2>
+                        <div className="space-y-10 max-w-3xl">
+                            <h3 className="text-2xl md:text-3xl font-bold text-white">Technical Boundaries</h3>
+                            <p className="text-white/60 text-lg leading-relaxed">
+                                Google Calendar integration is provided as a utility to enhance your scheduling. We are not liable for any discrepancies caused by third-party API delays or outages. Always verify your schedule independently.
                             </p>
                         </div>
                     </section>
 
-                    {/* Section 7: Google Calendar */}
-                    <section className="bg-white/5 p-12 rounded-[2.5rem] border border-white/10">
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">07 / Google Calendar Sync</h2>
-                        <div className="space-y-8 max-w-3xl">
-                            <h3 className="text-2xl font-bold">Technical Disclaimer</h3>
-                            <p className="text-white/60 leading-relaxed">
-                                We offer Google Calendar sync as a convenience. We aren't liable for sync delays, double bookings, or outages in Google's services. Always double check your schedule.
+                    {/* Section 7: Content Ownership */}
+                    <section>
+                        <h2 className="text-xs uppercase tracking-[0.2em] text-white/30 font-bold mb-10">07 / INTELLECTUAL PROPERTY</h2>
+                        <div className="max-w-2xl space-y-8">
+                            <p className="text-white/70 text-lg leading-relaxed">
+                                You retain ownership of all content you upload. By sharing it on Bventy, you grant us a non-exclusive license to display it to our global community to facilitate our services.
                             </p>
-                        </div>
-                    </section>
-
-                    {/* Section 8: Your Content */}
-                    <section>
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">08 / Photos & Portfolios</h2>
-                        <p className="text-white/60 leading-relaxed max-w-2xl mb-8">
-                            When you upload photos or descriptions, you give us permission to show them to other users on Bventy. You still own your content, but we need this license to make the platform work.
-                        </p>
-                    </section>
-
-                    {/* Section 9: Prohibited Behavior */}
-                    <section>
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">09 / Common Sense</h2>
-                        <ul className="grid md:grid-cols-2 gap-4 text-sm text-white/40 list-disc list-inside">
-                            <li>No scraping our data.</li>
-                            <li>No fake portfolios.</li>
-                            <li>No spamming the chat.</li>
-                            <li>No illegal activities.</li>
-                        </ul>
-                    </section>
-
-                    {/* Section 10: Ending our Relationship */}
-                    <section>
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">10 / Termination</h2>
-                        <p className="text-white/60 leading-relaxed max-w-2xl">
-                            You can stop using Bventy at any time. We also reserve the right to stop providing the service to you if you violate these rules.
-                        </p>
-                    </section>
-
-                    {/* Section 11: Liability */}
-                    <section>
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">11 / Legalese</h2>
-                        <div className="p-8 rounded-3xl bg-white/5 border border-white/10 text-white/40 text-xs uppercase leading-relaxed space-y-4">
-                            <p>
-                                BVENTY IS PROVIDED "AS IS." WE DON'T PROMISE IT WILL BE PERFECT OR UNINTERRUPTED.
-                            </p>
-                            <p>
-                                OUR LIABILITY IS LIMITED TO THE AMOUNT YOU HAVE PAID US IN THE LAST 12 MONTHS. WE AREN'T LIABLE FOR INDIRECT DAMAGES LIKE LOST PROFITS.
-                            </p>
-                        </div>
-                    </section>
-
-                    {/* Section 12: Disputes */}
-                    <section>
-                        <h2 className="text-sm uppercase tracking-widest text-white/30 font-bold mb-8">12 / Governing Law</h2>
-                        <p className="text-white/60 leading-relaxed max-w-2xl">
-                            These terms are governed by the laws of India. Any formal disputes will be handled in Mumbai.
-                        </p>
-                    </section>
-
-                    {/* Final Contact */}
-                    <section className="pt-32 border-t border-white/10 pb-20">
-                        <div className="flex flex-col md:flex-row justify-between gap-16">
-                            <div className="space-y-6">
-                                <h2 className="text-3xl font-bold tracking-tight text-white">Contact Us</h2>
-                                <p className="text-white/50 text-sm leading-relaxed max-w-sm">
-                                    Have questions about these rules? We are here to help.
-                                </p>
-                                <div className="space-y-1">
-                                    <p className="text-white font-semibold">legal@bventy.in</p>
-                                    <Link href="/privacy" className="text-white/30 text-xs hover:text-white transition-colors">View Privacy Policy</Link>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-6 rounded-2xl bg-white/5 border border-white/5 text-center">
+                                    <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold">You Own It</p>
+                                </div>
+                                <div className="p-6 rounded-2xl bg-white/5 border border-white/5 text-center">
+                                    <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold">We Shield It</p>
                                 </div>
                             </div>
-                            <div className="flex flex-col justify-end text-right space-y-2">
-                                <p className="text-white/20 text-[10px] font-mono uppercase tracking-[0.3em] font-bold">DESIGNED IN INDIA</p>
-                                <p className="text-white/40 text-sm">© {new Date().getFullYear()} Bventy. All rights reserved.</p>
+                        </div>
+                    </section>
+
+                    {/* Section 8: Limitations */}
+                    <section>
+                        <h2 className="text-xs uppercase tracking-[0.2em] text-white/30 font-bold mb-10">08 / LEGAL LIMITATIONS</h2>
+                        <div className="p-10 rounded-3xl bg-white/5 border border-white/10 space-y-6">
+                            <p className="text-white/50 text-xs uppercase tracking-widest font-black leading-relaxed">
+                                BVENTY IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS. WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED.
+                            </p>
+                            <p className="text-white/30 text-xs uppercase tracking-widest font-bold leading-relaxed">
+                                OUR TOTAL LIABILITY FOR ANY CLAIM ARISING OUT OF THESE TERMS SHALL NOT EXCEED THE TOTAL FEES PAID TO US BY YOU DURING THE PRECEDING TWELVE MONTHS.
+                            </p>
+                        </div>
+                    </section>
+
+                    {/* Section 9: Governing Law */}
+                    <section>
+                        <h2 className="text-xs uppercase tracking-[0.2em] text-white/30 font-bold mb-10">09 / JURISDICTION</h2>
+                        <p className="text-white/60 text-lg leading-relaxed max-w-2xl">
+                            These terms are governed by the laws of the Republic of India. Any disputes shall be subject to the exclusive jurisdiction of the courts in Mumbai.
+                        </p>
+                    </section>
+
+                    {/* Final Footer */}
+                    <section className="pt-48 border-t border-white/10 pb-20">
+                        <div className="grid md:grid-cols-2 gap-16">
+                            <div className="space-y-12">
+                                <h2 className="text-5xl md:text-6xl font-bold tracking-tighter text-white">Contact Us</h2>
+                                <div className="space-y-8">
+                                    <p className="text-white/50 text-lg leading-relaxed max-w-sm">
+                                        If you have questions about these standards or wish to exercise your rights, our team is ready to assist.
+                                    </p>
+                                    <div className="space-y-4">
+                                        <p className="text-3xl md:text-4xl font-bold tracking-tight text-white selection:bg-white selection:text-black">legal@bventy.in</p>
+                                        <div className="pt-4">
+                                            <Link href="/privacy" className="text-white/40 text-sm hover:text-white transition-all underline underline-offset-8 decoration-white/10 hover:decoration-white">View Privacy Policy</Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex flex-col justify-end md:items-end space-y-4">
+                                <p className="text-white/50 text-sm">© {new Date().getFullYear()} Bventy. All rights reserved.</p>
+                                <p className="text-white/20 text-xs font-mono uppercase tracking-[0.4em]">DESIGNED IN INDIA</p>
                             </div>
                         </div>
                     </section>
