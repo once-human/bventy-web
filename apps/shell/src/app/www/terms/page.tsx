@@ -19,89 +19,121 @@ export default function TermsOfServicePage() {
                     </Link>
                 </div>
 
-                <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">
-                    Terms of Service
-                </h1>
+                <div className="space-y-4 mb-16">
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+                        Terms of Service. Clear and simple.
+                    </h1>
+                    <p className="text-white/50 font-medium">Last updated: March 11, 2026</p>
+                </div>
 
-                <p className="text-white/70 text-lg leading-relaxed mb-12">
-                    Effective Date: March 8, 2026<br />
-                    Welcome to Bventy. By using our platform, you agree to these terms. Please read them carefully.
+                <p className="text-white/70 text-xl leading-relaxed mb-16">
+                    These Terms of Service govern your use of Bventy. By accessing our platform, you agree to these terms. We have designed them to be easy to understand, reflecting our commitment to transparency and mutual respect.
                 </p>
 
-                <div className="space-y-12">
-                    <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            1. Acceptance of Terms
-                        </h2>
-                        <p className="text-white/70 leading-relaxed">
-                            By accessing or using Bventy, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
-                        </p>
-                    </section>
+                <div className="space-y-20">
 
                     <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            2. Use License
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            1. The Bventy Marketplace
                         </h2>
-                        <div className="space-y-4 text-white/70 leading-relaxed">
+                        <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                Bventy is an open-source platform. While the source code is available under its respective license, our hosted service ("Bventy Cloud") is subject to these terms.
+                                Bventy provides a sophisticated platform to connect Event Organizers with professional Vendors. We are the architects of this marketplace, facilitating connections and providing tools for seamless planning.
                             </p>
                             <p>
-                                You may not use the platform for any illegal purpose, to harass others, or to distribute spam. We reserve the right to terminate accounts that violate these guidelines.
+                                It is important to note that Bventy does not provide the event services or vendor services ourselves. Any agreement for services is directly between the Organizer and the Vendor.
                             </p>
                         </div>
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            2. Account Responsibilities
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                To use certain features of Bventy, you must create an account. You are responsible for maintaining the confidentiality of your credentials and for all activities that occur under your account.
+                            </p>
+                            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                                <h3 className="text-white font-medium mb-2">Professional Conduct</h3>
+                                <p className="text-sm">We expect all users to interact with professional courtesy. Harassment, spam, or any illegal activity will result in immediate termination of account access.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
                             3. Calendar Synchronization
                         </h2>
-                        <div className="space-y-4 text-white/70 leading-relaxed">
-                            <p>
-                                Our platform offers a Google Calendar synchronization feature for vendors. By enabling this feature:
+                        <div className="p-8 rounded-3xl bg-white/5 border border-white/10 space-y-6">
+                            <p className="text-white/70 leading-relaxed text-sm italic">
+                                For Vendors using our Google Calendar integration:
                             </p>
-                            <ul className="list-disc pl-5 space-y-2">
-                                <li>You represent that you have the authority to grant us access to the connected Google account.</li>
-                                <li>You understand that Bventy will read your busy slots to update your availability and write new events for confirmed bookings.</li>
-                                <li>Maintaining the accuracy of your synced calendar is your responsibility. Bventy is not liable for missed bookings or scheduling conflicts due to sync delays or user error.</li>
+                            <ul className="space-y-6">
+                                <li className="flex gap-4">
+                                    <div className="h-2 w-2 rounded-full bg-white/20 mt-2 shrink-0"></div>
+                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Authorization.</span> You authorize Bventy to access your connected Google account to synchronize availability and bookings.</p>
+                                </li>
+                                <li className="flex gap-4">
+                                    <div className="h-2 w-2 rounded-full bg-white/20 mt-2 shrink-0"></div>
+                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Accuracy.</span> While we aim for perfect synchronization, you are responsible for the ultimate accuracy of your calendar and availability.</p>
+                                </li>
+                                <li className="flex gap-4">
+                                    <div className="h-2 w-2 rounded-full bg-white/20 mt-2 shrink-0"></div>
+                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Service Continuity.</span> We are not liable for scheduling conflicts arising from sync delays, technical interruptions, or third party service outages.</p>
+                                </li>
                             </ul>
                         </div>
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            4. Disclaimer
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            4. Intellectual Property
                         </h2>
-                        <p className="text-white/70 leading-relaxed">
-                            The materials on Bventy's website are provided on an 'as is' basis. Bventy makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
-                        </p>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                You retain ownership of the content you upload to Bventy. By sharing content on our platform, you grant Bventy a non exclusive license to display and distribute that content to facilitate our services.
+                            </p>
+                            <p>
+                                The Bventy brand, platform design, and original software are the intellectual property of Bventy and are protected by applicable copyright and trademark laws.
+                            </p>
+                        </div>
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            5. Limitations
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            5. Limitation of Liability
                         </h2>
-                        <p className="text-white/70 leading-relaxed">
-                            In no event shall Bventy or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Bventy's website, even if Bventy or a Bventy authorized representative has been notified orally or in writing of the possibility of such damage.
-                        </p>
+                        <div className="space-y-6 text-white/70 leading-relaxed italic text-sm">
+                            <p>
+                                Bventy is provided on an "as is" and "as available" basis. To the maximum extent permitted by law, Bventy shall not be liable for any indirect, incidental, or consequential damages resulting from your use of the platform.
+                            </p>
+                            <p>
+                                We do not guarantee that the platform will be uninterrupted or error free. Your use of Bventy is at your own professional risk.
+                            </p>
+                        </div>
                     </section>
 
-                    <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            6. Governing Law
-                        </h2>
-                        <p className="text-white/70 leading-relaxed">
-                            These terms and conditions are governed by and construed in accordance with the laws and you irrevocably submit to the exclusive jurisdiction of the courts in that State or location.
-                        </p>
+                    <section className="pt-20 border-t border-white/10">
+                        <div className="flex flex-col md:flex-row justify-between gap-12">
+                            <div className="space-y-4">
+                                <h2 className="text-2xl font-semibold tracking-tight">Legal Inquiry</h2>
+                                <p className="text-white/50 text-sm leading-relaxed max-w-xs">
+                                    For formal legal notices or questions regarding these terms, please contact our administrative team.
+                                </p>
+                                <p className="text-white font-medium">legal@bventy.in</p>
+                            </div>
+                            <div className="text-white/30 text-xs flex flex-col justify-end">
+                                <p>© {new Date().getFullYear()} Bventy. All rights reserved.</p>
+                            </div>
+                        </div>
                     </section>
+
                 </div>
 
-                <div className="mt-20 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/40 text-sm">
-                    <p>© {new Date().getFullYear()} Bventy. All rights reserved.</p>
-                    <div className="flex gap-6">
-                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-                        <Link href="/" className="hover:text-white transition-colors">Home</Link>
-                    </div>
+                <div className="mt-12 flex gap-6 text-white/40 text-sm">
+                    <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                    <Link href="/" className="hover:text-white transition-colors">Home</Link>
                 </div>
             </div>
         </div>

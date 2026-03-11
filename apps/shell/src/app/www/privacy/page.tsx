@@ -19,121 +19,134 @@ export default function PrivacyPolicyPage() {
                     </Link>
                 </div>
 
-                <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">
-                    Privacy Policy
-                </h1>
-
-                <p className="text-white/70 text-lg leading-relaxed mb-12">
-                    Effective Date: February 23, 2026<br />
-                    At Bventy, we believe in radical transparency. In the spirit of open-source development, we want you to know exactly what data we collect, how we collect it, and why. We do not sell your data. We use telemetry strictly to improve the platform and provide a world-class experience.
-                </p>
-
-                <div className="space-y-12">
-
-                    <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            1. Information We Collect
-                        </h2>
-                        <div className="space-y-4 text-white/70 leading-relaxed">
-                            <p>
-                                <strong>When you visit anonymously:</strong> We collect basic telemetry data such as your referring URL, device type, general location (country/city), and the pages you visit.
-                            </p>
-                            <p>
-                                <strong>When you create an account:</strong> We collect the information you explicitly provide: your name, email address, password (securely hashed), and any profile information you choose to upload (portfolios, event details, etc.).
-                            </p>
-                        </div>
-                    </section>
-
-                    <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            2. Google Calendar Data Usage
-                        </h2>
-                        <div className="space-y-4 text-white/70 leading-relaxed">
-                            <p>
-                                When you choose to sync your Google Calendar with Bventy, we request access to your calendar events. This section explains how we handle that sensitive data.
-                            </p>
-                            <ul className="list-disc pl-5 space-y-2">
-                                <li><strong>What we access:</strong> We only access your calendar events and "Busy" time slots via the Google Calendar API.</li>
-                                <li><strong>Why we access it:</strong> To automatically block off dates on your Bventy availability when you are busy on Google, and to push your confirmed Bventy bookings to your Google Calendar for easier management.</li>
-                                <li><strong>Storage & Sharing:</strong> Your Google OAuth tokens are stored securely in our database. We do not share your calendar data with any third parties or use it for any purpose other than providing the synchronization service.</li>
-                                <li><strong>Your Control:</strong> You can disconnect your Google Calendar at any time via your dashboard. Disconnecting will revoke our access and allow you to delete all previously synced Google data from our servers.</li>
-                            </ul>
-                        </div>
-                    </section>
-
-                    <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            3. How We Track Usage (Analytics)
-                        </h2>
-                        <div className="space-y-4 text-white/70 leading-relaxed">
-                            <p>
-                                We use two primary analytics tools to understand how Bventy is used. To ensure we have complete and accurate data to improve our platform, <strong>we actively route this analytics traffic through our own first-party servers (Reverse Proxies)</strong>. This means our tracking scripts are deliberately constructed to bypass browser ad-blockers and privacy shields.
-                            </p>
-
-                            <div className="bg-white/5 border border-white/10 p-6 rounded-2xl mt-4">
-                                <h3 className="text-lg font-medium text-white mb-2">Umami Analytics</h3>
-                                <p className="text-sm">
-                                    We use Umami for lightweight, privacy-focused dashboarding. Umami is entirely cookieless and does not track you across the broader internet. It simply tells us how many people are visiting our site and which pages are most popular.
-                                </p>
-                            </div>
-
-                            <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-                                <h3 className="text-lg font-medium text-white mb-2">PostHog Analytics</h3>
-                                <p className="text-sm mb-3">
-                                    We use PostHog for deep, technical product analytics. This tool is highly aggressive in capturing data so we can squash bugs and understand user flows. PostHog captures:
-                                </p>
-                                <ul className="list-disc pl-5 text-sm space-y-1">
-                                    <li><strong>Autocapture:</strong> Every click, scroll, and form interaction.</li>
-                                    <li><strong>Session Recordings:</strong> Video-like playbacks of your screen interactions while using the platform.</li>
-                                    <li><strong>Identity Mapping:</strong> When you log into Bventy, we explicitly link your anonymous session data (including recordings) to your actual User Profile (Name, Email, ID). This allows our engineering team to provide highly targeted support if you encounter an error.</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            4. Why We Collect This Data
-                        </h2>
-                        <div className="space-y-4 text-white/70 leading-relaxed">
-                            <p>
-                                Building a complex marketplace requires deep insights. If a vendor struggles to upload a portfolio, or if an event planner encounters a broken button, we use session recordings and telemetry to see exactly what went wrong without needing you to write a lengthy bug report. We collect data to make Bventy faster, less buggy, and more intuitive.
-                            </p>
-                        </div>
-                    </section>
-
-                    <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            5. Data Sharing & Third Parties
-                        </h2>
-                        <div className="space-y-4 text-white/70 leading-relaxed">
-                            <p>
-                                We do not sell your personal data to data brokers, advertisers, or third-party marketers. Your data is housed securely within our database infrastructure (Render/PostgreSQL), our media storage (Cloudflare R2), and our analytics providers (Umami Cloud and PostHog US).
-                            </p>
-                        </div>
-                    </section>
-
-                    <section>
-                        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-                            6. Your Rights & Contact
-                        </h2>
-                        <div className="space-y-4 text-white/70 leading-relaxed">
-                            <p>
-                                Because we are an open platform, we believe you have a right to your data. If you wish to have your account, your data, or your analytics sessions permanently deleted from our servers, please contact us.
-                            </p>
-                            <p>
-                                If you have privacy-specific concerns or questions about this policy, reach out directly at: <strong>privacy@bventy.in</strong>
-                            </p>
-                        </div>
-                    </section>
-
+                <div className="space-y-4 mb-16">
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+                        Privacy. Built into everything we do.
+                    </h1>
+                    <p className="text-white/50 font-medium">Last updated: March 11, 2026</p>
                 </div>
 
-                <div className="mt-20 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/40 text-sm">
-                    <p>© {new Date().getFullYear()} Bventy. All rights reserved.</p>
-                    <div className="flex gap-6">
-                        <Link href="/" className="hover:text-white transition-colors">Home</Link>
-                    </div>
+                <p className="text-white/70 text-xl leading-relaxed mb-16">
+                    At Bventy, we believe privacy is a fundamental human right. Our platform is designed from the ground up to protect your information, providing you with transparency and control over your data. This policy explains how we handle your personal information and the choices you have.
+                </p>
+
+                <div className="space-y-20">
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            1. Information We Collect
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                We collect information to provide a better experience for everyone using Bventy. The types of data we collect depend on how you interact with our platform.
+                            </p>
+                            <div className="grid gap-6 md:grid-cols-2">
+                                <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                                    <h3 className="text-white font-medium mb-2">Account Information</h3>
+                                    <p className="text-sm">When you create an account, we collect your name, email address, and profile preferences. Your password is never stored in plain text; we use secure hashing to protect it.</p>
+                                </div>
+                                <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                                    <h3 className="text-white font-medium mb-2">Profile Content</h3>
+                                    <p className="text-sm">For vendors and organizers, we store the content you choose to share, such as portfolios, event descriptions, and business details, to facilitate the marketplace.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            2. Google API Services & Data Protection
+                        </h2>
+                        <div className="p-8 rounded-3xl bg-white/5 border border-white/10 space-y-6">
+                            <p className="text-white/70 leading-relaxed">
+                                When you choose to integrate Bventy with Google Calendar, we access specific data to enable synchronization features.
+                            </p>
+                            <ul className="space-y-4">
+                                <li className="flex gap-4">
+                                    <div className="h-6 w-6 rounded-full bg-white/10 flex items-center justify-center text-xs shrink-0 font-bold">1</div>
+                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Minimal Scopes.</span> We only request access to your calendar events and email address to manage availability and verify your identity.</p>
+                                </li>
+                                <li className="flex gap-4">
+                                    <div className="h-6 w-6 rounded-full bg-white/10 flex items-center justify-center text-xs shrink-0 font-bold">2</div>
+                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Limited Use.</span> Bventy's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy#limited-use" className="underline hover:text-white">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+                                </li>
+                                <li className="flex gap-4">
+                                    <div className="h-6 w-6 rounded-full bg-white/10 flex items-center justify-center text-xs shrink-0 font-bold">3</div>
+                                    <p className="text-white/70 text-sm"><span className="text-white font-medium">Data Integrity.</span> We do not use your Google data for advertising products or services, nor do we sell it to third party providers.</p>
+                                </li>
+                            </ul>
+                            
+                            <div className="pt-6 border-t border-white/10 mt-6">
+                                <h3 className="text-white font-medium mb-3">Commitment to Security</h3>
+                                <p className="text-white/70 text-sm leading-relaxed">
+                                    Security procedures are in place to protect the confidentiality of your data. We use industry standard encryption to protect your information, including TLS 1.3 for data in transit and AES-256 for data at rest within our infrastructure.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            3. Analytics and Operational Metrics
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                To maintain the health and performance of our platform, we use internal tools and privacy first analytics providers to understand how Bventy is functioning.
+                            </p>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-start gap-4">
+                                    <div>
+                                        <h4 className="text-white font-medium">Service Integrity</h4>
+                                        <p className="text-sm">We route technical telemetry through our own servers to ensure we have the necessary data to resolve bugs and improve platform responsiveness. This data is linked to your profile only when necessary for technical support.</p>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-start gap-4">
+                                    <div>
+                                        <h4 className="text-white font-medium">Performance Metrics</h4>
+                                        <p className="text-sm">We collect anonymous usage patterns to see which features are most helpful. We do not track your activity across other websites or services.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-semibold tracking-tight mb-6">
+                            4. Your Data. Your Control.
+                        </h2>
+                        <div className="space-y-6 text-white/70 leading-relaxed">
+                            <p>
+                                You are the owner of your data. Bventy provides clear tools to manage, export, or delete your information at any time.
+                            </p>
+                            <div className="flex flex-col gap-4">
+                                <div className="flex gap-4 items-center">
+                                    <div className="h-2 w-2 rounded-full bg-white/20"></div>
+                                    <p className="text-sm italic">You can revoke Google Calendar access instantly through your dashboard settings.</p>
+                                </div>
+                                <div className="flex gap-4 items-center">
+                                    <div className="h-2 w-2 rounded-full bg-white/20"></div>
+                                    <p className="text-sm italic">Permanent account deletion removes all associated personal data from our active databases.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="pt-20 border-t border-white/10">
+                        <div className="flex flex-col md:flex-row justify-between gap-12">
+                            <div className="space-y-4">
+                                <h2 className="text-2xl font-semibold tracking-tight">Contact Us</h2>
+                                <p className="text-white/50 text-sm leading-relaxed max-w-xs">
+                                    If you have questions about our privacy standards or wish to exercise your data rights, our team is ready to assist.
+                                </p>
+                                <p className="text-white font-medium">privacy@bventy.in</p>
+                            </div>
+                            <div className="text-white/30 text-xs flex flex-col justify-end">
+                                <p>© {new Date().getFullYear()} Bventy. All rights reserved.</p>
+                                <p className="mt-1 font-mono uppercase tracking-widest">Designed in India</p>
+                            </div>
+                        </div>
+                    </section>
+
                 </div>
 
             </div>
