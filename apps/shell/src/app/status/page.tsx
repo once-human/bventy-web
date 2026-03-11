@@ -26,17 +26,17 @@ async function getStatusData() {
 }
 
 const DEFAULT_MONITORS = [
-    { Name: "bventy.in", Display: "Main Website", Category: "Web", Status: "operational" },
-    { Name: "app.bventy.in", Display: "User Portal", Category: "Web", Status: "operational" },
-    { Name: "auth.bventy.in", Display: "Auth Service", Category: "Frontend", Status: "operational" },
-    { Name: "partner.bventy.in", Display: "Vendor Dashboard", Category: "Frontend", Status: "operational" },
-    { Name: "admin.bventy.in", Display: "Admin Panel", Category: "Frontend", Status: "operational" },
-    { Name: "api.bventy.in", Display: "Core API", Category: "API", Status: "operational" },
-    { Name: "Neon", Display: "PostgreSQL Database", Category: "Backend", Status: "operational" },
-    { Name: "Render", Display: "Compute Engine", Category: "Backend", Status: "operational" },
-    { Name: "Cloudflare R2", Display: "Object Storage", Category: "Backend", Status: "operational" },
-    { Name: "PostHog", Display: "User Analytics", Category: "Analytics", Status: "operational" },
-    { Name: "Umami", Display: "Web Analytics", Category: "Analytics", Status: "operational" },
+    { Name: "bventy.in", Display: "Main Website", Category: "Web", Status: "offline" },
+    { Name: "app.bventy.in", Display: "User Portal", Category: "Web", Status: "offline" },
+    { Name: "auth.bventy.in", Display: "Auth Service", Category: "Frontend", Status: "offline" },
+    { Name: "partner.bventy.in", Display: "Vendor Dashboard", Category: "Frontend", Status: "offline" },
+    { Name: "admin.bventy.in", Display: "Admin Panel", Category: "Frontend", Status: "offline" },
+    { Name: "api.bventy.in", Display: "Core API", Category: "API", Status: "offline" },
+    { Name: "Neon", Display: "PostgreSQL Database", Category: "Backend", Status: "offline" },
+    { Name: "Render", Display: "Compute Engine", Category: "Backend", Status: "offline" },
+    { Name: "Cloudflare R2", Display: "Object Storage", Category: "Backend", Status: "offline" },
+    { Name: "PostHog", Display: "User Analytics", Category: "Analytics", Status: "offline" },
+    { Name: "Umami", Display: "Web Analytics", Category: "Analytics", Status: "offline" },
 ];
 
 const CATEGORY_MAP: Record<string, { icon: any, title: string }> = {
@@ -88,7 +88,7 @@ export default async function StatusPage() {
     });
 
     const allOperational = monitors.length > 0 ? monitors.every((m: any) => m.status === "operational") : false;
-    const anyDown = monitors.some((m: any) => m.status === "down");
+    const anyDown = monitors.some((m: any) => m.status === "down" || m.status === "offline");
 
     return (
         <div className="min-h-screen bg-black text-white px-6 py-12 md:py-24 flex justify-center selection:bg-white selection:text-black antialiased font-sans">
@@ -101,9 +101,9 @@ export default async function StatusPage() {
                             Bventy<span className="text-white/40">Status</span>
                         </Link>
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
-                            <div className={`h-1.5 w-1.5 rounded-full ${isFallback ? 'bg-blue-500' : allOperational ? 'bg-green-500 status-pulse' : anyDown ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
+                            <div className={`h-1.5 w-1.5 rounded-full ${allOperational ? 'bg-green-500 status-pulse' : anyDown ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
                             <span className="text-[10px] font-mono uppercase tracking-wider text-white/50">
-                                {isFallback ? "Service Tracking" : "Live Tracking"}
+                                {isFallback ? "Tracking Offline" : "Live Tracking"}
                             </span>
                         </div>
                     </div>
@@ -111,20 +111,18 @@ export default async function StatusPage() {
                     <div 
                         className={`p-8 md:p-12 rounded-[2.5rem] bg-white/[0.03] border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden group`}
                     >
-                        <div className={`absolute inset-0 ${isFallback ? 'bg-blue-500/5' : allOperational ? 'bg-green-500/5' : anyDown ? 'bg-red-500/5' : 'bg-yellow-500/5'} opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`}></div>
+                        <div className={`absolute inset-0 ${allOperational ? 'bg-green-500/5' : anyDown ? 'bg-red-500/5' : 'bg-yellow-500/5'} opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`}></div>
                         <div className="space-y-2 relative">
                             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-                                {isFallback ? "Systems Tracked" : allOperational ? "All Systems Operational" : anyDown ? "Active Incident" : "Partial Service Outage"}
+                                {allOperational ? "All Systems Operational" : anyDown ? "Active Incident" : "Partial Service Outage"}
                             </h1>
                             <p className="text-white/40 font-medium">
-                                {isFallback ? "Monitoring engine initializing. Showing tracked system components." : "Verified real-time from our Internal Monitoring Engine."}
+                                {isFallback ? "Real-time monitoring engine unreachable. Systems currently untracked." : <>Verified real-time from our <span className="text-white">Internal Monitoring Engine</span>.</>}
                             </p>
                         </div>
                         <div className="flex items-center gap-4 relative">
-                            <div className={`h-16 w-16 rounded-full ${isFallback ? 'bg-blue-500/10 border-blue-500/20' : allOperational ? 'bg-green-500/10 border-green-500/20' : anyDown ? 'bg-red-500/10 border-red-500/20' : 'bg-yellow-500/10 border-yellow-500/20'} border flex items-center justify-center`}>
-                                {isFallback ? (
-                                    <Activity className="h-8 w-8 text-blue-500" />
-                                ) : allOperational ? (
+                            <div className={`h-16 w-16 rounded-full ${allOperational ? 'bg-green-500/10 border-green-500/20' : anyDown ? 'bg-red-500/10 border-red-500/20' : 'bg-yellow-500/10 border-yellow-500/20'} border flex items-center justify-center`}>
+                                {allOperational ? (
                                     <CheckCircle2 className="h-8 w-8 text-green-500" />
                                 ) : anyDown ? (
                                     <AlertCircle className="h-8 w-8 text-red-500" />
