@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertCircle, Clock, Globe, Shield, Terminal, Zap, ExternalLink, BarChart3, Server, Activity } from "lucide-react";
+import { CheckCircle2, AlertCircle, Clock, Globe, Shield, Terminal, Zap, ExternalLink, BarChart3, Server, Activity, Laptop, Smartphone, Code, Layers } from "lucide-react";
 import Link from "next/link";
 import { Metadata } from "next";
 
@@ -7,69 +7,66 @@ export const metadata: Metadata = {
     description: "Real-time monitoring and incident transparency for the Bventy ecosystem.",
 };
 
-// --- OpenStatus Configuration ---
-// The slug is used to fetch the public JSON feed.
-const OPENSTATUS_SLUG = process.env.NEXT_PUBLIC_OPENSTATUS_SLUG || "bventy"; 
-const STATUS_FEED_URL = `https://${OPENSTATUS_SLUG}.openstatus.dev/feed/json`;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bventy.in";
+const STATUS_ENDPOINT = `${API_URL}/system/status`;
 
 async function getStatusData() {
     try {
-        const res = await fetch(STATUS_FEED_URL, { 
+        const res = await fetch(STATUS_ENDPOINT, { 
             next: { revalidate: 300 }, // Cache for 5 minutes
             headers: { 'Cache-Control': 'no-cache' }
         });
         
-        if (!res.ok) throw new Error("OpenStatus feed fetch failed");
+        if (!res.ok) throw new Error("System status fetch failed");
         return await res.json();
     } catch (e) {
-        console.error("OpenStatus Error:", e);
+        console.error("Status Error:", e);
         return null;
     }
 }
 
-const CATEGORIES = [
-    {
-        id: "core",
-        title: "Core Services",
-        icon: <Activity className="h-4 w-4" />,
-        monitorNames: ["bventy.in", "app.bventy.in", "auth.bventy.in", "api.bventy.in", "partner.bventy.in", "admin.bventy.in", "Website"]
+const CATEGORY_MAP: Record<string, { icon: any, title: string }> = {
+    "Web": {
+        title: "Web Services",
+        icon: <Globe className="h-4 w-4" />
     },
-    {
-        id: "analytics",
-        title: "Analytics Stack",
-        icon: <BarChart3 className="h-4 w-4" />,
-        monitorNames: ["PostHog Cloud", "Umami Cloud"]
+    "Mobile": {
+        title: "Mobile Ecosystem",
+        icon: <Smartphone className="h-4 w-4" />
     },
-    {
-        id: "infra",
-        title: "Infrastructure",
-        icon: <Server className="h-4 w-4" />,
-        monitorNames: ["Compute", "Database", "Edge"]
+    "API": {
+        title: "API Layer",
+        icon: <Code className="h-4 w-4" />
+    },
+    "Frontend": {
+        title: "Frontend Apps",
+        icon: <Laptop className="h-4 w-4" />
+    },
+    "Backend": {
+        title: "Infrastructure & Data",
+        icon: <Layers className="h-4 w-4" />
+    },
+    "Analytics": {
+        title: "Insights Stack",
+        icon: <BarChart3 className="h-4 w-4" />
     }
-];
+};
 
 export default async function StatusPage() {
     const data = await getStatusData();
     const monitors = data?.monitors || [];
     
-    // Fallback/Draft Monitors for mapping if API is disconnected or during setup
-    const defaultMonitors = [
-        { name: "Website", status: "operational", display: "bventy.in" },
-        { name: "Organizer Portal", status: "operational", display: "app.bventy.in" },
-        { name: "Core API Engine", status: "operational", display: "api.bventy.in" },
-        { name: "Authentication Service", status: "operational", display: "auth.bventy.in" },
-        { name: "Vendor Dashboard", status: "operational", display: "partner.bventy.in" },
-        { name: "Admin Controllers", status: "operational", display: "admin.bventy.in" },
-    ];
+    // Group monitors by category
+    const groupedMonitors: Record<string, any[]> = {};
+    monitors.forEach((m: any) => {
+        if (!groupedMonitors[m.category]) {
+            groupedMonitors[m.category] = [];
+        }
+        groupedMonitors[m.category].push(m);
+    });
 
-    const getMonitorStatus = (namePattern: string) => {
-        const monitor = monitors.find((m: any) => m.name.toLowerCase().includes(namePattern.toLowerCase()));
-        if (!monitor) return "operational"; // Default to operational or "unknown" if not found
-        return monitor.status === "success" ? "operational" : monitor.status === "failure" ? "down" : "operational";
-    };
-
-    const allOperational = monitors.length > 0 ? monitors.every((m: any) => m.status === "success") : true;
-    const anyDown = monitors.some((m: any) => m.status === "failure");
+    const allOperational = monitors.length > 0 ? monitors.every((m: any) => m.status === "operational") : true;
+    const anyDown = monitors.some((m: any) => m.status === "down");
 
     return (
         <div className="min-h-screen bg-black text-white px-6 py-12 md:py-24 flex justify-center selection:bg-white selection:text-black antialiased font-sans">
@@ -96,7 +93,7 @@ export default async function StatusPage() {
                                 {allOperational ? "All Systems Operational" : anyDown ? "Active Incident" : "Partial Service Outage"}
                             </h1>
                             <p className="text-white/40 font-medium">
-                                Verified real-time from 28 global regions through <span className="text-white">OpenStatus</span>.
+                                Verified real-time from our <span className="text-white">Internal Monitoring Engine</span>.
                             </p>
                         </div>
                         <div className="flex items-center gap-4 relative">
@@ -115,33 +112,25 @@ export default async function StatusPage() {
 
                 {/* Categorized Service Grid */}
                 <div className="space-y-24">
-                    {CATEGORIES.map((category) => {
-                        // Filter monitors that belong to this category
-                        const categoryMonitors = category.monitorNames.map(name => {
-                            const realMonitor = monitors.find((m: any) => m.name.toLowerCase().includes(name.toLowerCase()));
-                            return {
-                                name: realMonitor ? realMonitor.name : name,
-                                status: realMonitor ? (realMonitor.status === "success" ? "operational" : "down") : "operational",
-                                display: realMonitor?.description || name
-                            };
-                        });
-
+                    {Object.entries(groupedMonitors).map(([category, categoryMonitors]) => {
+                        const catInfo = CATEGORY_MAP[category] || { title: category, icon: <Activity className="h-4 w-4" /> };
+                        
                         return (
-                            <section key={category.id} className="space-y-8">
+                            <section key={category} className="space-y-8">
                                 <div className="flex items-center gap-3 px-2">
-                                    <div className="text-white/20">{category.icon}</div>
-                                    <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-white/30">{category.title}</h2>
+                                    <div className="text-white/20">{catInfo.icon}</div>
+                                    <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-white/30">{catInfo.title}</h2>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {categoryMonitors.map((service, idx) => (
                                         <div
-                                            key={`${category.id}-${idx}`}
+                                            key={`${category}-${idx}`}
                                             className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300 group"
                                         >
                                             <div className="flex justify-between items-start mb-6">
                                                 <div className="space-y-1">
-                                                    <h3 className="font-semibold text-white/90">{service.name}</h3>
-                                                    <p className="text-[10px] font-mono text-white/30 uppercase tracking-tight">{service.display}</p>
+                                                    <h3 className="font-semibold text-white/90">{service.display}</h3>
+                                                    <p className="text-[10px] font-mono text-white/30 uppercase tracking-tight">{service.name}</p>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <span className={`text-[10px] font-bold uppercase tracking-tighter ${
@@ -195,45 +184,16 @@ export default async function StatusPage() {
                     <div className="relative pl-8 space-y-16">
                         <div className="absolute left-[7px] top-2 bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent"></div>
                         
-                        {(data?.statusReports || []).length > 0 ? (
-                            data.statusReports.map((report: any) => (
-                                <div key={report.id} className="relative group">
-                                    <div className={`absolute -left-[30px] top-1.5 h-3 w-3 rounded-full border-2 border-black transition-colors ${
-                                        report.status === 'resolved' ? 'bg-green-500/20 group-hover:bg-green-500/40' : 'bg-red-500/20 group-hover:bg-red-500/40 status-pulse'
-                                    }`}></div>
-                                    <div className="space-y-2">
-                                        <p className="text-xs font-mono text-white/30 tracking-tight">{new Date(report.updatedAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</p>
-                                        <h3 className="font-semibold text-lg flex items-center gap-3">
-                                            {report.title}
-                                            <span className={`text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border ${
-                                                report.status === 'resolved' ? 'text-green-500 border-green-500/20 bg-green-500/5' : 'text-red-500 border-red-500/20 bg-red-500/5'
-                                            }`}>
-                                                {report.status}
-                                            </span>
-                                        </h3>
-                                        <div className="space-y-4 pt-2">
-                                            {report.statusReportUpdates.map((update: any) => (
-                                                <div key={update.id} className="border-l border-white/5 pl-4 py-1">
-                                                    <p className="text-white/40 text-[10px] font-mono mb-1">{update.status.toUpperCase()} — {new Date(update.date).toLocaleTimeString()}</p>
-                                                    <p className="text-white/50 text-sm leading-relaxed max-w-2xl">{update.message}</p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="relative group grayscale">
-                                <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-white/10 border-2 border-black"></div>
-                                <div className="space-y-2">
-                                    <p className="text-xs font-mono text-white/30 tracking-tight">March 2026</p>
-                                    <h3 className="font-semibold text-lg text-white/40">No system incidents reported</h3>
-                                    <p className="text-white/20 text-sm leading-relaxed max-w-2xl">
-                                        System stability is our priority. Historical incidents will be documented here with high transparency.
-                                    </p>
-                                </div>
+                        <div className="relative group grayscale">
+                            <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-white/10 border-2 border-black"></div>
+                            <div className="space-y-2">
+                                <p className="text-xs font-mono text-white/30 tracking-tight">March 2026</p>
+                                <h3 className="font-semibold text-lg text-white/40">No system incidents reported</h3>
+                                <p className="text-white/20 text-sm leading-relaxed max-w-2xl">
+                                    System stability is our priority. Historical incidents will be documented here with high transparency.
+                                </p>
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
 
