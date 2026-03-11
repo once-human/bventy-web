@@ -8,8 +8,7 @@ export const metadata: Metadata = {
 };
 
 // --- OpenStatus Configuration ---
-// REPLACE 'bventy' with your actual OpenStatus page slug if different.
-const OPENSTATUS_SLUG = "bventy"; 
+const OPENSTATUS_SLUG = process.env.NEXT_PUBLIC_OPENSTATUS_SLUG || "bventy"; 
 
 async function getOpenStatusData() {
     try {
