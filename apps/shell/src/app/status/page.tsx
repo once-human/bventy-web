@@ -207,7 +207,7 @@ export default async function StatusPage() {
                                 For infrastructure concerns or critical incident reporting.
                             </p>
                             <p className="text-white font-medium text-lg selection:bg-white selection:text-black hover:opacity-70 transition-opacity">
-                                <a href="mailto:ops@bventy.in">ops@bventy.in</a>
+                                <a href="mailto:support@bventy.in">support@bventy.in</a>
                             </p>
                         </div>
                         <div className="flex flex-col justify-end md:items-end space-y-2">
