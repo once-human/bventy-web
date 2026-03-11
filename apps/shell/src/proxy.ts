@@ -31,6 +31,12 @@ export function proxy(request: NextRequest) {
         return NextResponse.rewrite(url);
     }
 
+    // 0.1 Exclude Analytics/Relay from subdomain path mapping (to avoid /status/a/u/...)
+    const isAnalytics = url.pathname.startsWith('/a/') || url.pathname.startsWith('/vercel-relay/');
+    if (isAnalytics) {
+        return NextResponse.next();
+    }
+
     // 1. Handle Subdomain Mappings & Redirects
     let appPath = '/www';
 

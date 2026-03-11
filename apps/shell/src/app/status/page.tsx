@@ -87,8 +87,9 @@ export default async function StatusPage() {
         groupedMonitors[m.category].push(m);
     });
 
-    const allOperational = monitors.length > 0 ? monitors.every((m: any) => m.status === "operational") : false;
-    const anyDown = monitors.some((m: any) => m.status === "down" || m.status === "offline");
+    const allOperational = monitors.length > 0 && !isFallback ? monitors.every((m: any) => m.status === "operational") : false;
+    const anyDown = monitors.some((m: any) => m.status === "down");
+    const anyOffline = monitors.some((m: any) => m.status === "offline");
 
     return (
         <div className="min-h-screen bg-black text-white px-6 py-12 md:py-24 flex justify-center selection:bg-white selection:text-black antialiased font-sans">
@@ -101,7 +102,7 @@ export default async function StatusPage() {
                             Bventy<span className="text-white/40">Status</span>
                         </Link>
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
-                            <div className={`h-1.5 w-1.5 rounded-full ${allOperational ? 'bg-green-500 status-pulse' : anyDown ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
+                            <div className={`h-1.5 w-1.5 rounded-full ${allOperational ? 'bg-green-500 status-pulse' : anyDown ? 'bg-red-500' : 'bg-white/20'}`}></div>
                             <span className="text-[10px] font-mono uppercase tracking-wider text-white/50">
                                 {isFallback ? "Tracking Offline" : "Live Tracking"}
                             </span>
@@ -111,23 +112,23 @@ export default async function StatusPage() {
                     <div 
                         className={`p-8 md:p-12 rounded-[2.5rem] bg-white/[0.03] border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden group`}
                     >
-                        <div className={`absolute inset-0 ${allOperational ? 'bg-green-500/5' : anyDown ? 'bg-red-500/5' : 'bg-yellow-500/5'} opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`}></div>
+                        <div className={`absolute inset-0 ${allOperational ? 'bg-green-500/5' : anyDown ? 'bg-red-500/5' : 'bg-white/5'} opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`}></div>
                         <div className="space-y-2 relative">
                             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-                                {allOperational ? "All Systems Operational" : anyDown ? "Active Incident" : "Partial Service Outage"}
+                                {allOperational ? "All Systems Operational" : anyDown ? "Active Incident" : anyOffline ? "Tracking Initializing" : "Partial Service Outage"}
                             </h1>
                             <p className="text-white/40 font-medium">
                                 {isFallback ? "Real-time monitoring engine unreachable. Systems currently untracked." : <>Verified real-time from our <span className="text-white">Internal Monitoring Engine</span>.</>}
                             </p>
                         </div>
                         <div className="flex items-center gap-4 relative">
-                            <div className={`h-16 w-16 rounded-full ${allOperational ? 'bg-green-500/10 border-green-500/20' : anyDown ? 'bg-red-500/10 border-red-500/20' : 'bg-yellow-500/10 border-yellow-500/20'} border flex items-center justify-center`}>
+                            <div className={`h-16 w-16 rounded-full ${allOperational ? 'bg-green-500/10 border-green-500/20' : anyDown ? 'bg-red-500/10 border-red-500/20' : 'bg-white/10 border-white/20'} border flex items-center justify-center`}>
                                 {allOperational ? (
                                     <CheckCircle2 className="h-8 w-8 text-green-500" />
                                 ) : anyDown ? (
                                     <AlertCircle className="h-8 w-8 text-red-500" />
                                 ) : (
-                                    <Clock className="h-8 w-8 text-yellow-500" />
+                                    <Activity className="h-8 w-8 text-white/20" />
                                 )}
                             </div>
                         </div>
@@ -146,52 +147,65 @@ export default async function StatusPage() {
                                     <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-white/30">{catInfo.title}</h2>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {categoryMonitors.map((service, idx) => (
-                                        <div
-                                            key={`${category}-${idx}`}
-                                            className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300 group"
-                                        >
-                                            <div className="flex justify-between items-start mb-6">
-                                                <div className="space-y-1">
-                                                    <h3 className="font-semibold text-white/90">{service.display}</h3>
-                                                    <p className="text-[10px] font-mono text-white/30 uppercase tracking-tight">{service.name}</p>
+                                    {categoryMonitors.map((service, idx) => {
+                                        const historyPoints = service.history || [];
+                                        // We want to show 42 bars. Map real history to these bars.
+                                        // Reverse history to have most recent on the right (idx 41)
+                                        const bars = Array.from({ length: 42 }).map((_, i) => {
+                                            const dataPoint = historyPoints[41 - i];
+                                            if (!dataPoint) return 'empty';
+                                            return dataPoint.status;
+                                        });
+
+                                        return (
+                                            <div
+                                                key={`${category}-${idx}`}
+                                                className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300 group"
+                                            >
+                                                <div className="flex justify-between items-start mb-6">
+                                                    <div className="space-y-1">
+                                                        <h3 className="font-semibold text-white/90">{service.display}</h3>
+                                                        <p className="text-[10px] font-mono text-white/30 uppercase tracking-tight">{service.name}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`text-[10px] font-bold uppercase tracking-tighter ${
+                                                            service.status === 'operational' ? 'text-green-500' : 
+                                                            service.status === 'down' ? 'text-red-500' :
+                                                            'text-white/20'
+                                                        }`}>
+                                                            {service.status}
+                                                        </span>
+                                                        <div className={`h-1.5 w-1.5 rounded-full ${
+                                                            service.status === 'operational' ? 'bg-green-500' : 
+                                                            service.status === 'down' ? 'bg-red-500' :
+                                                            'bg-white/10'
+                                                        }`}></div>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${
-                                                        service.status === 'operational' ? 'text-green-500' : 
-                                                        'text-red-500'
-                                                    }`}>
-                                                        {service.status}
-                                                    </span>
-                                                    <div className={`h-1.5 w-1.5 rounded-full ${
-                                                        service.status === 'operational' ? 'bg-green-500' : 
-                                                        'bg-red-500'
-                                                    }`}></div>
+                                                
+                                                {/* Uptime Visualization */}
+                                                <div className="space-y-3">
+                                                    <div className="flex gap-[2px] h-6 items-end">
+                                                        {bars.map((status, i) => (
+                                                            <div 
+                                                                key={i} 
+                                                                className={`flex-1 rounded-full transition-all duration-500 ${
+                                                                    status === 'operational' ? 'bg-green-500/80 group-hover:bg-green-500 group-hover:h-6 h-5' :
+                                                                    status === 'down' ? 'bg-red-500 group-hover:h-6 h-5' :
+                                                                    'bg-white/5 h-3'
+                                                                }`}
+                                                            ></div>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex justify-between items-center text-[10px] font-medium text-white/20">
+                                                        <span>{isFallback ? "Untracked" : "90 days ago"}</span>
+                                                        <span className="text-white/40">{isFallback ? "Initial state" : "Historical data points"}</span>
+                                                        <span>Today</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            
-                                            {/* Uptime Visualization */}
-                                            <div className="space-y-3">
-                                                <div className="flex gap-[2px] h-6 items-end">
-                                                    {Array.from({ length: 42 }).map((_, i) => (
-                                                        <div 
-                                                            key={i} 
-                                                            className={`flex-1 rounded-full transition-all duration-500 ${
-                                                                service.status !== 'operational' && i === 41
-                                                                ? 'bg-red-500'
-                                                                : 'bg-green-500/80 group-hover:bg-green-500 group-hover:h-6 h-5'
-                                                            }`}
-                                                        ></div>
-                                                    ))}
-                                                </div>
-                                                <div className="flex justify-between items-center text-[10px] font-medium text-white/20">
-                                                    <span>90 days ago</span>
-                                                    <span className="text-white/40">100% uptime tracked</span>
-                                                    <span>Today</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </section>
                         );
