@@ -12,22 +12,32 @@ const STATUS_ENDPOINT = `${API_URL}/system/status`;
 
 async function getStatusData() {
     try {
-        console.log("Fetching status from:", STATUS_ENDPOINT);
         const res = await fetch(STATUS_ENDPOINT, { 
             next: { revalidate: 300 }, // Cache for 5 minutes
             headers: { 'Cache-Control': 'no-cache' }
         });
         
-        console.log("Status response status:", res.status);
         if (!res.ok) throw new Error(`System status fetch failed with status ${res.status}`);
-        const data = await res.json();
-        console.log("Status monitors count:", data?.monitors?.length || 0);
-        return data;
+        return await res.json();
     } catch (e) {
         console.error("Status Error:", e);
         return null;
     }
 }
+
+const DEFAULT_MONITORS = [
+    { Name: "bventy.in", Display: "Main Website", Category: "Web", Status: "offline" },
+    { Name: "app.bventy.in", Display: "User Portal", Category: "Web", Status: "offline" },
+    { Name: "auth.bventy.in", Display: "Auth Service", Category: "Frontend", Status: "offline" },
+    { Name: "partner.bventy.in", Display: "Vendor Dashboard", Category: "Frontend", Status: "offline" },
+    { Name: "admin.bventy.in", Display: "Admin Panel", Category: "Frontend", Status: "offline" },
+    { Name: "api.bventy.in", Display: "Core API", Category: "API", Status: "offline" },
+    { Name: "Neon", Display: "PostgreSQL Database", Category: "Backend", Status: "offline" },
+    { Name: "Render", Display: "Compute Engine", Category: "Backend", Status: "offline" },
+    { Name: "Cloudflare R2", Display: "Object Storage", Category: "Backend", Status: "offline" },
+    { Name: "PostHog", Display: "User Analytics", Category: "Analytics", Status: "offline" },
+    { Name: "Umami", Display: "Web Analytics", Category: "Analytics", Status: "offline" },
+];
 
 const CATEGORY_MAP: Record<string, { icon: any, title: string }> = {
     "Web": {
@@ -58,7 +68,12 @@ const CATEGORY_MAP: Record<string, { icon: any, title: string }> = {
 
 export default async function StatusPage() {
     const data = await getStatusData();
-    const monitors = data?.monitors || [];
+    const monitors = data?.monitors && data.monitors.length > 0 ? data.monitors : DEFAULT_MONITORS.map(m => ({
+        name: m.Name,
+        display: m.Display,
+        category: m.Category,
+        status: m.Status
+    }));
     
     // Group monitors by category
     const groupedMonitors: Record<string, any[]> = {};
@@ -69,8 +84,8 @@ export default async function StatusPage() {
         groupedMonitors[m.category].push(m);
     });
 
-    const allOperational = monitors.length > 0 ? monitors.every((m: any) => m.status === "operational") : true;
-    const anyDown = monitors.some((m: any) => m.status === "down");
+    const allOperational = monitors.length > 0 ? monitors.every((m: any) => m.status === "operational") : false;
+    const anyDown = monitors.some((m: any) => m.status === "down" || m.status === "offline");
 
     return (
         <div className="min-h-screen bg-black text-white px-6 py-12 md:py-24 flex justify-center selection:bg-white selection:text-black antialiased font-sans">
