@@ -18,14 +18,16 @@ export default function PrivacyPolicyPage() {
                 </div>
 
                 <div className="space-y-4 mb-16">
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-                        Privacy. <span className="text-white/40 font-bold">Open and transparent.</span>
-                    </h1>
-                    <p className="text-white/50 font-medium">Last updated: March 11, 2026</p>
+                    <div className="space-y-1">
+                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+                            Privacy. <span className="text-white/40 font-bold">Open and transparent.</span>
+                        </h1>
+                        <p className="text-white/30 text-xs font-medium tracking-wide uppercase">Version 2.3.0 • March 11, 2026</p>
+                    </div>
                 </div>
 
                 <p className="text-white/70 text-xl leading-relaxed mb-24">
-                    We take your privacy seriously because we are users too. Our approach is simple: your data belongs to you. We only collect what is essential, keep it only as long as necessary, and protect it as if it were our own.
+                    At Bventy, your privacy is a fundamental commitment, not a secondary choice. We engineer our platform with the belief that your data belongs exclusively to you. Every line of code we write is governed by a singular intent: protecting your information with the highest standards of integrity and transparency.
                 </p>
 
                 <div className="space-y-24">
@@ -36,7 +38,7 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                At Bventy, privacy isn't a feature; it's the foundation of everything we build. We believe that professional coordination shouldn't come at the cost of personal anonymity. We operate on a data-minimization principle, ensuring that our systems only ever handle the information they absolutely need to function.
+                                Privacy is the bedrock of professional trust. We operate on a strict data-minimization framework, ensuring that our systems only process information that is essential for delivering a seamless marketplace experience. This philosophy ensures that your professional interactions remain secure, private, and entirely under your control.
                             </p>
                         </div>
                     </section>
@@ -47,7 +49,7 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                Bventy acts as the primary data controller for all information collected through the platform. We manage your data with strict internal protocols designed to isolate sensitive identifiers from general application logic. We do not employ third-party data brokers or marketing teams.
+                                Bventy acts as the primary data controller for all personal information collected through our services. We maintain rigorous internal protocols to isolate sensitive identifiers from general application logic. We do not engage with third-party data brokers, ensuring your identity is never commoditized.
                             </p>
                         </div>
                     </section>
@@ -58,7 +60,7 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                We collect your name, email address, and profile details to establish a trusted connection between you and the vendors or organizers you interact with. This information is used strictly for authentication, account management, and facilitating marketplace interactions.
+                                To facilitate trusted connections between organizers and vendors, we collect essential identity markers such as name, email address, and verified profile attributes. This data is utilized solely for authentication, professional representation, and maintaining the security of the Bventy ecosystem.
                             </p>
                         </div>
                     </section>
@@ -69,7 +71,7 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                For security and stability, basic technical identifiers like IP addresses, browser types, and device fingerprints are logged temporarily. This data is used to detect fraudulent activity, optimize our global infrastructure, and maintain the health of our real-time services.
+                                To ensure system stability and defense against coordinated threats, we log technical telemetry including IP addresses and device identifiers. This information is utilized for platform optimization, security forensic analysis, and ensuring the consistent availability of our global infrastructure.
                             </p>
                         </div>
                     </section>
@@ -116,17 +118,17 @@ export default function PrivacyPolicyPage() {
                                     To maintain the health and performance of our platform, we use internal tools and privacy-first analytics (PostHog Cloud and Umami Cloud) to understand how Bventy is functioning.
                                 </p>
                                 <p>
-                                    We route technical telemetry through our own secure proxies to strip identifiable markers before they reach third-party servers. Your IP is always anonymized at the edge.
+                                    We route technical telemetry through our own secure proxies to strip identifiable markers before they reach any third-party infrastructure. Your IP is anonymized at our edge servers.
                                 </p>
                             </div>
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
                                     <h4 className="text-white font-medium mb-2">Service Integrity</h4>
-                                    <p className="text-sm text-white/50">Basic technical identifiers are logged temporarily to maintain system stability and prevent coordinated attacks.</p>
+                                    <p className="text-sm text-white/50">Technical identifiers are processed temporarily to ensure platform stability and protect against automated attacks.</p>
                                 </div>
                                 <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
                                     <h4 className="text-white font-medium mb-2">Performance Metrics</h4>
-                                    <p className="text-sm text-white/50">We collect anonymous usage patterns to optimize feature delivery. We do not track your activity across other domains.</p>
+                                    <p className="text-sm text-white/50">We analyze aggregated usage patterns to refine our feature delivery. We never track your activity across secondary domains.</p>
                                 </div>
                             </div>
                         </div>
@@ -138,19 +140,19 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-8 text-white/70 leading-relaxed">
                             <p>
-                                Our core data resides in Neon (PostgreSQL) and Cloudflare R2 (Media Storage). These providers are selected for their rigorous security compliance (SOC2 Type II) and global availability.
+                                Our infrastructure is architected for resilience and security, utilizing Neon (PostgreSQL) and Cloudflare R2 (Media Storage). These partners are selected for their compliance with global standards, including SOC2 Type II.
                             </p>
                             <div className="grid md:grid-cols-2 gap-12">
                                 <div className="space-y-4">
                                     <h3 className="text-white font-medium">Network Security</h3>
                                     <p className="text-sm text-white/50 leading-relaxed">
-                                        We employ TLS 1.3 for all data in transit. Production environments are air-gapped from internal development networks to prevent accidental leaks.
+                                        All data is transmitted via TLS 1.3. Our production environments are logically isolated from development networks to prevent unauthorized data exposure.
                                     </p>
                                 </div>
                                 <div className="space-y-4">
-                                    <h3 className="text-white font-medium">Data Encryption</h3>
+                                    <h3 className="text-white font-medium">Encryption at Rest</h3>
                                     <p className="text-sm text-white/50 leading-relaxed">
-                                        All sensitive data is encrypted at rest using AES-256 hardware-level encryption, ensuring that physical access to servers does not compromise your identity.
+                                        Personal information is stored using AES-256 hardware-level encryption, ensuring that data remains protected even at the physical storage layer.
                                     </p>
                                 </div>
                             </div>
@@ -163,7 +165,7 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                Personal data is retained only as long as your account is active and for a short period thereafter for legal compliance. Upon deletion, we initiate an automated process to purge all identifiable records from our active systems within 30 days.
+                                We retain personal data only for as long as necessary to fulfill the purposes for which it was collected. Upon account termination, an automated workflow initiates the permanent deletion of identifiable records within 30 days.
                             </p>
                         </div>
                     </section>
@@ -174,7 +176,7 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                We use essential cookies to maintain your session, security context, and preferences. We do not use third-party tracking cookies, advertising pixels, or cross-site behavioral indicators. Your digital footprint remains yours alone.
+                                Bventy utilizes essential cookies strictly for session management, security, and personalizing your dashboard experience. We do not participate in cross-site tracking, behavioral advertising, or third-party pixel tracking.
                             </p>
                         </div>
                     </section>
@@ -185,7 +187,7 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                You have the right to access, rectify, or export your data at any time. Our platform provides self-service tools for data portability, allowing you to take your information wherever you choose.
+                                You possess the unambiguous right to access, rectify, or export your personal information. We provide intuitive tools for data portability, allowing you to maintain ownership of your professional history.
                             </p>
                         </div>
                     </section>
@@ -196,7 +198,7 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                Deleting your Bventy account triggers an automated workflow that wipes your profile history, media uploads, and analytics telemetry from our stack. We believe deletion should be absolute, not a request waiting for approval.
+                                Bventy honors your right to erasure. Deleting your account triggers a comprehensive purge of your profile existence, including media assets and telemetry. This process is absolute and irreversible once initiated.
                             </p>
                         </div>
                     </section>
@@ -207,7 +209,7 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                Bventy is designed for professional use by adults (18+). We do not knowingly collect data from minors. If such data is discovered, it is purged immediately and without exception from our production archives.
+                                Our platform is designed for professional use by individuals aged 18 and older. We do not knowingly process data from minors. Any such data identified within our systems is immediately and permanently deleted.
                             </p>
                         </div>
                     </section>
@@ -218,7 +220,7 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                As a global platform, your data may be processed in various secure regions. We ensure all cross-border transfers comply with standard contractual clauses (SCCs) and the highest possible encryption standards throughout the lifecycle.
+                                As a global service, your information may be processed in various secure jurisdictions. We ensure all transfers adhere to standard contractual clauses (SCCs) and maintain consistent security standards worldwide.
                             </p>
                         </div>
                     </section>
@@ -229,18 +231,18 @@ export default function PrivacyPolicyPage() {
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                We update this policy as we ship new features and iterate on our infrastructure. Major changes are announced via email and through your dashboard to ensure ongoing transparency and informed consent.
+                                We periodically update this policy to reflect platform evolutions. Significant modifications will be communicated via direct notification to ensure continued transparency and informed consent.
                             </p>
                         </div>
                     </section>
 
                     <section>
                         <h2 className="text-2xl font-semibold tracking-tight mb-6">
-                            15. Transparency Commitment
+                            15. Commitment to Transparency
                         </h2>
                         <div className="space-y-6 text-white/70 leading-relaxed">
                             <p>
-                                Our commitment to privacy is absolute. We invite you to review our security headers and technical disclosures any time. We build in the open, with your trust as our primary metric of success.
+                                Our commitment to your privacy is unwavering. We invite you to examine our security disclosures and platform integrity any time. We build with the knowledge that your trust is our most significant asset.
                             </p>
                         </div>
                     </section>
@@ -261,7 +263,7 @@ export default function PrivacyPolicyPage() {
                             </div>
                             <div className="flex flex-col justify-end md:items-end space-y-2">
                                 <p className="text-white/50 text-sm">© {new Date().getFullYear()} Bventy. All rights reserved.</p>
-                                <p className="text-white/20 text-xs font-mono uppercase tracking-[0.4em]">DESIGNED IN INDIA</p>
+                                <p className="text-white/20 text-xs font-mono uppercase tracking-[0.15em]">DESIGNED IN INDIA</p>
                             </div>
                         </div>
                     </section>
