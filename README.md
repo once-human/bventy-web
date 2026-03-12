@@ -79,7 +79,7 @@ graph TD
     subgraph Infrastructure Layer
         API[Backend API]
         DB[(PostgreSQL)]
-        R2[Cloudflare R2]
+        R2[media.bventy.in]
         KV[Redis Cache]
     end
 
