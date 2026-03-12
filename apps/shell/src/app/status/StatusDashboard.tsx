@@ -163,24 +163,27 @@ function MonitorGroup({ category, monitors }: { category: string, monitors: any[
 function MonitorCard({ service }: { service: any }) {
     const [hoveredStat, setHoveredStat] = useState<any>(null);
     const dailyStats = service.daily_stats || [];
-    
     // Ultra-Compact Progressive Density (90 days -> Exactly 30 bars)
     const rawBars = Array.from({ length: 90 }).map((_, i) => dailyStats[i] || { date: '', uptime_percentage: -1, avg_latency_ms: 0 }).reverse();
     const bars: any[] = [];
     
-    // Phase 1: Recent 10 days (Indices 80-89) - High precision
-    for (let i = 80; i < 90; i++) bars.push(rawBars[i]);
-    
-    // Phase 2: Middle 30 days (Indices 50-79) - 3 days per bar (10 bars)
-    for (let i = 50; i < 80; i += 3) {
-        const group = [rawBars[i], rawBars[i+1], rawBars[i+2]];
-        bars.push(aggregateStats(group));
-    }
+    // Order: [Legacy] -> [Middle] -> [Recent] (Left to Right)
     
     // Phase 3: Legacy 50 days (Indices 0-49) - 5 days per bar (10 bars)
     for (let i = 0; i < 50; i += 5) {
         const group = [rawBars[i], rawBars[i+1], rawBars[i+2], rawBars[i+3], rawBars[i+4]];
         bars.push(aggregateStats(group));
+    }
+
+    // Phase 2: Middle 30 days (Indices 50-79) - 3 days per bar (10 bars)
+    for (let i = 50; i < 80; i += 3) {
+        const group = [rawBars[i], rawBars[i+1], rawBars[i+2]];
+        bars.push(aggregateStats(group));
+    }
+
+    // Phase 1: Recent 10 days (Indices 80-89) - Today is Index 89
+    for (let i = 80; i < 90; i++) {
+        bars.push(rawBars[i]);
     }
 
     function aggregateStats(group: any[]) {
@@ -223,14 +226,14 @@ function MonitorCard({ service }: { service: any }) {
             </div>
             
             <div className="space-y-4" onMouseLeave={() => setHoveredStat(null)}>
-                <div className="flex gap-[2px] h-5 items-end justify-end relative">
+                <div className="flex gap-[3px] h-5 items-end relative w-full">
                     {bars.map((stat, i) => {
                         const color = stat.uptime_percentage === -1 ? 'bg-white/5' : stat.uptime_percentage === 100 ? 'bg-green-500/40 hover:bg-green-500' : stat.uptime_percentage === 50 ? 'bg-yellow-500/50 hover:bg-yellow-500' : 'bg-red-500/60 hover:bg-red-500';
                         const height = stat.uptime_percentage === -1 ? 'h-2.5' : 'h-5';
                         return (
                             <div 
                                 key={i} 
-                                className={`flex-1 max-w-[4px] rounded-full transition-all duration-300 cursor-crosshair hover:scale-y-125 ${color} ${height}`}
+                                className={`flex-1 rounded-full transition-all duration-300 cursor-crosshair hover:scale-y-125 ${color} ${height}`}
                                 onMouseEnter={() => setHoveredStat(stat)}
                             />
                         );
