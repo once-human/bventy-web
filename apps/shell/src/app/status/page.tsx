@@ -224,25 +224,22 @@ export default async function StatusPage() {
 
                                                                     return (
                                                                         <div key={i} className="flex-1 relative group">
-                                                                            <div className={`w-full rounded-[1px] transition-all duration-500 cursor-crosshair ${color} ${height}`}></div>
+                                                                            <div className={`w-full rounded-[1px] cursor-crosshair ${color} ${height}`}></div>
                                                                             
-                                                                            {/* Custom Premium Tooltip - Minimalist version */}
-                                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-50 transform translate-y-2 group-hover:translate-y-0">
-                                                                                <div className="bg-[#0A0A0A] border border-white/10 rounded-xl py-4 px-5 shadow-[0_30px_60px_rgba(0,0,0,1)] flex flex-col gap-3 min-w-[180px] backdrop-blur-2xl">
-                                                                                    <div className="flex flex-col gap-0.5">
-                                                                                        <span className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em]">{dateStr}</span>
-                                                                                        <span className="text-sm font-bold text-white/90">Diagnostic Snapshot</span>
-                                                                                    </div>
-                                                                                    <div className="space-y-2.5 border-t border-white/5 pt-3">
-                                                                                        <div className="flex justify-between items-center group/item">
-                                                                                            <span className="text-xs text-white/40">Uptime Stability</span>
-                                                                                            <span className={`text-xs font-black ${stat.uptime_percentage === 100 ? 'text-green-500' : stat.uptime_percentage === 50 ? 'text-yellow-500' : stat.uptime_percentage === 0 ? 'text-red-500' : 'text-white/20'}`}>
-                                                                                                {stat.uptime_percentage === -1 ? 'N/A' : stat.uptime_percentage === 100 ? '100%' : stat.uptime_percentage === 50 ? 'Degraded' : 'Major Outage'}
+                                                                            {/* High-Performance Minimalist Tooltip */}
+                                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 hidden group-hover:flex flex-col z-50 pointer-events-none transform translate-y-1">
+                                                                                <div className="bg-[#0D0D0D] border border-white/10 rounded-lg py-2.5 px-3.5 shadow-2xl flex flex-col gap-2 min-w-[150px]">
+                                                                                    <span className="text-[9px] font-mono text-white/20 uppercase tracking-[0.2em]">{dateStr}</span>
+                                                                                    <div className="space-y-1.5 border-t border-white/5 pt-2">
+                                                                                        <div className="flex justify-between items-center gap-4">
+                                                                                            <span className="text-[10px] text-white/30 uppercase font-bold tracking-tighter">Uptime</span>
+                                                                                            <span className={`text-[10px] font-black uppercase ${stat.uptime_percentage === 100 ? 'text-green-500' : stat.uptime_percentage === 50 ? 'text-yellow-500' : stat.uptime_percentage === 0 ? 'text-red-500' : 'text-white/10'}`}>
+                                                                                                {stat.uptime_percentage === -1 ? 'N/A' : stat.uptime_percentage === 100 ? 'Stable' : stat.uptime_percentage === 50 ? 'Blip' : 'Down'}
                                                                                             </span>
                                                                                         </div>
-                                                                                        <div className="flex justify-between items-center">
-                                                                                            <span className="text-xs text-white/40">Response Time</span>
-                                                                                            <span className="text-xs font-bold text-white/90 font-mono tracking-tight">{latencyStr}</span>
+                                                                                        <div className="flex justify-between items-center gap-4">
+                                                                                            <span className="text-[10px] text-white/30 uppercase font-bold tracking-tighter">Latency</span>
+                                                                                            <span className="text-[10px] font-mono font-bold text-white/70">{latencyStr}</span>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
