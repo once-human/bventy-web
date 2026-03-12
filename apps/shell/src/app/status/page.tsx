@@ -293,10 +293,10 @@ export default async function StatusPage() {
                                             <div className={`absolute -left-[37px] top-1.5 h-4 w-4 rounded-full border-2 border-black transition-all duration-500 group-hover:scale-125 ${inc.status === 'resolved' ? 'bg-white/20' : 'bg-red-500 status-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]'}`}></div>
                                             <div className="space-y-2">
                                                 <div className="flex items-center gap-4">
-                                                    <p className="text-[10px] font-mono text-white/50 tracking-widest uppercase">
+                                                    <p className="text-[11px] font-mono text-white/50 tracking-widest uppercase">
                                                         {new Date(inc.created_at).toLocaleDateString()} — {inc.monitor_name}
                                                     </p>
-                                                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${inc.status === 'resolved' ? 'bg-white/10 text-white/40' : 'bg-red-500/10 text-red-500'}`}>
+                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${inc.status === 'resolved' ? 'bg-white/10 text-white/40' : 'bg-red-500/10 text-red-500'}`}>
                                                         {inc.status}
                                                     </span>
                                                 </div>
