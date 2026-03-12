@@ -226,21 +226,18 @@ export default async function StatusPage() {
                                                                         <div key={i} className="flex-1 relative group">
                                                                             <div className={`w-full rounded-[1px] cursor-crosshair ${color} ${height}`}></div>
                                                                             
-                                                                            {/* High-Performance Minimalist Tooltip */}
-                                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 hidden group-hover:flex flex-col z-50 pointer-events-none transform translate-y-1">
-                                                                                <div className="bg-[#0D0D0D] border border-white/10 rounded-lg py-2.5 px-3.5 shadow-2xl flex flex-col gap-2 min-w-[150px]">
-                                                                                    <span className="text-[9px] font-mono text-white/20 uppercase tracking-[0.2em]">{dateStr}</span>
-                                                                                    <div className="space-y-1.5 border-t border-white/5 pt-2">
-                                                                                        <div className="flex justify-between items-center gap-4">
-                                                                                            <span className="text-[10px] text-white/30 uppercase font-bold tracking-tighter">Uptime</span>
-                                                                                            <span className={`text-[10px] font-black uppercase ${stat.uptime_percentage === 100 ? 'text-green-500' : stat.uptime_percentage === 50 ? 'text-yellow-500' : stat.uptime_percentage === 0 ? 'text-red-500' : 'text-white/10'}`}>
-                                                                                                {stat.uptime_percentage === -1 ? 'N/A' : stat.uptime_percentage === 100 ? 'Stable' : stat.uptime_percentage === 50 ? 'Blip' : 'Down'}
-                                                                                            </span>
-                                                                                        </div>
-                                                                                        <div className="flex justify-between items-center gap-4">
-                                                                                            <span className="text-[10px] text-white/30 uppercase font-bold tracking-tighter">Latency</span>
-                                                                                            <span className="text-[10px] font-mono font-bold text-white/70">{latencyStr}</span>
-                                                                                        </div>
+                                                                            {/* Ultra-Minimalist High-Performance Tooltip */}
+                                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none whitespace-nowrap">
+                                                                                <div className="bg-[#050505] border border-white/10 rounded px-2 py-1.5 min-w-[120px]">
+                                                                                    <div className="flex justify-between items-center gap-3">
+                                                                                        <span className="text-[9px] font-mono text-white/20">{dateStr}</span>
+                                                                                        <span className={`text-[9px] font-black uppercase ${stat.uptime_percentage === 100 ? 'text-green-500' : stat.uptime_percentage === 50 ? 'text-yellow-500' : stat.uptime_percentage === 0 ? 'text-red-500' : 'text-white/10'}`}>
+                                                                                            {stat.uptime_percentage === -1 ? 'None' : stat.uptime_percentage === 100 ? 'Up' : stat.uptime_percentage === 50 ? 'Blip' : 'Down'}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                    <div className="flex justify-between items-center mt-1 border-t border-white/5 pt-1">
+                                                                                        <span className="text-[9px] font-mono text-white/40">{latencyStr}</span>
+                                                                                        <span className="text-[8px] font-mono text-white/10 uppercase tracking-tighter">Verified</span>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
