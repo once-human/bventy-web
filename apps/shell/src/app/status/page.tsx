@@ -212,6 +212,7 @@ export default async function StatusPage() {
                                                                 {bars.map((stat, i) => {
                                                                     const color = stat.uptime_percentage === -1 ? 'bg-white/5' :
                                                                                 stat.uptime_percentage === 100 ? 'bg-green-500/40 hover:bg-green-500 hover:scale-y-125' :
+                                                                                stat.uptime_percentage === 50 ? 'bg-yellow-500/50 hover:bg-yellow-500 hover:scale-y-125' :
                                                                                 'bg-red-500/60 hover:bg-red-500 hover:scale-y-125';
                                                                     const height = stat.uptime_percentage === -1 ? 'h-2.5' :
                                                                                 stat.uptime_percentage === 100 ? 'h-5' : 'h-5';
@@ -223,26 +224,26 @@ export default async function StatusPage() {
                                                                         <div key={i} className="flex-1 relative group">
                                                                             <div className={`w-full rounded-[1px] transition-all duration-500 cursor-crosshair ${color} ${height}`}></div>
                                                                             
-                                                                            {/* Custom Premium Tooltip */}
+                                                                            {/* Custom Premium Tooltip - Minimalist version */}
                                                                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-50 transform translate-y-2 group-hover:translate-y-0">
-                                                                                <div className="bg-[#0A0A0A] border border-white/10 rounded-xl py-3 px-4 shadow-[0_30px_60px_rgba(0,0,0,1)] flex flex-col gap-2 min-w-[170px] backdrop-blur-xl">
-                                                                                    <div className="flex justify-between items-center border-b border-white/5 pb-2 mb-1">
-                                                                                        <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">{dateStr}</span>
-                                                                                        <div className={`h-2 w-2 rounded-full ${stat.uptime_percentage === 100 ? 'bg-green-500' : stat.uptime_percentage === -1 ? 'bg-white/10' : 'bg-red-500'}`}></div>
+                                                                                <div className="bg-[#0A0A0A] border border-white/10 rounded-xl py-4 px-5 shadow-[0_30px_60px_rgba(0,0,0,1)] flex flex-col gap-3 min-w-[180px] backdrop-blur-2xl">
+                                                                                    <div className="flex flex-col gap-0.5">
+                                                                                        <span className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em]">{dateStr}</span>
+                                                                                        <span className="text-sm font-bold text-white/90">Diagnostic Snapshot</span>
                                                                                     </div>
-                                                                                    <div className="space-y-1.5">
-                                                                                        <div className="flex justify-between items-center">
-                                                                                            <span className="text-xs text-white/50">Service Uptime</span>
-                                                                                            <span className="text-xs font-bold text-white">{stat.uptime_percentage === -1 ? 'N/A' : `${stat.uptime_percentage.toFixed(1)}%`}</span>
+                                                                                    <div className="space-y-2.5 border-t border-white/5 pt-3">
+                                                                                        <div className="flex justify-between items-center group/item">
+                                                                                            <span className="text-xs text-white/40">Uptime Stability</span>
+                                                                                            <span className={`text-xs font-black ${stat.uptime_percentage === 100 ? 'text-green-500' : stat.uptime_percentage === 50 ? 'text-yellow-500' : stat.uptime_percentage === 0 ? 'text-red-500' : 'text-white/20'}`}>
+                                                                                                {stat.uptime_percentage === -1 ? 'N/A' : stat.uptime_percentage === 100 ? '100%' : stat.uptime_percentage === 50 ? 'Degraded' : 'Major Outage'}
+                                                                                            </span>
                                                                                         </div>
                                                                                         <div className="flex justify-between items-center">
-                                                                                            <span className="text-xs text-white/50">Response Time</span>
-                                                                                            <span className="text-xs font-bold text-white/90">{latencyStr}</span>
+                                                                                            <span className="text-xs text-white/40">Response Time</span>
+                                                                                            <span className="text-xs font-bold text-white/90 font-mono tracking-tight">{latencyStr}</span>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
-                                                                                {/* Tooltip Arrow */}
-                                                                                <div className="w-2.5 h-2.5 bg-[#0A0A0A] border-r border-b border-white/10 rotate-45 absolute -bottom-1.5 left-1/2 -translate-x-1/2"></div>
                                                                             </div>
                                                                         </div>
                                                                     );
