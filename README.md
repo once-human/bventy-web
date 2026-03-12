@@ -157,8 +157,6 @@ Platform health and real time service availability can be monitored at [status.b
 
 ---
 
----
-
 ## License
 
 This project is licensed under the **GNU Affero General Public License v3 ([AGPL-3.0](LICENSE))**. 
