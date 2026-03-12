@@ -13,7 +13,7 @@ const STATUS_ENDPOINT = `${API_URL}/system/status`;
 async function getStatusData() {
     try {
         const res = await fetch(STATUS_ENDPOINT, { 
-            next: { revalidate: 300 }, // Cache for 5 minutes
+            next: { revalidate: 60 }, // Shorter revalidation for faster feedback
             headers: { 'Cache-Control': 'no-cache' }
         });
         
@@ -94,8 +94,15 @@ export default async function StatusPage() {
     });
 
     const anyDown = monitors.some((m: any) => m.status === "down");
+    const allOffline = monitors.length > 0 && monitors.every((m: any) => m.status === "offline");
     const anyOffline = monitors.some((m: any) => m.status === "offline");
-    const allOperational = monitors.length > 0 && !isFallback && !anyDown && !anyOffline;
+    const anyOperational = monitors.some((m: any) => m.status === "operational");
+    
+    // Deeper logic: 
+    // - Operational if at least one is up and none are down. 
+    // - Incident if any are down. 
+    // - Initializing ONLY if all are offline.
+    const allOperational = monitors.length > 0 && !isFallback && !anyDown && !allOffline;
 
     return (
         <div className="min-h-screen bg-black text-white px-6 py-12 md:py-20 flex justify-center selection:bg-white selection:text-black antialiased font-sans">
@@ -128,7 +135,7 @@ export default async function StatusPage() {
                         <div className={`absolute inset-0 ${allOperational ? 'bg-green-500/5' : anyDown ? 'bg-red-500/5' : 'bg-white/5'} opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`}></div>
                         <div className="space-y-1 relative">
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                                {anyDown ? "Active Incident" : allOperational ? "All Systems Operational" : anyOffline ? "Tracking Initializing" : "Partial Service Outage"}
+                                {anyDown ? "Active Incident" : allOffline ? "Tracking Initializing" : allOperational ? "All Systems Operational" : "Partial Tracking Active"}
                             </h1>
                             <p className="text-white/40 font-medium text-xs">
                                 {isFallback ? "Real-time monitoring engine unreachable. Systems currently untracked." : <>Resources verified every 30 minutes by <span className="text-white">Internal Monitoring Engine</span>.</>}
