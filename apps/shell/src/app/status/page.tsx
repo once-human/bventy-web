@@ -194,6 +194,7 @@ export default async function StatusPage() {
                                                                 <span className={`text-[10px] font-bold uppercase tracking-widest ${
                                                                     service.status === 'operational' ? 'text-green-500' : 
                                                                     service.status === 'down' ? 'text-red-500' :
+                                                                    service.status === 'degraded' ? 'text-yellow-500' :
                                                                     'text-white/30'
                                                                 }`}>
                                                                     {service.status}
@@ -201,6 +202,7 @@ export default async function StatusPage() {
                                                                 <div className={`h-1.5 w-1.5 rounded-full ${
                                                                     service.status === 'operational' ? 'bg-green-500 status-pulse' : 
                                                                     service.status === 'down' ? 'bg-red-500' :
+                                                                    service.status === 'degraded' ? 'bg-yellow-500' :
                                                                     'bg-white/10'
                                                                 }`}></div>
                                                             </div>
