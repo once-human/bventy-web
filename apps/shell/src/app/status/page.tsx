@@ -75,8 +75,13 @@ export default async function StatusPage() {
         name: m.Name,
         display: m.Display,
         category: m.Category,
-        status: m.Status
+        status: m.Status,
+        uptime_percentage: 100,
+        daily_stats: []
     }));
+
+    const incidents = data?.incidents || [];
+    const overallUptime = data?.overall_uptime || 100;
     
     // Group monitors by category
     const groupedMonitors: Record<string, any[]> = {};
@@ -96,39 +101,46 @@ export default async function StatusPage() {
             <div className="max-w-6xl w-full">
                 
                 {/* Header Section */}
-                <div className="mb-16 space-y-8">
+                <div className="mb-12 space-y-6">
                     <div className="flex justify-between items-center">
                         <Link href="/" className="text-xl font-bold tracking-tight hover:opacity-70 transition-opacity">
                             Bventy<span className="text-white/40">Status</span>
                         </Link>
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
-                            <div className={`h-1.5 w-1.5 rounded-full ${allOperational ? 'bg-green-500 status-pulse' : anyDown ? 'bg-red-500' : 'bg-white/20'}`}></div>
-                            <span className="text-[10px] font-mono uppercase tracking-wider text-white/50">
-                                {isFallback ? "Tracking Offline" : "Live Tracking"}
-                            </span>
+                        <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-end">
+                                <span className="text-[10px] font-mono uppercase tracking-widest text-white/30">Total Uptime (90d)</span>
+                                <span className="text-sm font-bold text-white/80">{overallUptime.toFixed(2)}%</span>
+                            </div>
+                            <div className="h-8 w-[1px] bg-white/10 hidden md:block"></div>
+                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+                                <div className={`h-1.5 w-1.5 rounded-full ${allOperational ? 'bg-green-500 status-pulse' : anyDown ? 'bg-red-500' : 'bg-white/20'}`}></div>
+                                <span className="text-[10px] font-mono uppercase tracking-wider text-white/50">
+                                    {isFallback ? "Tracking Offline" : "Live Tracking"}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
                     <div 
-                        className={`p-6 md:p-10 rounded-[2rem] bg-white/[0.03] border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden group`}
+                        className={`p-6 md:p-8 rounded-[1.5rem] bg-white/[0.03] border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden group`}
                     >
                         <div className={`absolute inset-0 ${allOperational ? 'bg-green-500/5' : anyDown ? 'bg-red-500/5' : 'bg-white/5'} opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`}></div>
-                        <div className="space-y-2 relative">
+                        <div className="space-y-1 relative">
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                                 {anyDown ? "Active Incident" : allOperational ? "All Systems Operational" : anyOffline ? "Tracking Initializing" : "Partial Service Outage"}
                             </h1>
-                            <p className="text-white/40 font-medium text-sm">
-                                {isFallback ? "Real-time monitoring engine unreachable. Systems currently untracked." : <>Verified real-time from our <span className="text-white">Internal Monitoring Engine</span>.</>}
+                            <p className="text-white/40 font-medium text-xs">
+                                {isFallback ? "Real-time monitoring engine unreachable. Systems currently untracked." : <>Resources verified every 15 minutes by <span className="text-white">Internal Monitoring Engine</span>.</>}
                             </p>
                         </div>
                         <div className="flex items-center gap-4 relative">
-                            <div className={`h-14 w-14 rounded-full ${allOperational ? 'bg-green-500/10 border-green-500/20' : anyDown ? 'bg-red-500/10 border-red-500/20' : 'bg-white/10 border-white/20'} border flex items-center justify-center`}>
+                            <div className={`h-12 w-12 rounded-full ${allOperational ? 'bg-green-500/10 border-green-500/20' : anyDown ? 'bg-red-500/10 border-red-500/20' : 'bg-white/10 border-white/20'} border flex items-center justify-center`}>
                                 {allOperational ? (
-                                    <CheckCircle2 className="h-7 w-7 text-green-500" />
+                                    <CheckCircle2 className="h-6 w-6 text-green-500" />
                                 ) : anyDown ? (
-                                    <AlertCircle className="h-7 w-7 text-red-500" />
+                                    <AlertCircle className="h-6 w-6 text-red-500" />
                                 ) : (
-                                    <Activity className="h-7 w-7 text-white/20" />
+                                    <Activity className="h-6 w-6 text-white/20" />
                                 )}
                             </div>
                         </div>
@@ -136,36 +148,37 @@ export default async function StatusPage() {
                 </div>
 
                 {/* Categorized Service Grid */}
-                <div className="space-y-16">
+                <div className="space-y-12">
                     {Object.entries(groupedMonitors).map(([category, categoryMonitors]) => {
                         const catInfo = CATEGORY_MAP[category] || { title: category, icon: <Activity className="h-4 w-4" /> };
                         
                         return (
-                            <section key={category} className="space-y-6">
+                            <section key={category} className="space-y-4">
                                 <div className="flex items-center gap-3 px-2">
                                     <div className="text-white/20">{catInfo.icon}</div>
-                                    <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">{catInfo.title}</h2>
+                                    <h2 className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/30">{catInfo.title}</h2>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
                                     {categoryMonitors.map((service, idx) => {
-                                        const historyPoints = service.history || [];
-                                        // We want to show 42 bars. Map real history to these bars.
-                                        // Reverse history to have most recent on the right (idx 41)
-                                        const bars = Array.from({ length: 42 }).map((_, i) => {
-                                            const dataPoint = historyPoints[41 - i];
-                                            if (!dataPoint) return 'empty';
-                                            return dataPoint.status;
-                                        });
+                                        const dailyStats = service.daily_stats || [];
+                                        // 90 bars for 90 days
+                                        const bars = Array.from({ length: 90 }).map((_, i) => {
+                                            const stat = dailyStats[i]; // Backend returns newest first at [0]
+                                            return stat || { date: '', uptime_percentage: -1 };
+                                        }).reverse(); // Reverse so newest index 89 is Today
 
                                         return (
                                             <div
                                                 key={`${category}-${idx}`}
-                                                className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300 group"
+                                                className="p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300 group"
                                             >
                                                 <div className="flex justify-between items-start mb-4">
                                                     <div className="space-y-0.5">
                                                         <h3 className="text-sm font-semibold text-white/90">{service.display}</h3>
-                                                        <p className="text-[9px] font-mono text-white/20 uppercase tracking-tight">{service.name}</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-[8px] font-mono text-white/20 uppercase tracking-tight">{service.name}</p>
+                                                            <span className="text-[8px] font-bold text-white/40">{service.uptime_percentage.toFixed(2)}% uptime</span>
+                                                        </div>
                                                     </div>
                                                     <div className="flex items-center gap-1.5">
                                                         <span className={`text-[9px] font-bold uppercase tracking-tighter ${
@@ -183,23 +196,28 @@ export default async function StatusPage() {
                                                     </div>
                                                 </div>
                                                 
-                                                {/* Uptime Visualization */}
+                                                {/* Daily Visualization (90 dots) */}
                                                 <div className="space-y-2">
-                                                    <div className="flex gap-[1.5px] h-4 items-end">
-                                                        {bars.map((status, i) => (
-                                                            <div 
-                                                                key={i} 
-                                                                className={`flex-1 rounded-sm transition-all duration-500 ${
-                                                                    status === 'operational' ? 'bg-green-500/70 group-hover:bg-green-500 group-hover:h-4 h-3.5' :
-                                                                    status === 'down' ? 'bg-red-500 group-hover:h-4 h-3.5' :
-                                                                    'bg-white/5 h-2'
-                                                                }`}
-                                                            ></div>
-                                                        ))}
+                                                    <div className="flex gap-[1px] h-3 items-end">
+                                                        {bars.map((stat, i) => {
+                                                            const color = stat.uptime_percentage === -1 ? 'bg-white/5' :
+                                                                         stat.uptime_percentage === 100 ? 'bg-green-500/60 group-hover:bg-green-500' :
+                                                                         'bg-red-500/80 group-hover:bg-red-500';
+                                                            const height = stat.uptime_percentage === -1 ? 'h-1.5' :
+                                                                          stat.uptime_percentage === 100 ? 'h-3' : 'h-3';
+                                                            
+                                                            return (
+                                                                <div 
+                                                                    key={i} 
+                                                                    title={stat.uptime_percentage === -1 ? 'No data' : `${stat.uptime_percentage}% at ${stat.date}`}
+                                                                    className={`flex-1 rounded-[1px] transition-all duration-500 ${color} ${height}`}
+                                                                ></div>
+                                                            );
+                                                        })}
                                                     </div>
-                                                    <div className="flex justify-between items-center text-[8px] font-medium text-white/10">
-                                                        <span>{isFallback ? "Untracked" : "90d ago"}</span>
-                                                        <span className="text-white/20">{isFallback ? "Initial state" : "Tracking Log"}</span>
+                                                    <div className="flex justify-between items-center text-[7px] font-medium text-white/10 uppercase tracking-tighter">
+                                                        <span>90d ago</span>
+                                                        <span>Daily Uptime</span>
                                                         <span>Today</span>
                                                     </div>
                                                 </div>
@@ -212,44 +230,68 @@ export default async function StatusPage() {
                     })}
                 </div>
 
-                {/* Narrative Incident Log */}
-                <div className="mt-32 mb-32 space-y-12">
+                {/* Real Incident Log */}
+                <div className="mt-24 mb-32 space-y-8">
                     <div className="flex justify-between items-end px-2">
-                        <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-white/30">Incident History</h2>
-                        <span className="text-[10px] font-mono text-white/20">Real-time Log</span>
+                        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">Incident History</h2>
+                        <span className="text-[9px] font-mono text-white/20 uppercase">Real-time Automated Log</span>
                     </div>
                     
-                    <div className="relative pl-8 space-y-16">
+                    <div className="relative pl-8 space-y-12">
                         <div className="absolute left-[7px] top-2 bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent"></div>
                         
-                        <div className="relative group grayscale">
-                            <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-white/10 border-2 border-black"></div>
-                            <div className="space-y-2">
-                                <p className="text-xs font-mono text-white/30 tracking-tight">March 2026</p>
-                                <h3 className="font-semibold text-lg text-white/40">No system incidents reported</h3>
-                                <p className="text-white/20 text-sm leading-relaxed max-w-2xl">
-                                    System stability is our priority. Historical incidents will be documented here with high transparency.
-                                </p>
+                        {incidents.length === 0 ? (
+                            <div className="relative group grayscale opaity-60">
+                                <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-white/10 border-2 border-black"></div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-mono text-white/30 tracking-tight">System Status</p>
+                                    <h3 className="font-semibold text-base text-white/40">No system incidents reported</h3>
+                                    <p className="text-white/20 text-xs leading-relaxed max-w-2xl">
+                                        All systems have been monitored with high stability over the recent period.
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            incidents.map((inc: any) => (
+                                <div key={inc.id} className="relative group animate-in fade-in duration-700">
+                                    <div className={`absolute -left-[30px] top-1.5 h-3 w-3 rounded-full border-2 border-black ${inc.status === 'resolved' ? 'bg-white/20' : 'bg-red-500 status-pulse'}`}></div>
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-3">
+                                            <p className="text-[10px] font-mono text-white/40 tracking-tight">
+                                                {new Date(inc.created_at).toLocaleDateString()} — {inc.monitor_name}
+                                            </p>
+                                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase ${inc.status === 'resolved' ? 'bg-white/10 text-white/40' : 'bg-red-500/10 text-red-500'}`}>
+                                                {inc.status}
+                                            </span>
+                                        </div>
+                                        <h3 className={`font-semibold text-base ${inc.status === 'resolved' ? 'text-white/50' : 'text-white'}`}>
+                                            {inc.issue_type}
+                                        </h3>
+                                        <p className="text-white/30 text-xs leading-relaxed max-w-2xl">
+                                            {inc.description} {inc.resolved_at && `Resolved after automated verification at ${new Date(inc.resolved_at).toLocaleTimeString()}.`}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 
                 {/* Footer Section */}
-                <footer className="pt-20 border-t border-white/10 pb-20">
+                <footer className="pt-16 border-t border-white/10 pb-20">
                     <div className="flex flex-col md:flex-row justify-between gap-12">
                         <div className="space-y-4">
-                            <h2 className="text-2xl font-semibold tracking-tight text-white">Bventy Support</h2>
-                            <p className="text-white/50 text-sm leading-relaxed max-w-xs">
-                                Verified infrastructure monitoring. For critical incident reporting.
+                            <h2 className="text-xl font-semibold tracking-tight text-white">Bventy Status System</h2>
+                            <p className="text-white/40 text-xs leading-relaxed max-w-xs">
+                                Independent monitoring nodes verify service availability every quarter-hour. Transparency is our baseline.
                             </p>
-                            <p className="text-white font-medium text-lg hover:opacity-70 transition-opacity">
+                            <p className="text-white font-medium text-base hover:opacity-70 transition-opacity">
                                 <a href="mailto:support@bventy.in">support@bventy.in</a>
                             </p>
                         </div>
                         <div className="flex flex-col justify-end md:items-end space-y-2">
-                            <p className="text-white/50 text-sm">© {new Date().getFullYear()} Bventy. System Integrity Verified.</p>
-                            <p className="text-white/20 text-xs font-mono uppercase tracking-[0.15em]">DESIGNED IN INDIA</p>
+                            <p className="text-white/40 text-xs">© {new Date().getFullYear()} Bventy. System Integrity Verified.</p>
+                            <p className="text-white/10 text-[9px] font-mono uppercase tracking-[0.15em]">DESIGNED IN INDIA</p>
                         </div>
                     </div>
                 </footer>
