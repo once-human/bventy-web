@@ -164,26 +164,22 @@ function MonitorCard({ service }: { service: any }) {
     const [hoveredStat, setHoveredStat] = useState<any>(null);
     const dailyStats = service.daily_stats || [];
     
-    // Progressive Density logic (90 days -> ~45 bars)
-    // Recent 15 days: 1 bar per day
-    // Days 16-45: 1 bar per 2 days (15 bars)
-    // Days 46-90: 1 bar per 3 days (15 bars)
-    // Goal: ~45 bars
+    // Ultra-Compact Progressive Density (90 days -> Exactly 30 bars)
     const rawBars = Array.from({ length: 90 }).map((_, i) => dailyStats[i] || { date: '', uptime_percentage: -1, avg_latency_ms: 0 }).reverse();
     const bars: any[] = [];
     
-    // Phase 1: Recent 15 days (Daily)
-    for (let i = 75; i < 90; i++) bars.push(rawBars[i]);
+    // Phase 1: Recent 10 days (Indices 80-89) - High precision
+    for (let i = 80; i < 90; i++) bars.push(rawBars[i]);
     
-    // Phase 2: Middle 30 days (Bi-daily)
-    for (let i = 45; i < 75; i += 2) {
-        const group = [rawBars[i], rawBars[i+1]];
+    // Phase 2: Middle 30 days (Indices 50-79) - 3 days per bar (10 bars)
+    for (let i = 50; i < 80; i += 3) {
+        const group = [rawBars[i], rawBars[i+1], rawBars[i+2]];
         bars.push(aggregateStats(group));
     }
     
-    // Phase 3: Legacy 45 days (Tri-daily)
-    for (let i = 0; i < 45; i += 3) {
-        const group = [rawBars[i], rawBars[i+1], rawBars[i+2]];
+    // Phase 3: Legacy 50 days (Indices 0-49) - 5 days per bar (10 bars)
+    for (let i = 0; i < 50; i += 5) {
+        const group = [rawBars[i], rawBars[i+1], rawBars[i+2], rawBars[i+3], rawBars[i+4]];
         bars.push(aggregateStats(group));
     }
 
@@ -191,7 +187,6 @@ function MonitorCard({ service }: { service: any }) {
         const validStats = group.filter(s => s.uptime_percentage !== -1);
         if (validStats.length === 0) return { date: group[0].date, uptime_percentage: -1, avg_latency_ms: 0 };
         
-        // If any day is down, show down. Else if any degraded, show degraded.
         let uptime = 100;
         if (validStats.some(s => s.uptime_percentage === 0)) uptime = 0;
         else if (validStats.some(s => s.uptime_percentage === 50)) uptime = 50;
@@ -228,14 +223,14 @@ function MonitorCard({ service }: { service: any }) {
             </div>
             
             <div className="space-y-4" onMouseLeave={() => setHoveredStat(null)}>
-                <div className="flex gap-[2px] h-5 items-end relative">
+                <div className="flex gap-[2px] h-5 items-end justify-end relative">
                     {bars.map((stat, i) => {
                         const color = stat.uptime_percentage === -1 ? 'bg-white/5' : stat.uptime_percentage === 100 ? 'bg-green-500/40 hover:bg-green-500' : stat.uptime_percentage === 50 ? 'bg-yellow-500/50 hover:bg-yellow-500' : 'bg-red-500/60 hover:bg-red-500';
                         const height = stat.uptime_percentage === -1 ? 'h-2.5' : 'h-5';
                         return (
                             <div 
                                 key={i} 
-                                className={`flex-1 rounded-[1px] transition-all duration-300 cursor-crosshair hover:scale-y-125 ${color} ${height}`}
+                                className={`flex-1 max-w-[4px] rounded-full transition-all duration-300 cursor-crosshair hover:scale-y-125 ${color} ${height}`}
                                 onMouseEnter={() => setHoveredStat(stat)}
                             />
                         );
@@ -244,24 +239,24 @@ function MonitorCard({ service }: { service: any }) {
                     {/* Shared Single Instance Tooltip */}
                     {hoveredStat && (
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 pointer-events-none animate-in fade-in zoom-in-95 duration-200 z-[100]">
-                            <div className="bg-[#0A0A0A] border border-white/10 rounded-xl py-3 px-4 shadow-2xl flex flex-col gap-2.5 min-w-[180px] backdrop-blur-xl">
-                                <div className="flex flex-col gap-0.5">
+                            <div className="bg-[#0A0A0A] border border-white/10 rounded-xl py-3 px-4 shadow-2xl flex flex-col gap-2.5 min-w-[170px] backdrop-blur-xl">
+                                <div className="flex flex-col gap-0.5 whitespace-nowrap">
                                     <span className="text-[9px] font-mono text-white/20 uppercase tracking-[0.2em]">
                                         {hoveredStat.isAggregated ? `Range Start: ${new Date(hoveredStat.date).toLocaleDateString()}` : new Date(hoveredStat.date).toLocaleDateString()}
                                     </span>
-                                    <span className="text-sm font-black text-white/90">
-                                        {hoveredStat.isAggregated ? `Averaged (${hoveredStat.rangeSize}d)` : 'Deep Snapshot'}
+                                    <span className="text-[12px] font-black text-white/90">
+                                        {hoveredStat.isAggregated ? `Averaged (${hoveredStat.rangeSize}d)` : 'Snapshot'}
                                     </span>
                                 </div>
-                                <div className="space-y-2 border-t border-white/5 pt-2">
+                                <div className="space-y-1.5 border-t border-white/5 pt-2">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">Stability</span>
+                                        <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">Status</span>
                                         <span className={`text-[10px] font-black uppercase tracking-widest ${hoveredStat.uptime_percentage === 100 ? 'text-green-500' : hoveredStat.uptime_percentage === 50 ? 'text-yellow-500' : hoveredStat.uptime_percentage === 0 ? 'text-red-500' : 'text-white/10'}`}>
-                                            {hoveredStat.uptime_percentage === -1 ? 'N/A' : hoveredStat.uptime_percentage === 100 ? 'Stable' : hoveredStat.uptime_percentage === 50 ? 'Blip' : 'Down'}
+                                            {hoveredStat.uptime_percentage === -1 ? 'None' : hoveredStat.uptime_percentage === 100 ? 'Up' : hoveredStat.uptime_percentage === 50 ? 'Blip' : 'Down'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">Response</span>
+                                        <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">Lat</span>
                                         <span className="text-[10px] font-black text-white/70 font-mono">{hoveredStat.avg_latency_ms}ms</span>
                                     </div>
                                 </div>
