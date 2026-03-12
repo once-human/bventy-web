@@ -205,27 +205,53 @@ export default async function StatusPage() {
                                                 </div>
                                                 
                                                 {/* Daily Visualization (90 dots) */}
-                                                <div className="space-y-2">
-                                                    <div className="flex gap-[1px] h-3 items-end">
+                                                <div className="space-y-4">
+                                                    <div className="flex gap-[1.5px] h-4 items-end">
                                                         {bars.map((stat, i) => {
                                                             const color = stat.uptime_percentage === -1 ? 'bg-white/5' :
-                                                                         stat.uptime_percentage === 100 ? 'bg-green-500/60 hover:bg-green-500 hover:scale-y-125' :
-                                                                         'bg-red-500/80 hover:bg-red-500 hover:scale-y-125';
-                                                            const height = stat.uptime_percentage === -1 ? 'h-1.5' :
-                                                                          stat.uptime_percentage === 100 ? 'h-3' : 'h-3';
+                                                                         stat.uptime_percentage === 100 ? 'bg-green-500/40 hover:bg-green-500 hover:scale-y-125' :
+                                                                         'bg-red-500/60 hover:bg-red-500 hover:scale-y-125';
+                                                            const height = stat.uptime_percentage === -1 ? 'h-2' :
+                                                                          stat.uptime_percentage === 100 ? 'h-4' : 'h-4';
                                                             
+                                                            const dateStr = stat.date ? new Date(stat.date).toLocaleDateString() : 'Unknown Date';
+                                                            const latencyStr = stat.avg_latency_ms ? `${stat.avg_latency_ms}ms` : '0ms';
+
                                                             return (
-                                                                <div 
-                                                                    key={i} 
-                                                                    title={stat.uptime_percentage === -1 ? 'No data' : `${new Date(stat.date).toLocaleDateString()}: ${stat.uptime_percentage.toFixed(1)}% uptime, ${stat.avg_latency_ms}ms avg latency`}
-                                                                    className={`flex-1 rounded-[1px] transition-all duration-300 cursor-help ${color} ${height}`}
-                                                                ></div>
+                                                                <div key={i} className="flex-1 relative group">
+                                                                    <div className={`w-full rounded-[1px] transition-all duration-500 cursor-crosshair ${color} ${height}`}></div>
+                                                                    
+                                                                    {/* Custom Premium Tooltip */}
+                                                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-50 transform translate-y-2 group-hover:translate-y-0">
+                                                                        <div className="bg-[#0A0A0A] border border-white/10 rounded-lg py-2.5 px-3 shadow-[0_20px_50px_rgba(0,0,0,1)] flex flex-col gap-1.5 min-w-[140px]">
+                                                                            <div className="flex justify-between items-center border-b border-white/5 pb-1.5 mb-0.5">
+                                                                                <span className="text-[8px] font-mono text-white/30 uppercase tracking-tighter">{dateStr}</span>
+                                                                                <div className={`h-1.5 w-1.5 rounded-full ${stat.uptime_percentage === 100 ? 'bg-green-500' : stat.uptime_percentage === -1 ? 'bg-white/10' : 'bg-red-500'}`}></div>
+                                                                            </div>
+                                                                            <div className="space-y-1">
+                                                                                <div className="flex justify-between items-center">
+                                                                                    <span className="text-[9px] text-white/50">Uptime</span>
+                                                                                    <span className="text-[9px] font-bold text-white">{stat.uptime_percentage === -1 ? 'N/A' : `${stat.uptime_percentage.toFixed(1)}%`}</span>
+                                                                                </div>
+                                                                                <div className="flex justify-between items-center">
+                                                                                    <span className="text-[9px] text-white/50">Avg Latency</span>
+                                                                                    <span className="text-[9px] font-bold text-white/90">{latencyStr}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        {/* Tooltip Arrow */}
+                                                                        <div className="w-2 h-2 bg-[#0A0A0A] border-r border-b border-white/10 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2"></div>
+                                                                    </div>
+                                                                </div>
                                                             );
                                                         })}
                                                     </div>
                                                     <div className="flex justify-between items-center text-[7px] font-medium text-white/10 uppercase tracking-tighter">
                                                         <span>90d ago</span>
-                                                        <span>Daily Diagnostics</span>
+                                                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/5 bg-white/[0.02]">
+                                                            <Activity className="h-2 w-2 text-white/20" />
+                                                            <span>Daily Diagnostics Summary</span>
+                                                        </div>
                                                         <span>Today</span>
                                                     </div>
                                                 </div>
