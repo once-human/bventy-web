@@ -68,6 +68,7 @@ graph TD
         APP[app.bventy.in]
         VENDOR[partner.bventy.in]
         ADMIN[admin.bventy.in]
+        STATUS[status.bventy.in]
     end
 
     subgraph Service Shared Packages
