@@ -248,8 +248,8 @@ export default async function StatusPage() {
                                                             <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white/20 uppercase tracking-[0.2em]">
                                                                 <span>90 Days Ago</span>
                                                                 <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-white/5 bg-white/[0.01]">
-                                                                    <Activity className="h-2.5 w-2.5 text-white/10" />
-                                                                    <span className="text-[9px] tracking-[0.1em]">Verification Engine Active</span>
+                                                                    <Activity className="h-3 w-3 text-white/20" />
+                                                                    <span className="text-[10px] tracking-[0.2em] font-black text-white/30 uppercase">Active</span>
                                                                 </div>
                                                                 <span>Today</span>
                                                             </div>
@@ -315,7 +315,7 @@ export default async function StatusPage() {
                     <div className="flex flex-col md:flex-row justify-between gap-12">
                         <div className="space-y-4">
                             <h2 className="text-xl font-semibold tracking-tight text-white">Bventy Status System</h2>
-                            <p className="text-white/40 text-xs leading-relaxed max-w-xs">
+                            <p className="text-white/40 text-sm leading-relaxed max-w-sm">
                                 Independent monitoring nodes verify service availability every 30 minutes. Transparency is our baseline.
                             </p>
                             <p className="text-white font-medium text-base hover:opacity-70 transition-opacity">
@@ -323,8 +323,8 @@ export default async function StatusPage() {
                             </p>
                         </div>
                         <div className="flex flex-col justify-end md:items-end space-y-2">
-                            <p className="text-white/40 text-xs">© {new Date().getFullYear()} Bventy. System Integrity Verified.</p>
-                            <p className="text-white/10 text-[9px] font-mono uppercase tracking-[0.15em]">DESIGNED IN INDIA</p>
+                            <p className="text-white/40 text-sm">© {new Date().getFullYear()} Bventy. System Integrity Verified.</p>
+                            <p className="text-white/10 text-[11px] font-mono uppercase tracking-[0.15em]">DESIGNED IN INDIA</p>
                         </div>
                     </div>
                 </footer>
