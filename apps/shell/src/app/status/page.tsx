@@ -13,7 +13,7 @@ const STATUS_ENDPOINT = `${API_URL}/system/status`;
 async function getStatusData() {
     try {
         const res = await fetch(STATUS_ENDPOINT, { 
-            next: { revalidate: 60 }, // Shorter revalidation for faster feedback
+            next: { revalidate: 1800 }, // 30 minutes revalidation to match backend heartbeat
             headers: { 'Cache-Control': 'no-cache' }
         });
         
