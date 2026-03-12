@@ -26,10 +26,10 @@ async function getStatusData() {
 }
 
 const DEFAULT_MONITORS = [
-    { Name: "bventy.in", Display: "Main Website", Category: "Web", Status: "offline" },
+    { Name: "bventy.in", Display: "Website", Category: "Web", Status: "offline" },
     { Name: "app.bventy.in", Display: "User Portal", Category: "Web", Status: "offline" },
     { Name: "auth.bventy.in", Display: "Auth Service", Category: "Frontend", Status: "offline" },
-    { Name: "partner.bventy.in", Display: "Vendor Dashboard", Category: "Frontend", Status: "offline" },
+    { Name: "partner.bventy.in", Display: "Partner Portal", Category: "Frontend", Status: "offline" },
     { Name: "admin.bventy.in", Display: "Admin Panel", Category: "Frontend", Status: "offline" },
     { Name: "api.bventy.in", Display: "Core API", Category: "API", Status: "offline" },
     { Name: "Neon", Display: "PostgreSQL Database", Category: "Backend", Status: "offline" },
@@ -77,6 +77,7 @@ export default async function StatusPage() {
         category: m.Category,
         status: m.Status,
         uptime_percentage: 100,
+        avg_latency_ms: 0,
         daily_stats: []
     }));
 
@@ -130,7 +131,7 @@ export default async function StatusPage() {
                                 {anyDown ? "Active Incident" : allOperational ? "All Systems Operational" : anyOffline ? "Tracking Initializing" : "Partial Service Outage"}
                             </h1>
                             <p className="text-white/40 font-medium text-xs">
-                                {isFallback ? "Real-time monitoring engine unreachable. Systems currently untracked." : <>Resources verified every 15 minutes by <span className="text-white">Internal Monitoring Engine</span>.</>}
+                                {isFallback ? "Real-time monitoring engine unreachable. Systems currently untracked." : <>Resources verified every 30 minutes by <span className="text-white">Internal Monitoring Engine</span>.</>}
                             </p>
                         </div>
                         <div className="flex items-center gap-4 relative">
@@ -161,11 +162,10 @@ export default async function StatusPage() {
                                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
                                     {categoryMonitors.map((service, idx) => {
                                         const dailyStats = service.daily_stats || [];
-                                        // 90 bars for 90 days
                                         const bars = Array.from({ length: 90 }).map((_, i) => {
-                                            const stat = dailyStats[i]; // Backend returns newest first at [0]
-                                            return stat || { date: '', uptime_percentage: -1 };
-                                        }).reverse(); // Reverse so newest index 89 is Today
+                                            const stat = dailyStats[i];
+                                            return stat || { date: '', uptime_percentage: -1, avg_latency_ms: 0 };
+                                        }).reverse();
 
                                         return (
                                             <div
@@ -178,6 +178,7 @@ export default async function StatusPage() {
                                                         <div className="flex items-center gap-2">
                                                             <p className="text-[8px] font-mono text-white/20 uppercase tracking-tight">{service.name}</p>
                                                             <span className="text-[8px] font-bold text-white/40">{service.uptime_percentage.toFixed(2)}% uptime</span>
+                                                            <span className="text-[8px] text-white/20">• {service.avg_latency_ms}ms</span>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-1.5">
@@ -201,23 +202,23 @@ export default async function StatusPage() {
                                                     <div className="flex gap-[1px] h-3 items-end">
                                                         {bars.map((stat, i) => {
                                                             const color = stat.uptime_percentage === -1 ? 'bg-white/5' :
-                                                                         stat.uptime_percentage === 100 ? 'bg-green-500/60 group-hover:bg-green-500' :
-                                                                         'bg-red-500/80 group-hover:bg-red-500';
+                                                                         stat.uptime_percentage === 100 ? 'bg-green-500/60 hover:bg-green-500 hover:scale-y-125' :
+                                                                         'bg-red-500/80 hover:bg-red-500 hover:scale-y-125';
                                                             const height = stat.uptime_percentage === -1 ? 'h-1.5' :
                                                                           stat.uptime_percentage === 100 ? 'h-3' : 'h-3';
                                                             
                                                             return (
                                                                 <div 
                                                                     key={i} 
-                                                                    title={stat.uptime_percentage === -1 ? 'No data' : `${stat.uptime_percentage}% at ${stat.date}`}
-                                                                    className={`flex-1 rounded-[1px] transition-all duration-500 ${color} ${height}`}
+                                                                    title={stat.uptime_percentage === -1 ? 'No data' : `${new Date(stat.date).toLocaleDateString()}: ${stat.uptime_percentage.toFixed(1)}% uptime, ${stat.avg_latency_ms}ms avg latency`}
+                                                                    className={`flex-1 rounded-[1px] transition-all duration-300 cursor-help ${color} ${height}`}
                                                                 ></div>
                                                             );
                                                         })}
                                                     </div>
                                                     <div className="flex justify-between items-center text-[7px] font-medium text-white/10 uppercase tracking-tighter">
                                                         <span>90d ago</span>
-                                                        <span>Daily Uptime</span>
+                                                        <span>Daily Diagnostics</span>
                                                         <span>Today</span>
                                                     </div>
                                                 </div>
@@ -283,7 +284,7 @@ export default async function StatusPage() {
                         <div className="space-y-4">
                             <h2 className="text-xl font-semibold tracking-tight text-white">Bventy Status System</h2>
                             <p className="text-white/40 text-xs leading-relaxed max-w-xs">
-                                Independent monitoring nodes verify service availability every quarter-hour. Transparency is our baseline.
+                                Independent monitoring nodes verify service availability every 30 minutes. Transparency is our baseline.
                             </p>
                             <p className="text-white font-medium text-base hover:opacity-70 transition-opacity">
                                 <a href="mailto:support@bventy.in">support@bventy.in</a>
