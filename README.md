@@ -150,6 +150,14 @@ We take a deliberate approach to user data on the frontend.
 
 ---
 
+## Reliability
+
+Platform health and real time service availability can be monitored at [status.bventy.in](https://status.bventy.in). This dashboard provides a transparent view of our commitment to operational excellence and system uptime.
+
+---
+
+---
+
 ## License
 
 This project is licensed under the **GNU Affero General Public License v3 ([AGPL-3.0](LICENSE))**. 
