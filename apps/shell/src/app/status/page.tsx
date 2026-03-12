@@ -183,10 +183,10 @@ export default async function StatusPage() {
                                                             <div className="space-y-1.5">
                                                                 <h3 className="text-base font-bold text-white/90">{service.display}</h3>
                                                                 <div className="space-y-0.5">
-                                                                    <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest">{service.name}</p>
+                                                                    <p className="text-[11px] font-mono text-white/30 uppercase tracking-widest">{service.name}</p>
                                                                     <div className="flex items-center gap-2">
-                                                                        <span className="text-[11px] font-bold text-white/50">{service.uptime_percentage.toFixed(2)}% uptime</span>
-                                                                        <span className="text-[11px] text-white/30">• {service.avg_latency_ms}ms</span>
+                                                                        <span className="text-[12px] font-bold text-white/50">{service.uptime_percentage.toFixed(2)}% uptime</span>
+                                                                        <span className="text-[12px] text-white/30">• {service.avg_latency_ms}ms</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -248,11 +248,11 @@ export default async function StatusPage() {
                                                                     );
                                                                 })}
                                                             </div>
-                                                            <div className="flex justify-between items-center text-[9px] font-mono font-bold text-white/20 uppercase tracking-[0.2em]">
+                                                            <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white/20 uppercase tracking-[0.2em]">
                                                                 <span>90 Days Ago</span>
                                                                 <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-white/5 bg-white/[0.01]">
                                                                     <Activity className="h-2.5 w-2.5 text-white/10" />
-                                                                    <span className="text-[8px] tracking-[0.1em]">Verification Engine Active</span>
+                                                                    <span className="text-[9px] tracking-[0.1em]">Verification Engine Active</span>
                                                                 </div>
                                                                 <span>Today</span>
                                                             </div>
