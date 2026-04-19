@@ -284,3 +284,4 @@ export const vendorService = {
         return response.data;
     }
 }
+// Last sync: Sun Apr 19 03:48:03 PM IST 2026
