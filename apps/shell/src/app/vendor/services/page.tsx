@@ -36,8 +36,13 @@ import {
     MapPin,
     LayoutGrid,
     Settings2,
-    Loader2
+    Loader2,
+    Percent,
+    Banknote,
+    Clock,
+    CalendarDays
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { vendorService, VendorServiceItem, VendorPricingRules, VendorCancellationPolicy, VendorServiceArea } from "@bventy/services";
 import { toast } from "sonner";
 
@@ -137,6 +142,18 @@ export default function ServicesPricingPage() {
             await vendorService.updatePricingRules({ [key]: newRules[key] });
         } catch (err) {
             toast.error("Failed to update pricing rule");
+            loadData();
+        }
+    };
+
+    const updateRules = async (updates: Partial<VendorPricingRules>) => {
+        if (!rules) return;
+        try {
+            const newRules = { ...rules, ...updates };
+            setRules(newRules);
+            await vendorService.updatePricingRules(updates);
+        } catch (err) {
+            toast.error("Failed to update pricing rules");
             loadData();
         }
     };
@@ -282,30 +299,129 @@ export default function ServicesPricingPage() {
                                 <Settings2 className="h-4 w-4" /> Pricing Rules
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-center justify-between rounded-xl border border-border/40 p-4 transition-colors hover:bg-muted/10">
-                                <div className="space-y-0.5">
-                                    <p className="text-sm font-semibold">Weekend Premium</p>
-                                    <p className="text-xs text-muted-foreground">Apply surcharge on Fri, Sat, Sun</p>
+                        <CardContent className="space-y-6">
+                            {/* Weekend Rule */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between rounded-xl border border-border/40 p-4 transition-colors hover:bg-muted/10">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg ${rules?.weekend_premium_enabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                                            <CalendarDays className="h-4 w-4" />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-semibold">Weekend Premium</p>
+                                            <p className="text-xs text-muted-foreground">Surcharge on Fri, Sat, Sun</p>
+                                        </div>
+                                    </div>
+                                    <div
+                                        onClick={() => toggleRule('weekend_premium_enabled')}
+                                        className={`h-6 w-11 rounded-full relative cursor-pointer transition-colors duration-200 ${rules?.weekend_premium_enabled ? 'bg-primary' : 'bg-muted'}`}
+                                    >
+                                        <div className={`absolute top-1 h-4 w-4 bg-white rounded-full shadow-sm transition-all duration-200 ${rules?.weekend_premium_enabled ? 'right-1' : 'left-1'}`} />
+                                    </div>
                                 </div>
-                                <div
-                                    onClick={() => toggleRule('weekend_premium_enabled')}
-                                    className={`h-6 w-11 rounded-full relative cursor-pointer transition-colors duration-200 ${rules?.weekend_premium_enabled ? 'bg-primary' : 'bg-muted'}`}
-                                >
-                                    <div className={`absolute top-1 h-4 w-4 bg-white rounded-full shadow-sm transition-all duration-200 ${rules?.weekend_premium_enabled ? 'right-1' : 'left-1'}`} />
-                                </div>
+                                <AnimatePresence>
+                                    {rules?.weekend_premium_enabled && (
+                                        <motion.div 
+                                            initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                            animate={{ height: "auto", opacity: 1, marginTop: -8 }}
+                                            exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                            className="overflow-hidden px-1"
+                                        >
+                                            <div className="p-4 rounded-xl border border-border/40 bg-muted/5 space-y-4">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Type</Label>
+                                                        <Select value={rules.weekend_premium_type} onValueChange={v => updateRules({ weekend_premium_type: v as any })}>
+                                                            <SelectTrigger className="h-9">
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="percentage">Percentage (%)</SelectItem>
+                                                                <SelectItem value="fixed">Fixed (₹)</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Value</Label>
+                                                        <div className="relative">
+                                                            <Input 
+                                                                type="number"
+                                                                value={rules.weekend_premium_percentage}
+                                                                onChange={e => updateRules({ weekend_premium_percentage: Number(e.target.value) })}
+                                                                className="h-9 pl-8"
+                                                            />
+                                                            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/50">
+                                                                {rules.weekend_premium_type === 'percentage' ? <Percent className="h-3 w-3" /> : <Banknote className="h-3 w-3" />}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
-                            <div className="flex items-center justify-between rounded-xl border border-border/40 p-4 transition-colors hover:bg-muted/10">
-                                <div className="space-y-0.5">
-                                    <p className="text-sm font-semibold">Last Minute Booking</p>
-                                    <p className="text-xs text-muted-foreground">Surcharge for bookings within 7 days</p>
+
+                            {/* Last Minute Rule */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between rounded-xl border border-border/40 p-4 transition-colors hover:bg-muted/10">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg ${rules?.last_minute_booking_enabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                                            <Clock className="h-4 w-4" />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-semibold">Last Minute Booking</p>
+                                            <p className="text-xs text-muted-foreground">Surcharge for bookings within 7 days</p>
+                                        </div>
+                                    </div>
+                                    <div
+                                        onClick={() => toggleRule('last_minute_booking_enabled')}
+                                        className={`h-6 w-11 rounded-full relative cursor-pointer transition-colors duration-200 ${rules?.last_minute_booking_enabled ? 'bg-primary' : 'bg-muted'}`}
+                                    >
+                                        <div className={`absolute top-1 h-4 w-4 bg-white rounded-full shadow-sm transition-all duration-200 ${rules?.last_minute_booking_enabled ? 'right-1' : 'left-1'}`} />
+                                    </div>
                                 </div>
-                                <div
-                                    onClick={() => toggleRule('last_minute_booking_enabled')}
-                                    className={`h-6 w-11 rounded-full relative cursor-pointer transition-colors duration-200 ${rules?.last_minute_booking_enabled ? 'bg-primary' : 'bg-muted'}`}
-                                >
-                                    <div className={`absolute top-1 h-4 w-4 bg-white rounded-full shadow-sm transition-all duration-200 ${rules?.last_minute_booking_enabled ? 'right-1' : 'left-1'}`} />
-                                </div>
+                                <AnimatePresence>
+                                    {rules?.last_minute_booking_enabled && (
+                                        <motion.div 
+                                            initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                            animate={{ height: "auto", opacity: 1, marginTop: -8 }}
+                                            exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                            className="overflow-hidden px-1"
+                                        >
+                                            <div className="p-4 rounded-xl border border-border/40 bg-muted/5 space-y-4">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Type</Label>
+                                                        <Select value={rules.last_minute_booking_type} onValueChange={v => updateRules({ last_minute_booking_type: v as any })}>
+                                                            <SelectTrigger className="h-9">
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="percentage">Percentage (%)</SelectItem>
+                                                                <SelectItem value="fixed">Fixed (₹)</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Value</Label>
+                                                        <div className="relative">
+                                                            <Input 
+                                                                type="number"
+                                                                value={rules.last_minute_booking_percentage}
+                                                                onChange={e => updateRules({ last_minute_booking_percentage: Number(e.target.value) })}
+                                                                className="h-9 pl-8"
+                                                            />
+                                                            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/50">
+                                                                {rules.last_minute_booking_type === 'percentage' ? <Percent className="h-3 w-3" /> : <Banknote className="h-3 w-3" />}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </CardContent>
                     </Card>

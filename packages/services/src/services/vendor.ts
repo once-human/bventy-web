@@ -104,8 +104,10 @@ export interface VendorServiceItem {
 export interface VendorPricingRules {
     weekend_premium_enabled: boolean;
     weekend_premium_percentage: number;
+    weekend_premium_type: 'percentage' | 'fixed';
     last_minute_booking_enabled: boolean;
     last_minute_booking_percentage: number;
+    last_minute_booking_type: 'percentage' | 'fixed';
     last_minute_days: number;
 }
 

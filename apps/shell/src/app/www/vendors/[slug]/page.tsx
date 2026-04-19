@@ -304,13 +304,13 @@ export default function VendorProfilePage() {
                                     {details.pricing_rules && (
                                         <div className="mt-4 flex flex-wrap gap-2">
                                             {details.pricing_rules.weekend_premium_enabled && (
-                                                <Badge variant="outline" className="text-[10px] border-primary/20 bg-primary/5">
-                                                    Weekend Premium Applies
+                                                <Badge variant="outline" className="text-[10px] border-primary/30 bg-primary/5 text-primary font-bold">
+                                                    Weekend Premium ({details.pricing_rules.weekend_premium_type === 'percentage' ? '+' : '+₹'}{details.pricing_rules.weekend_premium_percentage}{details.pricing_rules.weekend_premium_type === 'percentage' ? '%' : ''})
                                                 </Badge>
                                             )}
                                             {details.pricing_rules.last_minute_booking_enabled && (
-                                                <Badge variant="outline" className="text-[10px] border-primary/20 bg-primary/5">
-                                                    Last-minute Surcharge
+                                                <Badge variant="outline" className="text-[10px] border-primary/30 bg-primary/5 text-primary font-bold">
+                                                    Last-minute ({details.pricing_rules.last_minute_booking_type === 'percentage' ? '+' : '+₹'}{details.pricing_rules.last_minute_booking_percentage}{details.pricing_rules.last_minute_booking_type === 'percentage' ? '%' : ''})
                                                 </Badge>
                                             )}
                                         </div>
